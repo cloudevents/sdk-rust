@@ -23,7 +23,7 @@ impl ExtensionValue {
     /// # Example
     ///
     /// ```
-    /// use cloudevents::ExtensionValue;
+    /// use cloudevents_rust_sdk::ExtensionValue;
     ///
     /// let value = ExtensionValue::from_string("value");
     /// assert_eq!(value, ExtensionValue::String("value".to_owned()));

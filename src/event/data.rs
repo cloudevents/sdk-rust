@@ -1,97 +1,70 @@
 use serde::{Deserialize, Serialize};
-use serde_json::Value;
-use std::convert::TryInto;
+use std::convert::{Into, TryFrom};
 
 #[derive(Debug, Deserialize, Serialize, PartialEq, Clone)]
 /// Possible data values
 pub enum Data {
     String(String),
     Binary(Vec<u8>),
-    Object(Value),
+    Json(serde_json::Value),
 }
-//
-// impl Data {
-//     /// Create a [`Data`] from a [`Into<String>`].
-//     ///
-//     /// # Example
-//     ///
-//     /// ```
-//     /// use cloudevents::Data;
-//     ///
-//     /// let value = Data::from_string("value");
-//     /// assert_eq!(value, Data::StringOrBinary("value".to_owned()));
-//     /// ```
-//     ///
-//     /// [`Into<String>`]: https://doc.rust-lang.org/std/convert/trait.Into.html
-//     /// [`Data`]: enum.Data.html
-//     pub fn from_string<S>(s: S) -> Self
-//         where
-//             S: Into<String>,
-//     {
-//         Data::StringOrBinary(s.into())
-//     }
-//
-//     /// Create a [`Data`] from a [`AsRef<[u8]>`].
-//     ///
-//     /// # Example
-//     ///
-//     /// ```
-//     /// use cloudevents::Data;
-//     ///
-//     /// let value = Data::from_binary(b"value");
-//     /// assert_eq!(value, Data::StringOrBinary("dmFsdWU=".to_owned()));
-//     /// ```
-//     ///
-//     /// [`AsRef<[u8]>`]: https://doc.rust-lang.org/std/convert/trait.AsRef.html
-//     /// [`Data`]: enum.Data.html
-//     pub fn from_binary<I>(i: I) -> Self
-//         where
-//             I: AsRef<[u8]>,
-//     {
-//         Data::StringOrBinary(base64::encode(&i))
-//     }
-//
-//     /// Create a [`Data`] from a [`Serialize`] object.
-//     ///
-//     /// # Example
-//     ///
-//     /// ```
-//     /// use cloudevents::Data;
-//     /// use serde_json::Value;
-//     /// use std::error::Error;
-//     ///
-//     /// fn main() -> Result<(), Box<Error>> {
-//     ///     let value = Data::from_serializable("value")?;
-//     ///     assert_eq!(value, Data::Object(Value::String("value".to_owned())));
-//     ///     Ok(())
-//     /// }
-//     /// ```
-//     ///
-//     /// [`Serialize`]: https://docs.serde.rs/serde/ser/trait.Serialize.html
-//     /// [`Data`]: enum.Data.html
-//     pub fn from_serializable<T>(v: T) -> Result<Self, Error>
-//         where
-//             T: Serialize,
-//     {
-//         Ok(Data::Object(serde_json::to_value(v)?))
-//     }
-// }
 
-impl Into<Data> for String {
+impl Data {
+    /// Create a [`Data`] from a [`Into<String>`].
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use cloudevents::event::Data;
+    ///
+    /// let value = Data::from_string("value");
+    /// assert_eq!(value, Data::from_string("value".to_owned()));
+    /// ```
+    ///
+    /// [`Into<String>`]: https://doc.rust-lang.org/std/convert/trait.Into.html
+    /// [`Data`]: enum.Data.html
+    pub fn from_string<S>(s: S) -> Self
+        where
+            S: Into<String>,
+    {
+        Data::String(s.into())
+    }
+
+    // /// Create a [`Data`] from a [`Into<Vec<u8>>`].
+    // ///
+    // /// # Example
+    // ///
+    // /// ```
+    // /// use cloudevents::event::Data;
+    // ///
+    // /// let value = Data::from_binary(b"value");
+    // /// assert_eq!(value, Data::Binary("dmFsdWU=".into_boxed_bytes().into_vec()));
+    // /// ```
+    // ///
+    // /// [`AsRef<[u8]>`]: https://doc.rust-lang.org/std/convert/trait.AsRef.html
+    // /// [`Data`]: enum.Data.html
+    // pub fn from_binary<I>(i: I) -> Self
+    //     where
+    //         I: Into<Vec<u8>>,
+    // {
+    //     Data::Binary(i.into())
+    // }
+}
+
+impl Into<Data> for serde_json::Value {
     fn into(self) -> Data {
-        Data::String(self)
+        Data::Json(self)
     }
 }
 
-// TODO Define an error here?
-impl TryInto<String> for Data {
-    type Error = ();
+impl TryFrom<Data> for serde_json::Value {
+    type Error = serde_json::Error;
 
-    fn try_into(self) -> Result<String, Self::Error> {
-        match self {
-            Data::String(s) => Ok(s),
-            Data::Binary(v) => String::from_utf8(v).map_err(|_e| ()),
-            _ => Err(()),
+    fn try_from(value: Data) -> Result<Self, Self::Error> {
+        match value {
+            Data::String(s) => Ok(serde_json::from_str(&s)?),
+            Data::Binary(v) => Ok(serde_json::from_slice(&v)?),
+            Data::Json(v) => Ok(v),
         }
     }
 }

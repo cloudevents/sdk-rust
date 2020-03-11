@@ -71,53 +71,53 @@ impl AttributesReader for Attributes {
 }
 
 impl AttributesWriter for Attributes {
-    fn set_id<'s, 'event: 's>(&'event mut self, id: impl Into<&'s str>) {
-        self.id = id.into().to_owned()
+    fn set_id(&mut self, id: impl Into<String>) {
+        self.id = id.into()
     }
 
-    fn set_source<'s, 'event: 's>(&'event mut self, source: impl Into<&'s str>) {
-        self.source = source.into().to_owned()
+    fn set_source(&mut self, source: impl Into<String>) {
+        self.source = source.into()
     }
 
-    fn set_type<'s, 'event: 's>(&'event mut self, ty: impl Into<&'s str>) {
-        self.ty = ty.into().to_owned()
+    fn set_type(&mut self, ty: impl Into<String>) {
+        self.ty = ty.into()
     }
 
-    fn set_subject<'s, 'event: 's>(&'event mut self, subject: Option<impl Into<&'s str>>) {
-        self.subject = subject.map(Into::into).map(String::from)
+    fn set_subject(&mut self, subject: Option<impl Into<String>>) {
+        self.subject = subject.map(Into::into)
     }
 
     fn set_time(&mut self, time: Option<impl Into<DateTime<FixedOffset>>>) {
         self.time = time.map(Into::into)
     }
 
-    fn set_extension<'s, 'event: 's>(
+    fn set_extension<'name, 'event: 'name>(
         &'event mut self,
-        extension_name: &'s str,
+        extension_name: &'name str,
         extension_value: impl Into<ExtensionValue>,
     ) {
         self.extensions
             .insert(extension_name.to_owned(), extension_value.into());
     }
 
-    fn remove_extension<'s, 'event: 's>(
+    fn remove_extension<'name, 'event: 'name>(
         &'event mut self,
-        extension_name: &'s str,
+        extension_name: &'name str,
     ) -> Option<ExtensionValue> {
         self.extensions.remove(extension_name)
     }
 }
 
 impl DataAttributesWriter for Attributes {
-    fn set_datacontenttype<'s, 'event: 's>(
-        &'event mut self,
-        datacontenttype: Option<impl Into<&'s str>>,
+    fn set_datacontenttype(
+        &mut self,
+        datacontenttype: Option<impl Into<String>>,
     ) {
-        self.datacontenttype = datacontenttype.map(Into::into).map(String::from)
+        self.datacontenttype = datacontenttype.map(Into::into)
     }
 
-    fn set_dataschema<'s, 'event: 's>(&'event mut self, dataschema: Option<impl Into<&'s str>>) {
-        self.dataschema = dataschema.map(Into::into).map(String::from)
+    fn set_dataschema(&mut self, dataschema: Option<impl Into<String>>) {
+        self.dataschema = dataschema.map(Into::into)
     }
 }
 

@@ -27,28 +27,28 @@ pub trait AttributesReader {
 }
 
 pub trait AttributesWriter {
-    fn set_id<'s, 'event: 's>(&'event mut self, id: impl Into<&'s str>);
-    fn set_source<'s, 'event: 's>(&'event mut self, source: impl Into<&'s str>);
-    fn set_type<'s, 'event: 's>(&'event mut self, ty: impl Into<&'s str>);
-    fn set_subject<'s, 'event: 's>(&'event mut self, subject: Option<impl Into<&'s str>>);
+    fn set_id(&mut self, id: impl Into<String>);
+    fn set_source(&mut self, source: impl Into<String>);
+    fn set_type(&mut self, ty: impl Into<String>);
+    fn set_subject(&mut self, subject: Option<impl Into<String>>);
     fn set_time(&mut self, time: Option<impl Into<DateTime<FixedOffset>>>);
-    fn set_extension<'s, 'event: 's>(
+    fn set_extension<'name, 'event: 'name>(
         &'event mut self,
-        extension_name: &'s str,
+        extension_name: &'name str,
         extension_value: impl Into<ExtensionValue>,
     );
-    fn remove_extension<'s, 'event: 's>(
+    fn remove_extension<'name, 'event: 'name>(
         &'event mut self,
-        extension_name: &'s str,
+        extension_name: &'name str,
     ) -> Option<ExtensionValue>;
 }
 
 pub(crate) trait DataAttributesWriter {
-    fn set_datacontenttype<'s, 'event: 's>(
-        &'event mut self,
-        datacontenttype: Option<impl Into<&'s str>>,
+    fn set_datacontenttype(
+        &mut self,
+        datacontenttype: Option<impl Into<String>>,
     );
-    fn set_dataschema<'s, 'event: 's>(&'event mut self, dataschema: Option<impl Into<&'s str>>);
+    fn set_dataschema(&mut self, dataschema: Option<impl Into<String>>);
 }
 
 pub enum Attributes {
@@ -118,25 +118,25 @@ impl AttributesReader for Attributes {
 }
 
 impl AttributesWriter for Attributes {
-    fn set_id<'s, 'event: 's>(&'event mut self, id: impl Into<&'s str>) {
+    fn set_id(&mut self, id: impl Into<String>) {
         match self {
             Attributes::V10(a) => a.set_id(id),
         }
     }
 
-    fn set_source<'s, 'event: 's>(&'event mut self, source: impl Into<&'s str>) {
+    fn set_source(&mut self, source: impl Into<String>) {
         match self {
             Attributes::V10(a) => a.set_source(source),
         }
     }
 
-    fn set_type<'s, 'event: 's>(&'event mut self, ty: impl Into<&'s str>) {
+    fn set_type(&mut self, ty: impl Into<String>) {
         match self {
             Attributes::V10(a) => a.set_type(ty),
         }
     }
 
-    fn set_subject<'s, 'event: 's>(&'event mut self, subject: Option<impl Into<&'s str>>) {
+    fn set_subject(&mut self, subject: Option<impl Into<String>>) {
         match self {
             Attributes::V10(a) => a.set_subject(subject),
         }
@@ -148,9 +148,9 @@ impl AttributesWriter for Attributes {
         }
     }
 
-    fn set_extension<'s, 'event: 's>(
+    fn set_extension<'name, 'event: 'name>(
         &'event mut self,
-        extension_name: &'s str,
+        extension_name: &'name str,
         extension_value: impl Into<ExtensionValue>,
     ) {
         match self {
@@ -158,9 +158,9 @@ impl AttributesWriter for Attributes {
         }
     }
 
-    fn remove_extension<'s, 'event: 's>(
+    fn remove_extension<'name, 'event: 'name>(
         &'event mut self,
-        extension_name: &'s str,
+        extension_name: &'name str,
     ) -> Option<ExtensionValue> {
         match self {
             Attributes::V10(a) => a.remove_extension(extension_name),
@@ -169,16 +169,16 @@ impl AttributesWriter for Attributes {
 }
 
 impl DataAttributesWriter for Attributes {
-    fn set_datacontenttype<'s, 'event: 's>(
-        &'event mut self,
-        datacontenttype: Option<impl Into<&'s str>>,
+    fn set_datacontenttype(
+        &mut self,
+        datacontenttype: Option<impl Into<String>>,
     ) {
         match self {
             Attributes::V10(a) => a.set_datacontenttype(datacontenttype),
         }
     }
 
-    fn set_dataschema<'s, 'event: 's>(&'event mut self, dataschema: Option<impl Into<&'s str>>) {
+    fn set_dataschema(&mut self, dataschema: Option<impl Into<String>>) {
         match self {
             Attributes::V10(a) => a.set_dataschema(dataschema),
         }

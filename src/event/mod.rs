@@ -5,7 +5,7 @@ mod extensions;
 mod spec_version;
 
 pub use attributes::Attributes;
-pub(crate) use attributes::{AttributesReader, AttributesWriter};
+pub use attributes::{AttributesReader, AttributesWriter};
 pub use data::Data;
 pub use event::Event;
 pub use extensions::ExtensionValue;

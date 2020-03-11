@@ -2,6 +2,7 @@ use super::{Attributes, AttributesReader, AttributesWriter, Data, ExtensionValue
 use chrono::{DateTime, FixedOffset};
 use delegate::delegate;
 use std::convert::{TryFrom, TryInto};
+use crate::event::attributes::DataAttributesWriter;
 
 pub struct Event {
     pub attributes: Attributes,
@@ -28,44 +29,60 @@ impl AttributesReader for Event {
 impl AttributesWriter for Event {
     delegate! {
         to self.attributes {
-            fn set_id<'event>(&'event mut self, id: impl Into<&'event str>);
-            fn set_source<'event>(&'event mut self, source: impl Into<&'event str>);
-            fn set_type<'event>(&'event mut self, ty: impl Into<&'event str>);
-            fn set_datacontenttype<'event>(
+            fn set_id<'s, 'event: 's>(&'event mut self, id: impl Into<&'s str>);
+            fn set_source<'s, 'event: 's>(&'event mut self, source: impl Into<&'s str>);
+            fn set_type<'s, 'event: 's>(&'event mut self, ty: impl Into<&'s str>);
+            fn set_subject<'s, 'event: 's>(&'event mut self, subject: Option<impl Into<&'s str>>);
+            fn set_time(&mut self, time: Option<impl Into<DateTime<FixedOffset>>>);
+            fn set_extension<'s, 'event: 's>(
                 &'event mut self,
-                datacontenttype: Option<impl Into<&'event str>>,
-            );
-            fn set_dataschema<'event>(&'event mut self, dataschema: Option<impl Into<&'event str>>);
-            fn set_subject<'event>(&'event mut self, subject: Option<impl Into<&'event str>>);
-            fn set_time<'event>(&'event mut self, time: Option<impl Into<DateTime<FixedOffset>>>);
-            fn set_extension<'event>(
-                &'event mut self,
-                extension_name: &'event str,
+                extension_name: &'s str,
                 extension_value: impl Into<ExtensionValue>,
             );
-            fn remove_extension<'event>(&'event mut self, extension_name: &'event str) -> Option<ExtensionValue>;
+            fn remove_extension<'s, 'event: 's>(
+                &'event mut self,
+                extension_name: &'s str,
+            ) -> Option<ExtensionValue>;
+        }
+    }
+}
+
+impl Default for Event {
+    fn default() -> Self {
+        Event {
+            attributes: Attributes::V10(crate::AttributesV10::default()),
+            data: None
         }
     }
 }
 
 impl Event {
-    fn remove_data(&mut self) {
+    pub fn remove_data(&mut self) {
         self.data = None;
     }
 
-    fn write_data(&mut self, v: impl Into<Data>) {
-        self.data = Some(v.into());
+    ///
+    /// ```
+    /// use cloudevents::Event;
+    ///
+    /// let mut e = Event::default();
+    /// e.write_data("application/json", None, json!{})
+    /// ```
+    pub fn write_data<'s, 'event: 's>(&'event mut self, content_type: impl Into<&'s str>, schema: Option<impl Into<&'s str>>, value: impl Into<Data>) {
+        self.attributes.set_datacontenttype::<'s, 'event>(Some(content_type));
+        self.attributes.set_dataschema::<'s, 'event>(schema);
+        self.data = Some(value.into());
     }
 
-    fn try_write_data<E: std::error::Error>(
-        &mut self,
-        v: impl TryInto<Data, Error = E>,
+    pub fn try_write_data<'s, 'event: 's, E: std::error::Error>(
+        &'event mut self,
+        content_type: impl Into<&'s str>, schema: Option<impl Into<&'s str>>,
+        value: impl TryInto<Data, Error = E>,
     ) -> Result<(), E> {
-        self.data = Some(v.try_into()?);
-        Ok(())
+        Ok(self.write_data(content_type, schema, value.try_into()?))
     }
 
-    fn get_data<T: Sized + TryFrom<Data, Error = E>, E: std::error::Error>(
+    pub fn get_data<T: Sized + TryFrom<Data, Error = E>, E: std::error::Error>(
         &self,
     ) -> Option<Result<T, E>> {
         match self.data.as_ref() {
@@ -74,7 +91,7 @@ impl Event {
         }
     }
 
-    fn into_data<T: Sized + TryFrom<Data, Error = E>, E: std::error::Error>(
+    pub fn into_data<T: Sized + TryFrom<Data, Error = E>, E: std::error::Error>(
         self,
     ) -> Option<Result<T, E>> {
         match self.data {

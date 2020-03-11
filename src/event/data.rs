@@ -90,7 +90,7 @@ impl TryInto<String> for Data {
     fn try_into(self) -> Result<String, Self::Error> {
         match self {
             Data::String(s) => Ok(s),
-            Data::Binary(v) => String::from_utf8(v).map_err(|e| ()),
+            Data::Binary(v) => String::from_utf8(v).map_err(|_e| ()),
             _ => Err(()),
         }
     }

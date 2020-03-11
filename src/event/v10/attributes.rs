@@ -1,6 +1,9 @@
 use crate::event::{AttributesReader, AttributesWriter, ExtensionValue, SpecVersion};
 use chrono::{DateTime, FixedOffset};
 use std::collections::HashMap;
+use crate::event::attributes::DataAttributesWriter;
+use uuid::Uuid;
+use hostname::get_hostname;
 
 pub struct Attributes {
     id: String,
@@ -18,16 +21,16 @@ impl AttributesReader for Attributes {
         &self.id
     }
 
-    fn get_type(&self) -> &str {
-        &self.ty
-    }
-
     fn get_source(&self) -> &str {
         &self.source
     }
 
     fn get_specversion(&self) -> SpecVersion {
         SpecVersion::V10
+    }
+
+    fn get_type(&self) -> &str {
+        &self.ty
     }
 
     fn get_datacontenttype(&self) -> Option<&str> {
@@ -68,50 +71,67 @@ impl AttributesReader for Attributes {
 }
 
 impl AttributesWriter for Attributes {
-    fn set_id<'event>(&'event mut self, id: impl Into<&'event str>) {
+    fn set_id<'s, 'event: 's>(&'event mut self, id: impl Into<&'s str>) {
         self.id = id.into().to_owned()
     }
 
-    fn set_type<'event>(&'event mut self, ty: impl Into<&'event str>) {
-        self.ty = ty.into().to_owned()
-    }
-
-    fn set_source<'event>(&'event mut self, source: impl Into<&'event str>) {
+    fn set_source<'s, 'event: 's>(&'event mut self, source: impl Into<&'s str>) {
         self.source = source.into().to_owned()
     }
 
-    fn set_datacontenttype<'event>(
-        &'event mut self,
-        datacontenttype: Option<impl Into<&'event str>>,
-    ) {
-        self.datacontenttype = datacontenttype.map(Into::into).map(String::from)
+    fn set_type<'s, 'event: 's>(&'event mut self, ty: impl Into<&'s str>) {
+        self.ty = ty.into().to_owned()
     }
 
-    fn set_dataschema<'event>(&'event mut self, dataschema: Option<impl Into<&'event str>>) {
-        self.dataschema = dataschema.map(Into::into).map(String::from)
-    }
-
-    fn set_subject<'event>(&'event mut self, subject: Option<impl Into<&'event str>>) {
+    fn set_subject<'s, 'event: 's>(&'event mut self, subject: Option<impl Into<&'s str>>) {
         self.subject = subject.map(Into::into).map(String::from)
     }
 
-    fn set_time<'event>(&'event mut self, time: Option<impl Into<DateTime<FixedOffset>>>) {
+    fn set_time(&mut self, time: Option<impl Into<DateTime<FixedOffset>>>) {
         self.time = time.map(Into::into)
     }
 
-    fn set_extension<'event>(
+    fn set_extension<'s, 'event: 's>(
         &'event mut self,
-        extension_name: &'event str,
+        extension_name: &'s str,
         extension_value: impl Into<ExtensionValue>,
     ) {
         self.extensions
             .insert(extension_name.to_owned(), extension_value.into());
     }
 
-    fn remove_extension<'event>(
+    fn remove_extension<'s, 'event: 's>(
         &'event mut self,
-        extension_name: &'event str,
+        extension_name: &'s str,
     ) -> Option<ExtensionValue> {
         self.extensions.remove(extension_name)
+    }
+}
+
+impl DataAttributesWriter for Attributes {
+    fn set_datacontenttype<'s, 'event: 's>(
+        &'event mut self,
+        datacontenttype: Option<impl Into<&'s str>>,
+    ) {
+        self.datacontenttype = datacontenttype.map(Into::into).map(String::from)
+    }
+
+    fn set_dataschema<'s, 'event: 's>(&'event mut self, dataschema: Option<impl Into<&'s str>>) {
+        self.dataschema = dataschema.map(Into::into).map(String::from)
+    }
+}
+
+impl Default for Attributes {
+    fn default() -> Self {
+        Attributes {
+            id: Uuid::new_v4().to_string(),
+            ty: "type".to_string(),
+            source: get_hostname().unwrap_or("http://localhost/".to_string()),
+            datacontenttype: None,
+            dataschema: None,
+            subject: None,
+            time: None,
+            extensions: HashMap::new()
+        }
     }
 }

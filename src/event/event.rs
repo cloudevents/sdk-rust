@@ -1,8 +1,11 @@
-use super::{Attributes, AttributesReader, AttributesWriter, Data, ExtensionValue, SpecVersion, AttributesV10};
+use super::{
+    Attributes, AttributesReader, AttributesV10, AttributesWriter, Data, ExtensionValue,
+    SpecVersion,
+};
+use crate::event::attributes::DataAttributesWriter;
 use chrono::{DateTime, FixedOffset};
 use delegate::delegate;
-use std::convert::{TryFrom};
-use crate::event::attributes::DataAttributesWriter;
+use std::convert::TryFrom;
 
 /// Data structure that represents a [CloudEvent](https://github.com/cloudevents/spec/blob/master/spec.md).
 /// It provides methods to get the attributes through [`AttributesReader`]
@@ -74,7 +77,7 @@ impl Default for Event {
     fn default() -> Self {
         Event {
             attributes: Attributes::V10(AttributesV10::default()),
-            data: None
+            data: None,
         }
     }
 }
@@ -94,15 +97,18 @@ impl Event {
     /// let mut e = Event::default();
     /// e.write_data("application/json", None, json!({}))
     /// ```
-    pub fn write_data<S: Into<String>, D: Into<Data>>(&mut self, content_type: S, schema: Option<S>, value: D) {
+    pub fn write_data<S: Into<String>, D: Into<Data>>(
+        &mut self,
+        content_type: S,
+        schema: Option<S>,
+        value: D,
+    ) {
         self.attributes.set_datacontenttype(Some(content_type));
         self.attributes.set_dataschema(schema);
         self.data = Some(value.into());
     }
 
-    pub fn get_data<T: Sized + From<Data>>(
-        &self,
-    ) -> Option<T> {
+    pub fn get_data<T: Sized + From<Data>>(&self) -> Option<T> {
         match self.data.as_ref() {
             Some(d) => Some(T::from(d.clone())),
             None => None,
@@ -128,8 +134,6 @@ impl Event {
     }
 }
 
-
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -140,17 +144,11 @@ mod tests {
             "hello": "world"
         });
 
-         let mut e = Event::default();
-         e.write_data(
-             "application/json",
-             None,
-             expected_data.clone()
-         );
-
+        let mut e = Event::default();
+        e.write_data("application/json", None, expected_data.clone());
 
         let data: serde_json::Value = e.try_get_data().unwrap().unwrap();
         assert_eq!(expected_data, data);
         assert_eq!("application/json", e.get_datacontenttype().unwrap())
     }
-
 }

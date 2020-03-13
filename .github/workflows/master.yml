@@ -7,7 +7,7 @@ on:
 
 jobs:
   build:
-    name: Run tests on ${{ matrix.target }} ${{ matrix.toolchain }}
+    name: Run tests on ${{ matrix.toolchain }} ${{ matrix.target }}
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -20,9 +20,9 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - run: apt-get update
-      if: matrix.toolchain == 'x86_64-unknown-linux-musl'
+      if: matrix.target == 'x86_64-unknown-linux-musl'
     - run: apt-get install -y musl
-      if: matrix.toolchain == 'x86_64-unknown-linux-musl'
+      if: matrix.target == 'x86_64-unknown-linux-musl'
     - name: Cache cargo registry
       uses: actions/cache@v1
       with:

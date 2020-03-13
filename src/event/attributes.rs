@@ -1,6 +1,6 @@
 use super::SpecVersion;
 use crate::event::{AttributesV10, ExtensionValue};
-use chrono::{DateTime, FixedOffset};
+use chrono::{DateTime, Utc};
 
 /// Trait to get [CloudEvents Context attributes](https://github.com/cloudevents/spec/blob/master/spec.md#context-attributes).
 pub trait AttributesReader {
@@ -19,7 +19,7 @@ pub trait AttributesReader {
     /// Get the [subject](https://github.com/cloudevents/spec/blob/master/spec.md#subject).
     fn get_subject(&self) -> Option<&str>;
     /// Get the [time](https://github.com/cloudevents/spec/blob/master/spec.md#time).
-    fn get_time(&self) -> Option<&DateTime<FixedOffset>>;
+    fn get_time(&self) -> Option<&DateTime<Utc>>;
     /// Get the [extension](https://github.com/cloudevents/spec/blob/master/spec.md#extension-context-attributes) named `extension_name`
     fn get_extension(&self, extension_name: &str) -> Option<&ExtensionValue>;
     /// Get all the [extensions](https://github.com/cloudevents/spec/blob/master/spec.md#extension-context-attributes)
@@ -31,7 +31,7 @@ pub trait AttributesWriter {
     fn set_source(&mut self, source: impl Into<String>);
     fn set_type(&mut self, ty: impl Into<String>);
     fn set_subject(&mut self, subject: Option<impl Into<String>>);
-    fn set_time(&mut self, time: Option<impl Into<DateTime<FixedOffset>>>);
+    fn set_time(&mut self, time: Option<impl Into<DateTime<Utc>>>);
     fn set_extension<'name, 'event: 'name>(
         &'event mut self,
         extension_name: &'name str,
@@ -48,6 +48,7 @@ pub(crate) trait DataAttributesWriter {
     fn set_dataschema(&mut self, dataschema: Option<impl Into<String>>);
 }
 
+#[derive(PartialEq, Debug, Clone)]
 pub enum Attributes {
     V10(AttributesV10),
 }
@@ -95,7 +96,7 @@ impl AttributesReader for Attributes {
         }
     }
 
-    fn get_time(&self) -> Option<&DateTime<FixedOffset>> {
+    fn get_time(&self) -> Option<&DateTime<Utc>> {
         match self {
             Attributes::V10(a) => a.get_time(),
         }
@@ -139,7 +140,7 @@ impl AttributesWriter for Attributes {
         }
     }
 
-    fn set_time(&mut self, time: Option<impl Into<DateTime<FixedOffset>>>) {
+    fn set_time(&mut self, time: Option<impl Into<DateTime<Utc>>>) {
         match self {
             Attributes::V10(a) => a.set_time(time),
         }

@@ -1,10 +1,11 @@
 use crate::event::attributes::DataAttributesWriter;
 use crate::event::{AttributesReader, AttributesWriter, ExtensionValue, SpecVersion};
-use chrono::{DateTime, FixedOffset};
+use chrono::{DateTime, Utc};
 use hostname::get_hostname;
 use std::collections::HashMap;
 use uuid::Uuid;
 
+#[derive(PartialEq, Debug, Clone)]
 pub struct Attributes {
     id: String,
     ty: String,
@@ -12,7 +13,7 @@ pub struct Attributes {
     datacontenttype: Option<String>,
     dataschema: Option<String>,
     subject: Option<String>,
-    time: Option<DateTime<FixedOffset>>,
+    time: Option<DateTime<Utc>>,
     extensions: HashMap<String, ExtensionValue>,
 }
 
@@ -54,7 +55,7 @@ impl AttributesReader for Attributes {
         }
     }
 
-    fn get_time(&self) -> Option<&DateTime<FixedOffset>> {
+    fn get_time(&self) -> Option<&DateTime<Utc>> {
         self.time.as_ref()
     }
 
@@ -87,7 +88,7 @@ impl AttributesWriter for Attributes {
         self.subject = subject.map(Into::into)
     }
 
-    fn set_time(&mut self, time: Option<impl Into<DateTime<FixedOffset>>>) {
+    fn set_time(&mut self, time: Option<impl Into<DateTime<Utc>>>) {
         self.time = time.map(Into::into)
     }
 

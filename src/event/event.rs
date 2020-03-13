@@ -5,8 +5,8 @@ use std::convert::{TryFrom};
 use crate::event::attributes::DataAttributesWriter;
 
 /// Data structure that represents a [CloudEvent](https://github.com/cloudevents/spec/blob/master/spec.md).
-/// It provides methods to get the attributes through [`AttributesReader`](cloudevents::event::AttributesReader)
-/// and write them through [`AttributesWriter`](cloudevents::event::AttributesWriter).
+/// It provides methods to get the attributes through [`AttributesReader`]
+/// and write them through [`AttributesWriter`].
 /// It also provides methods to read and write the [event data](https://github.com/cloudevents/spec/blob/master/spec.md#event-data)
 /// ```
 /// use cloudevents::Event;

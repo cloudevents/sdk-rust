@@ -16,6 +16,6 @@ pub struct EventBuilder {}
 impl EventBuilder {
     /// Creates a new builder for CloudEvents V1.0
     pub fn v10() -> EventBuilderV10 {
-        return EventBuilderV10::new()
+        return EventBuilderV10::new();
     }
 }

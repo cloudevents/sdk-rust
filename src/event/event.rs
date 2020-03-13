@@ -117,7 +117,12 @@ impl Event {
     /// let mut e = Event::default();
     /// e.write_data_with_schema("application/json", "http://myapplication.com/schema", json!({}))
     /// ```
-    pub fn write_data_with_schema(&mut self, datacontenttype: impl Into<String>, dataschema: impl Into<String>, data: impl Into<Data>) {
+    pub fn write_data_with_schema(
+        &mut self,
+        datacontenttype: impl Into<String>,
+        dataschema: impl Into<String>,
+        data: impl Into<Data>,
+    ) {
         self.attributes.set_datacontenttype(Some(datacontenttype));
         self.attributes.set_dataschema(Some(dataschema));
         self.data = Some(data.into());
@@ -159,13 +164,12 @@ mod tests {
             "hello": "world"
         });
 
-         let mut e = Event::default();
-         e.write_data_with_schema(
-             "application/json",
-             "http://localhost:8080/schema",
-             expected_data.clone()
-         );
-
+        let mut e = Event::default();
+        e.write_data_with_schema(
+            "application/json",
+            "http://localhost:8080/schema",
+            expected_data.clone(),
+        );
 
         let data: serde_json::Value = e.try_get_data().unwrap().unwrap();
         assert_eq!(expected_data, data);
@@ -180,12 +184,14 @@ mod tests {
             "application/json",
             serde_json::json!({
                 "hello": "world"
-            })
+            }),
         );
 
         e.remove_data();
 
-        assert!(e.try_get_data::<serde_json::Value, serde_json::Error>().is_none());
+        assert!(e
+            .try_get_data::<serde_json::Value, serde_json::Error>()
+            .is_none());
         assert!(e.get_dataschema().is_none());
         assert!(e.get_datacontenttype().is_none());
     }

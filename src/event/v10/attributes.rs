@@ -1,9 +1,9 @@
+use crate::event::attributes::DataAttributesWriter;
 use crate::event::{AttributesReader, AttributesWriter, ExtensionValue, SpecVersion};
 use chrono::{DateTime, FixedOffset};
-use std::collections::HashMap;
-use crate::event::attributes::DataAttributesWriter;
-use uuid::Uuid;
 use hostname::get_hostname;
+use std::collections::HashMap;
+use uuid::Uuid;
 
 pub struct Attributes {
     id: String,
@@ -109,10 +109,7 @@ impl AttributesWriter for Attributes {
 }
 
 impl DataAttributesWriter for Attributes {
-    fn set_datacontenttype(
-        &mut self,
-        datacontenttype: Option<impl Into<String>>,
-    ) {
+    fn set_datacontenttype(&mut self, datacontenttype: Option<impl Into<String>>) {
         self.datacontenttype = datacontenttype.map(Into::into)
     }
 
@@ -131,7 +128,7 @@ impl Default for Attributes {
             dataschema: None,
             subject: None,
             time: None,
-            extensions: HashMap::new()
+            extensions: HashMap::new(),
         }
     }
 }

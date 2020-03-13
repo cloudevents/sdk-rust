@@ -24,8 +24,8 @@ impl Data {
     /// [`AsRef<[u8]>`]: https://doc.rust-lang.org/std/convert/trait.AsRef.html
     /// [`Data`]: enum.Data.html
     pub fn from_base64<I>(i: I) -> Result<Self, base64::DecodeError>
-        where
-            I: AsRef<[u8]>,
+    where
+        I: AsRef<[u8]>,
     {
         Ok(base64::decode(&i)?.into())
     }
@@ -68,7 +68,7 @@ impl TryFrom<Data> for String {
         match value {
             Data::String(s) => Ok(s),
             Data::Binary(v) => Ok(String::from_utf8(v)?),
-            Data::Json(s) => Ok(s.to_string())
+            Data::Json(s) => Ok(s.to_string()),
         }
     }
 }

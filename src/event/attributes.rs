@@ -44,10 +44,7 @@ pub trait AttributesWriter {
 }
 
 pub(crate) trait DataAttributesWriter {
-    fn set_datacontenttype(
-        &mut self,
-        datacontenttype: Option<impl Into<String>>,
-    );
+    fn set_datacontenttype(&mut self, datacontenttype: Option<impl Into<String>>);
     fn set_dataschema(&mut self, dataschema: Option<impl Into<String>>);
 }
 
@@ -169,10 +166,7 @@ impl AttributesWriter for Attributes {
 }
 
 impl DataAttributesWriter for Attributes {
-    fn set_datacontenttype(
-        &mut self,
-        datacontenttype: Option<impl Into<String>>,
-    ) {
+    fn set_datacontenttype(&mut self, datacontenttype: Option<impl Into<String>>) {
         match self {
             Attributes::V10(a) => a.set_datacontenttype(datacontenttype),
         }

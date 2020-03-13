@@ -21,7 +21,6 @@ use std::convert::TryFrom;
 /// let mut e = Event::default();
 /// e.write_data(
 ///     "application/json",
-///     None,
 ///     serde_json::json!({"hello": "world"})
 /// );
 ///
@@ -92,7 +91,7 @@ impl Event {
         self.attributes.set_datacontenttype(None as Option<String>);
     }
 
-    /// Write data into the `Event`. You must provide a `content_type` and you can optionally provide a `schema`.
+    /// Write data into the `Event` with the specified `datacontenttype`.
     ///
     /// ```
     /// use cloudevents::Event;
@@ -100,12 +99,28 @@ impl Event {
     /// use std::convert::Into;
     ///
     /// let mut e = Event::default();
-    /// e.write_data("application/json", None, json!({}))
+    /// e.write_data("application/json", json!({}))
     /// ```
-    pub fn write_data(&mut self, content_type: impl Into<String>, schema: Option<impl Into<String>>, value: impl Into<Data>) {
-        self.attributes.set_datacontenttype(Some(content_type));
-        self.attributes.set_dataschema(schema);
-        self.data = Some(value.into());
+    pub fn write_data(&mut self, datacontenttype: impl Into<String>, data: impl Into<Data>) {
+        self.attributes.set_datacontenttype(Some(datacontenttype));
+        self.attributes.set_dataschema(None as Option<&str>);
+        self.data = Some(data.into());
+    }
+
+    /// Write data into the `Event` with the specified `datacontenttype` and `dataschema`.
+    ///
+    /// ```
+    /// use cloudevents::Event;
+    /// use serde_json::json;
+    /// use std::convert::Into;
+    ///
+    /// let mut e = Event::default();
+    /// e.write_data_with_schema("application/json", "http://myapplication.com/schema", json!({}))
+    /// ```
+    pub fn write_data_with_schema(&mut self, datacontenttype: impl Into<String>, dataschema: impl Into<String>, data: impl Into<Data>) {
+        self.attributes.set_datacontenttype(Some(datacontenttype));
+        self.attributes.set_dataschema(Some(dataschema));
+        self.data = Some(data.into());
     }
 
     pub fn get_data<T: Sized + From<Data>>(&self) -> Option<T> {
@@ -145,9 +160,9 @@ mod tests {
         });
 
          let mut e = Event::default();
-         e.write_data(
+         e.write_data_with_schema(
              "application/json",
-             Some("http://localhost:8080/schema"),
+             "http://localhost:8080/schema",
              expected_data.clone()
          );
 
@@ -163,7 +178,6 @@ mod tests {
         let mut e = Event::default();
         e.write_data(
             "application/json",
-            None as Option<String>,
             serde_json::json!({
                 "hello": "world"
             })

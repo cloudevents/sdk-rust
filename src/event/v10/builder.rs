@@ -52,8 +52,13 @@ impl EventBuilder {
         return self
     }
 
-    pub fn data<S: Into<String>, D: Into<Data>>(mut self, content_type: S, schema: Option<S>, value: D) -> Self {
-        self.event.write_data(content_type, schema, value);
+    pub fn data(mut self, datacontenttype: impl Into<String>, data: impl Into<Data>) -> Self {
+        self.event.write_data(datacontenttype, data);
+        return self
+    }
+
+    pub fn data_with_schema(mut self, datacontenttype: impl Into<String>, dataschema: impl Into<String>, data: impl Into<Data>) -> Self {
+        self.event.write_data_with_schema(datacontenttype, dataschema, data);
         return self
     }
 
@@ -90,7 +95,7 @@ mod tests {
             .subject(subject)
             .time(time)
             .extension(extension_name, extension_value)
-            .data(content_type, Some(schema), data.clone())
+            .data_with_schema(content_type, schema, data.clone())
             .build();
 
         assert_eq!(SpecVersion::V10, event.get_specversion());

@@ -31,7 +31,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "cloudevents"
+name = "cloudevents-sdk"
 version = "0.0.1"
 dependencies = [
  "base64",

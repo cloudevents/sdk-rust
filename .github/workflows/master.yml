@@ -40,16 +40,16 @@ jobs:
         key: ${{ runner.os }}-cargo-build-target-${{ hashFiles('**/Cargo.lock') }}
     - uses: actions-rs/toolchain@v1
       with:
-        override: true
         toolchain: ${{ matrix.toolchain }}
         target: ${{ matrix.target }}
+        override: true
     - uses: actions-rs/cargo@v1
       with:
         command: build
         toolchain: ${{ matrix.toolchain }}
-        target: ${{ matrix.target }}
+        args: --target ${{ matrix.target }}
     - uses: actions-rs/cargo@v1
       with:
         command: test
         toolchain: ${{ matrix.toolchain }}
-        target: ${{ matrix.target }}
+        args: --target ${{ matrix.target }}

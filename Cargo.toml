@@ -1,9 +1,20 @@
 [package]
-name = "cloudevents-rust-sdk"
-version = "0.1.0"
+name = "cloudevents"
+version = "0.0.1"
 authors = ["Francesco Guardiani <francescoguard@gmail.com>"]
+license-file = "LICENSE"
 edition = "2018"
+description = "CloudEvents official Rust SDK"
+readme = "README.md"
+repository = "https://github.com/cloudevents/sdk-rust"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+serde = { version = "^1.0", features = ["derive"] }
+serde_json = "^1.0"
+chrono = { version = "^0.4", features = ["serde"] }
+delegate = "^0.4"
+uuid = { version = "^0.8", features = ["serde", "v4"] }
+hostname = "^0.1"
+base64 = "^0.12"

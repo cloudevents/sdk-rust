@@ -135,22 +135,20 @@ impl Event {
         }
     }
 
-    pub fn try_get_data<T: Sized + TryFrom<Data>>(
-        &self,
-    ) -> Result<Option<T>, T::Error> {
+    pub fn try_get_data<T: Sized + TryFrom<Data>>(&self) -> Result<Option<T>, T::Error> {
         match self.data.as_ref() {
             Some(d) => Some(T::try_from(d.clone())),
             None => None,
-        }.transpose()
+        }
+            .transpose()
     }
 
-    pub fn into_data<T: Sized + TryFrom<Data>>(
-        self,
-    ) -> Result<Option<T>, T::Error> {
+    pub fn into_data<T: Sized + TryFrom<Data>>(self) -> Result<Option<T>, T::Error> {
         match self.data {
             Some(d) => Some(T::try_from(d)),
             None => None,
-        }.transpose()
+        }
+            .transpose()
     }
 }
 
@@ -189,10 +187,7 @@ mod tests {
 
         e.remove_data();
 
-        assert!(e
-            .try_get_data::<serde_json::Value>()
-            .unwrap()
-            .is_none());
+        assert!(e.try_get_data::<serde_json::Value>().unwrap().is_none());
         assert!(e.get_dataschema().is_none());
         assert!(e.get_datacontenttype().is_none());
     }

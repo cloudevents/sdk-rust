@@ -1,6 +1,6 @@
+use chrono::{DateTime, TimeZone, Utc};
 use cloudevents::{Event, EventBuilder};
-use serde_json::{Value, json};
-use chrono::{Utc, DateTime, TimeZone};
+use serde_json::{json, Value};
 
 pub fn id() -> String {
     "0001".to_string()

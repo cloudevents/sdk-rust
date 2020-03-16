@@ -2,9 +2,9 @@ use crate::event::attributes::DataAttributesWriter;
 use crate::event::{AttributesReader, AttributesWriter, ExtensionValue, SpecVersion};
 use chrono::{DateTime, Utc};
 use hostname::get_hostname;
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use uuid::Uuid;
-use serde::{Deserialize, Serialize};
 
 #[derive(PartialEq, Debug, Clone, Serialize, Deserialize)]
 pub struct Attributes {

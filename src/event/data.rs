@@ -1,7 +1,7 @@
-use std::convert::{Into, TryFrom};
-use serde::{Deserialize, Serialize, Serializer, Deserializer};
-use std::fmt::{self, Formatter};
 use serde::de::Visitor;
+use serde::{Deserialize, Deserializer, Serialize, Serializer};
+use std::convert::{Into, TryFrom};
+use std::fmt::{self, Formatter};
 
 /// Event [data attribute](https://github.com/cloudevents/spec/blob/master/spec.md#event-data) representation
 ///
@@ -37,7 +37,10 @@ impl Data {
     }
 }
 
-fn serialize_base64<S>(data: &Vec<u8>, serializer: S) -> Result<S::Ok, S::Error> where S: Serializer {
+fn serialize_base64<S>(data: &Vec<u8>, serializer: S) -> Result<S::Ok, S::Error>
+where
+    S: Serializer,
+{
     serializer.serialize_str(&base64::encode(&data))
 }
 
@@ -50,13 +53,18 @@ impl<'de> Visitor<'de> for Base64Visitor {
         formatter.write_str("a Base64 encoded string")
     }
 
-    fn visit_str<E>(self, v: &str) -> Result<Self::Value, E> where
-        E: serde::de::Error, {
+    fn visit_str<E>(self, v: &str) -> Result<Self::Value, E>
+    where
+        E: serde::de::Error,
+    {
         base64::decode(v).map_err(|e| serde::de::Error::custom(e.to_string()))
     }
 }
 
-fn deserialize_base64<'de, D>(deserializer: D) -> Result<Vec<u8>, D::Error> where D: Deserializer<'de> {
+fn deserialize_base64<'de, D>(deserializer: D) -> Result<Vec<u8>, D::Error>
+where
+    D: Deserializer<'de>,
+{
     deserializer.deserialize_str(Base64Visitor)
 }
 
@@ -107,7 +115,7 @@ impl TryFrom<Data> for String {
         match value {
             Data::Binary(v) => Ok(String::from_utf8(v)?),
             Data::Json(serde_json::Value::String(s)) => Ok(s), // Return the string without quotes
-            Data::Json(v) => Ok(v.to_string())
+            Data::Json(v) => Ok(v.to_string()),
         }
     }
 }

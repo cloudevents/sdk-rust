@@ -1,13 +1,14 @@
-use rstest::rstest;
 use claim::*;
-use cloudevents::{Event};
-use serde_json::{Value};
+use cloudevents::Event;
+use rstest::rstest;
+use serde_json::Value;
 
 mod test_data;
 use test_data::*;
 
 #[rstest(
-    event, json,
+    event,
+    json,
     case::minimal_v1(minimal_v1(), minimal_v1_json()),
     case::full_v1_no_data(full_v1_no_data(), full_v1_no_data_json()),
     case::full_v1_with_json_data(full_v1_json_data(), full_v1_json_data_json()),

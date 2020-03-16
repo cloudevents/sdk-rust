@@ -5,8 +5,8 @@ use super::{
 use crate::event::attributes::DataAttributesWriter;
 use chrono::{DateTime, Utc};
 use delegate::delegate;
+use serde::{Deserialize, Serialize};
 use std::convert::TryFrom;
-use serde::{Serialize, Deserialize};
 
 /// Data structure that represents a [CloudEvent](https://github.com/cloudevents/spec/blob/master/spec.md).
 /// It provides methods to get the attributes through [`AttributesReader`]

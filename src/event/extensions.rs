@@ -1,5 +1,5 @@
-use std::convert::From;
 use serde::{Deserialize, Serialize};
+use std::convert::From;
 
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
 #[serde(untagged)]
@@ -10,7 +10,7 @@ pub enum ExtensionValue {
     /// Represents a [`bool`](bool) value.
     Boolean(bool),
     /// Represents an integer [`i64`](i64) value.
-    Integer(i64)
+    Integer(i64),
 }
 
 impl From<String> for ExtensionValue {

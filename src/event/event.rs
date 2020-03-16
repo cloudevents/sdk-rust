@@ -34,10 +34,13 @@ use serde::{Serialize, Deserialize};
 /// ```
 #[derive(PartialEq, Debug, Clone, Serialize, Deserialize)]
 pub struct Event {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(alias = "data_base64")]
+    #[serde(alias = "data")]
+    #[serde(flatten)]
+    pub data: Option<Data>,
     #[serde(flatten)]
     pub attributes: Attributes,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub data: Option<Data>,
 }
 
 impl AttributesReader for Event {

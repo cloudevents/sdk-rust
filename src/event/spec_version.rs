@@ -1,12 +1,9 @@
-use serde::{Deserialize, Serialize};
 use std::convert::TryFrom;
 use std::fmt;
 
-#[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
+#[derive(PartialEq, Debug, Clone)]
 pub enum SpecVersion {
-    #[serde(rename = "0.3")]
     V03,
-    #[serde(rename = "1.0")]
     V10,
 }
 

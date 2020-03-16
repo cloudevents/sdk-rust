@@ -4,16 +4,23 @@ use chrono::{DateTime, Utc};
 use hostname::get_hostname;
 use std::collections::HashMap;
 use uuid::Uuid;
+use serde::{Deserialize, Serialize};
 
-#[derive(PartialEq, Debug, Clone)]
+#[derive(PartialEq, Debug, Clone, Serialize, Deserialize)]
 pub struct Attributes {
     id: String,
+    #[serde(rename = "type")]
     ty: String,
     source: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
     datacontenttype: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     dataschema: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     subject: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     time: Option<DateTime<Utc>>,
+    #[serde(flatten)]
     extensions: HashMap<String, ExtensionValue>,
 }
 

@@ -6,6 +6,7 @@ use crate::event::attributes::DataAttributesWriter;
 use chrono::{DateTime, Utc};
 use delegate::delegate;
 use std::convert::TryFrom;
+use serde::{Serialize, Deserialize};
 
 /// Data structure that represents a [CloudEvent](https://github.com/cloudevents/spec/blob/master/spec.md).
 /// It provides methods to get the attributes through [`AttributesReader`]
@@ -31,9 +32,11 @@ use std::convert::TryFrom;
 /// let data: serde_json::Value = e.try_get_data().unwrap().unwrap();
 /// println!("Event data: {}", data)
 /// ```
-#[derive(PartialEq, Debug, Clone)]
+#[derive(PartialEq, Debug, Clone, Serialize, Deserialize)]
 pub struct Event {
+    #[serde(flatten)]
     pub attributes: Attributes,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub data: Option<Data>,
 }
 

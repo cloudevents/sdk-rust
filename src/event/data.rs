@@ -1,7 +1,9 @@
 use std::convert::{Into, TryFrom};
+use serde::{Deserialize, Serialize};
 
-#[derive(Debug, PartialEq, Clone)]
 /// Possible data values
+#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
+#[serde(untagged)]
 pub enum Data {
     String(String),
     Binary(Vec<u8>),

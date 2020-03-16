@@ -1,7 +1,6 @@
-use serde::{Deserialize, Serialize};
 use std::convert::{Into, TryFrom};
 
-#[derive(Debug, Deserialize, Serialize, PartialEq, Clone)]
+#[derive(Debug, PartialEq, Clone)]
 /// Possible data values
 pub enum Data {
     String(String),

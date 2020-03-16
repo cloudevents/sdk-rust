@@ -3,14 +3,16 @@ use super::{
     SpecVersion,
 };
 use crate::event::attributes::DataAttributesWriter;
-use chrono::{DateTime, FixedOffset};
+use chrono::{DateTime, Utc};
 use delegate::delegate;
 use std::convert::TryFrom;
 
 /// Data structure that represents a [CloudEvent](https://github.com/cloudevents/spec/blob/master/spec.md).
 /// It provides methods to get the attributes through [`AttributesReader`]
 /// and write them through [`AttributesWriter`].
-/// It also provides methods to read and write the [event data](https://github.com/cloudevents/spec/blob/master/spec.md#event-data)
+/// It also provides methods to read and write the [event data](https://github.com/cloudevents/spec/blob/master/spec.md#event-data).
+///
+/// You can build events using [`EventBuilder`]
 /// ```
 /// use cloudevents::Event;
 /// use cloudevents::event::AttributesReader;
@@ -19,7 +21,6 @@ use std::convert::TryFrom;
 /// let mut e = Event::default();
 /// e.write_data(
 ///     "application/json",
-///     None,
 ///     serde_json::json!({"hello": "world"})
 /// );
 ///
@@ -30,6 +31,7 @@ use std::convert::TryFrom;
 /// let data: serde_json::Value = e.try_get_data().unwrap().unwrap();
 /// println!("Event data: {}", data)
 /// ```
+#[derive(PartialEq, Debug, Clone)]
 pub struct Event {
     pub attributes: Attributes,
     pub data: Option<Data>,
@@ -45,7 +47,7 @@ impl AttributesReader for Event {
             fn get_datacontenttype(&self) -> Option<&str>;
             fn get_dataschema(&self) -> Option<&str>;
             fn get_subject(&self) -> Option<&str>;
-            fn get_time(&self) -> Option<&DateTime<FixedOffset>>;
+            fn get_time(&self) -> Option<&DateTime<Utc>>;
             fn get_extension(&self, extension_name: &str) -> Option<&ExtensionValue>;
             fn get_extensions(&self) -> Vec<(&str, &ExtensionValue)>;
         }
@@ -59,7 +61,7 @@ impl AttributesWriter for Event {
             fn set_source(&mut self, source: impl Into<String>);
             fn set_type(&mut self, ty: impl Into<String>);
             fn set_subject(&mut self, subject: Option<impl Into<String>>);
-            fn set_time(&mut self, time: Option<impl Into<DateTime<FixedOffset>>>);
+            fn set_time(&mut self, time: Option<impl Into<DateTime<Utc>>>);
             fn set_extension<'name, 'event: 'name>(
                 &'event mut self,
                 extension_name: &'name str,
@@ -85,9 +87,11 @@ impl Default for Event {
 impl Event {
     pub fn remove_data(&mut self) {
         self.data = None;
+        self.attributes.set_dataschema(None as Option<String>);
+        self.attributes.set_datacontenttype(None as Option<String>);
     }
 
-    /// Write data into the `Event`. You must provide a `content_type` and you can optionally provide a `schema`.
+    /// Write data into the `Event` with the specified `datacontenttype`.
     ///
     /// ```
     /// use cloudevents::Event;
@@ -95,17 +99,33 @@ impl Event {
     /// use std::convert::Into;
     ///
     /// let mut e = Event::default();
-    /// e.write_data("application/json", None, json!({}))
+    /// e.write_data("application/json", json!({}))
     /// ```
-    pub fn write_data<S: Into<String>, D: Into<Data>>(
+    pub fn write_data(&mut self, datacontenttype: impl Into<String>, data: impl Into<Data>) {
+        self.attributes.set_datacontenttype(Some(datacontenttype));
+        self.attributes.set_dataschema(None as Option<&str>);
+        self.data = Some(data.into());
+    }
+
+    /// Write data into the `Event` with the specified `datacontenttype` and `dataschema`.
+    ///
+    /// ```
+    /// use cloudevents::Event;
+    /// use serde_json::json;
+    /// use std::convert::Into;
+    ///
+    /// let mut e = Event::default();
+    /// e.write_data_with_schema("application/json", "http://myapplication.com/schema", json!({}))
+    /// ```
+    pub fn write_data_with_schema(
         &mut self,
-        content_type: S,
-        schema: Option<S>,
-        value: D,
+        datacontenttype: impl Into<String>,
+        dataschema: impl Into<String>,
+        data: impl Into<Data>,
     ) {
-        self.attributes.set_datacontenttype(Some(content_type));
-        self.attributes.set_dataschema(schema);
-        self.data = Some(value.into());
+        self.attributes.set_datacontenttype(Some(datacontenttype));
+        self.attributes.set_dataschema(Some(dataschema));
+        self.data = Some(data.into());
     }
 
     pub fn get_data<T: Sized + From<Data>>(&self) -> Option<T> {
@@ -145,10 +165,34 @@ mod tests {
         });
 
         let mut e = Event::default();
-        e.write_data("application/json", None, expected_data.clone());
+        e.write_data_with_schema(
+            "application/json",
+            "http://localhost:8080/schema",
+            expected_data.clone(),
+        );
 
         let data: serde_json::Value = e.try_get_data().unwrap().unwrap();
         assert_eq!(expected_data, data);
-        assert_eq!("application/json", e.get_datacontenttype().unwrap())
+        assert_eq!("application/json", e.get_datacontenttype().unwrap());
+        assert_eq!("http://localhost:8080/schema", e.get_dataschema().unwrap())
+    }
+
+    #[test]
+    fn remove_data() {
+        let mut e = Event::default();
+        e.write_data(
+            "application/json",
+            serde_json::json!({
+                "hello": "world"
+            }),
+        );
+
+        e.remove_data();
+
+        assert!(e
+            .try_get_data::<serde_json::Value, serde_json::Error>()
+            .is_none());
+        assert!(e.get_dataschema().is_none());
+        assert!(e.get_datacontenttype().is_none());
     }
 }

@@ -1,9 +1,7 @@
-use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::convert::From;
 
-#[derive(Debug, Deserialize, Serialize, PartialEq, Clone)]
-#[serde(untagged)]
+#[derive(Debug, PartialEq, Clone)]
 /// Represents all the possible [CloudEvents extension](https://github.com/cloudevents/spec/blob/master/spec.md#extension-context-attributes) values
 pub enum ExtensionValue {
     /// Represents a [`String`](std::string::String) value.

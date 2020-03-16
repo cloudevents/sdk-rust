@@ -24,3 +24,20 @@ fn serialize_deserialize_should_succeed(event: Event, json: Value) {
     let deserialize_json = deserialize_result.unwrap();
     assert_eq!(deserialize_json, event)
 }
+
+
+#[cfg(test)]
+mod tests {
+    use cloudevents::EventBuilder;
+    #[test]
+    fn serialize_full_event_to_json_data() {
+        let event = EventBuilder::v10()
+            .id("id")
+            .ty("test type")
+            .source("http://localhost:8080")
+            .build();
+        let deserialized_event = serde_json::to_value(event);
+        let json = "{\"type\":\"test type\",\"specversion\":\"1.0\",\"source\":\"http://localhost:8080\",\"id\":\"id\",\"datacontenttype\":\"application/json\",\"data\":\"\\\"test\\\"\"}";
+        assert_eq!(json, deserialized_event.unwrap());
+    }
+}

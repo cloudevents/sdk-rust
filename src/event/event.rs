@@ -140,7 +140,7 @@ impl Event {
             Some(d) => Some(T::try_from(d.clone())),
             None => None,
         }
-            .transpose()
+        .transpose()
     }
 
     pub fn into_data<T: Sized + TryFrom<Data>>(self) -> Result<Option<T>, T::Error> {
@@ -148,7 +148,7 @@ impl Event {
             Some(d) => Some(T::try_from(d)),
             None => None,
         }
-            .transpose()
+        .transpose()
     }
 }
 

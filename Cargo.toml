@@ -19,5 +19,9 @@ uuid = { version = "^0.8", features = ["serde", "v4"] }
 hostname = "^0.1"
 base64 = "^0.12"
 
+[dev-dependencies]
+rstest = "0.6"
+claim = "0.3.1"
+
 [lib]
 name = "cloudevents"

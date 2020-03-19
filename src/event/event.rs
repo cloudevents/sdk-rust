@@ -5,6 +5,7 @@ use super::{
 use crate::event::attributes::DataAttributesWriter;
 use chrono::{DateTime, Utc};
 use delegate::delegate;
+use serde::{Deserialize, Serialize};
 use std::convert::TryFrom;
 
 /// Data structure that represents a [CloudEvent](https://github.com/cloudevents/spec/blob/master/spec.md).
@@ -31,10 +32,15 @@ use std::convert::TryFrom;
 /// let data: serde_json::Value = e.try_get_data().unwrap().unwrap();
 /// println!("Event data: {}", data)
 /// ```
-#[derive(PartialEq, Debug, Clone)]
+#[derive(PartialEq, Debug, Clone, Serialize, Deserialize)]
 pub struct Event {
-    pub attributes: Attributes,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(alias = "data_base64")]
+    #[serde(alias = "data")]
+    #[serde(flatten)]
     pub data: Option<Data>,
+    #[serde(flatten)]
+    pub attributes: Attributes,
 }
 
 impl AttributesReader for Event {

@@ -63,11 +63,8 @@ impl AttributesReader for Attributes {
         self.extensions.get(extension_name)
     }
 
-    fn get_extensions(&self) -> Vec<(&str, &ExtensionValue)> {
-        self.extensions
-            .iter()
-            .map(|(k, v)| (k.as_str(), v))
-            .collect()
+    fn iter_extensions(&self) -> std::collections::hash_map::Iter<String, ExtensionValue> {
+        self.extensions.iter()
     }
 }
 

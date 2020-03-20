@@ -22,5 +22,6 @@ If you're interested in contributing to sdk-rust, look at [Contributing document
   to determine which week will have the call.
 - Slack: #cloudeventssdk (or #cloudevents-sdk-rust) channel under
   [CNCF's Slack workspace](https://slack.cncf.io/).
+- Email: https://lists.cncf.io/g/cncf-cloudevents-sdk
 - Contact for additional information: Fancesco Guardiani (`@slinkydeveloper`
   on slack).

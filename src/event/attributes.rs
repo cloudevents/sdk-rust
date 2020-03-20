@@ -2,6 +2,42 @@ use super::SpecVersion;
 use crate::event::{AttributesV10, ExtensionValue};
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
+use std::fmt;
+
+impl ExactSizeIterator for Iter {
+    type Item = (&'a str, AttributeValue<'a>);
+
+    fn next(&mut self) -> Option<u32> {
+        let new_next = self.curr + self.next;
+
+        self.curr = self.next;
+        self.next = new_next;
+
+        // Since there's no endpoint to a Fibonacci sequence, the `Iterator`
+        // will never return `None`, and `Some` is always returned.
+        Some(self.curr)
+    }
+}
+
+pub enum AttributeValue<'a> {
+    SpecVersion(SpecVersion),
+    String(&'a str),
+    URI(&'a str),
+    URIRef(&'a str),
+    Time(&'a DateTime<Utc>)
+}
+
+impl fmt::Display for AttributeValue<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            AttributeValue::SpecVersion(s) => s.fmt(f),
+            AttributeValue::String(s) => f.write_str(s),
+            AttributeValue::URI(s) => f.write_str(s),
+            AttributeValue::URIRef(s) => f.write_str(s),
+            AttributeValue::Time(s) => f.write_str(&s.to_rfc2822()),
+        }
+    }
+}
 
 /// Trait to get [CloudEvents Context attributes](https://github.com/cloudevents/spec/blob/master/spec.md#context-attributes).
 pub trait AttributesReader {
@@ -24,7 +60,7 @@ pub trait AttributesReader {
     /// Get the [extension](https://github.com/cloudevents/spec/blob/master/spec.md#extension-context-attributes) named `extension_name`
     fn get_extension(&self, extension_name: &str) -> Option<&ExtensionValue>;
     /// Get all the [extensions](https://github.com/cloudevents/spec/blob/master/spec.md#extension-context-attributes)
-    fn get_extensions(&self) -> Vec<(&str, &ExtensionValue)>;
+    fn iter_extensions(&self) -> std::collections::hash_map::Iter<String, ExtensionValue>;
 }
 
 pub trait AttributesWriter {
@@ -111,9 +147,9 @@ impl AttributesReader for Attributes {
         }
     }
 
-    fn get_extensions(&self) -> Vec<(&str, &ExtensionValue)> {
+    fn iter_extensions(&self) -> std::collections::hash_map::Iter<String, ExtensionValue> {
         match self {
-            Attributes::V10(a) => a.get_extensions(),
+            Attributes::V10(a) => a.iter_extensions(),
         }
     }
 }

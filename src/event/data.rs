@@ -1,16 +1,10 @@
-use serde::de::Visitor;
-use serde::{Serialize, Serializer};
 use std::convert::{Into, TryFrom};
-use std::fmt::{self, Formatter};
 
 /// Event [data attribute](https://github.com/cloudevents/spec/blob/master/spec.md#event-data) representation
 ///
-#[derive(Debug, PartialEq, Clone, Serialize)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum Data {
-    #[serde(rename = "data_base64")]
-    #[serde(serialize_with = "serialize_base64")]
     Binary(Vec<u8>),
-    #[serde(rename = "data")]
     Json(serde_json::Value),
 }
 
@@ -34,13 +28,6 @@ impl Data {
     {
         Ok(base64::decode(&i)?.into())
     }
-}
-
-fn serialize_base64<S>(data: &Vec<u8>, serializer: S) -> Result<S::Ok, S::Error>
-where
-    S: Serializer,
-{
-    serializer.serialize_str(&base64::encode(&data))
 }
 
 impl Into<Data> for serde_json::Value {

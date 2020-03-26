@@ -100,3 +100,54 @@ impl<S: serde::Serializer> crate::event::serde::EventSerializer<S, Attributes> f
         state.end()
     }
 }
+
+pub(crate) struct EventSerializer {}
+
+impl<S: serde::Serializer> crate::event::serde::EventSerializer<S, Attributes> for EventSerializer {
+    fn serialize(
+        attributes: &Attributes,
+        data: &Option<Data>,
+        extensions: &HashMap<String, ExtensionValue>,
+        serializer: S,
+    ) -> Result<<S as Serializer>::Ok, <S as Serializer>::Error> {
+        let num =
+            3 + if attributes.datacontenttype.is_some() {
+                1
+            } else {
+                0
+            } + if attributes.dataschema.is_some() {
+                1
+            } else {
+                0
+            } + if attributes.subject.is_some() { 1 } else { 0 }
+                + if attributes.time.is_some() { 1 } else { 0 }
+                + if data.is_some() { 1 } else { 0 }
+                + extensions.len();
+        let mut state = serializer.serialize_map(Some(num))?;
+        state.serialize_entry("specversion", "1.0")?;
+        state.serialize_entry("id", &attributes.id)?;
+        state.serialize_entry("type", &attributes.ty)?;
+        state.serialize_entry("source", &attributes.source)?;
+        if let Some(datacontenttype) = &attributes.datacontenttype {
+            state.serialize_entry("datacontenttype", datacontenttype)?;
+        }
+        if let Some(dataschema) = &attributes.dataschema {
+            state.serialize_entry("dataschema", dataschema)?;
+        }
+        if let Some(subject) = &attributes.subject {
+            state.serialize_entry("subject", subject)?;
+        }
+        if let Some(time) = &attributes.time {
+            state.serialize_entry("time", time)?;
+        }
+        match data {
+            Some(Data::Json(j)) => state.serialize_entry("data", j)?,
+            Some(Data::Binary(v)) => state.serialize_entry("data_base64", &base64::encode(v))?,
+            _ => (),
+        };
+        for (k, v) in extensions {
+            state.serialize_entry(k, v)?;
+        }
+        state.end()
+    }
+}

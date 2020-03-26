@@ -134,6 +134,15 @@ pub(crate) trait EventSerializer<S: Serializer, A: Sized> {
     ) -> Result<<S as Serializer>::Ok, <S as Serializer>::Error>;
 }
 
+pub(crate) trait EventSerializer<S: Serializer, A: Sized> {
+    fn serialize(
+        attributes: &A,
+        data: &Option<Data>,
+        extensions: &HashMap<String, ExtensionValue>,
+        serializer: S,
+    ) -> Result<<S as Serializer>::Ok, <S as Serializer>::Error>;
+}
+
 impl<'de> Deserialize<'de> for Event {
     fn deserialize<D>(deserializer: D) -> Result<Self, <D as Deserializer<'de>>::Error>
     where
@@ -172,6 +181,19 @@ impl Serialize for Event {
             Attributes::V03(a) => {
                 EventSerializerV03::serialize(a, &self.data, &self.extensions, serializer)
             }
+            Attributes::V10(a) => {
+                EventSerializerV10::serialize(a, &self.data, &self.extensions, serializer)
+            }
+        }
+    }
+}
+
+impl Serialize for Event {
+    fn serialize<S>(&self, serializer: S) -> Result<<S as Serializer>::Ok, <S as Serializer>::Error>
+    where
+        S: Serializer,
+    {
+        match &self.attributes {
             Attributes::V10(a) => {
                 EventSerializerV10::serialize(a, &self.data, &self.extensions, serializer)
             }

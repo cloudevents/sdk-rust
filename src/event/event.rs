@@ -5,7 +5,6 @@ use super::{
 use crate::event::attributes::DataAttributesWriter;
 use chrono::{DateTime, Utc};
 use delegate::delegate;
-use serde::Serialize;
 use std::collections::HashMap;
 use std::convert::TryFrom;
 
@@ -33,14 +32,10 @@ use std::convert::TryFrom;
 /// let data: serde_json::Value = e.try_get_data().unwrap().unwrap();
 /// println!("Event data: {}", data)
 /// ```
-#[derive(PartialEq, Debug, Clone, Serialize)]
+#[derive(PartialEq, Debug, Clone)]
 pub struct Event {
-    #[serde(flatten)]
     pub attributes: Attributes,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    #[serde(flatten)]
     pub data: Option<Data>,
-    #[serde(flatten)]
     pub extensions: HashMap<String, ExtensionValue>,
 }
 

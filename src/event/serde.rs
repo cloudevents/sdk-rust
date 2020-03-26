@@ -1,9 +1,9 @@
-use super::{Attributes, Data, Event, EventDeseriazerV10};
-use serde::de::{Error, Unexpected, IntoDeserializer};
-use serde::{Deserialize, Deserializer};
+use super::{Attributes, Data, Event, EventDeserializerV10, EventSerializerV10};
+use crate::event::ExtensionValue;
+use serde::de::{Error, IntoDeserializer, Unexpected};
+use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use serde_value::Value;
 use std::collections::{BTreeMap, HashMap};
-use crate::event::ExtensionValue;
 
 const SPEC_VERSIONS: [&'static str; 1] = ["1.0"];
 
@@ -40,6 +40,15 @@ pub(crate) trait EventDeserializer {
     ) -> Result<Option<Data>, E>;
 }
 
+pub(crate) trait EventSerializer<S: Serializer, A: Sized> {
+    fn serialize(
+        attributes: &A,
+        data: &Option<Data>,
+        extensions: &HashMap<String, ExtensionValue>,
+        serializer: S,
+    ) -> Result<<S as Serializer>::Ok, <S as Serializer>::Error>;
+}
+
 impl<'de> Deserialize<'de> for Event {
     fn deserialize<D>(deserializer: D) -> Result<Self, <D as Deserializer<'de>>::Error>
     where
@@ -62,7 +71,7 @@ impl<'de> Deserialize<'de> for Event {
             match parse_field!(map, "specversion", String, <D as Deserializer<'de>>::Error)?
                 .as_str()
             {
-                "1.0" => Ok(EventDeseriazerV10 {}),
+                "1.0" => Ok(EventDeserializerV10 {}),
                 s => Err(<D as Deserializer<'de>>::Error::unknown_variant(
                     s,
                     &SPEC_VERSIONS,
@@ -71,7 +80,8 @@ impl<'de> Deserialize<'de> for Event {
 
         let attributes = event_deserializer.deserialize_attributes(&mut map)?;
         let data = event_deserializer.deserialize_data(&mut map)?;
-        let extensions = map.into_iter()
+        let extensions = map
+            .into_iter()
             .map(|(k, v)| Ok((k, ExtensionValue::deserialize(v.into_deserializer())?)))
             .collect::<Result<HashMap<String, ExtensionValue>, serde_value::DeserializerError>>()
             .map_err(|e| <D as Deserializer<'de>>::Error::custom(e))?;
@@ -81,6 +91,19 @@ impl<'de> Deserialize<'de> for Event {
             data,
             extensions,
         })
+    }
+}
+
+impl Serialize for Event {
+    fn serialize<S>(&self, serializer: S) -> Result<<S as Serializer>::Ok, <S as Serializer>::Error>
+    where
+        S: Serializer,
+    {
+        match &self.attributes {
+            Attributes::V10(a) => {
+                EventSerializerV10::serialize(a, &self.data, &self.extensions, serializer)
+            }
+        }
     }
 }
 

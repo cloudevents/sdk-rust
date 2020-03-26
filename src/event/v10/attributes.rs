@@ -2,22 +2,16 @@ use crate::event::attributes::DataAttributesWriter;
 use crate::event::{AttributesReader, AttributesWriter, SpecVersion};
 use chrono::{DateTime, Utc};
 use hostname::get_hostname;
-use serde::Serialize;
 use uuid::Uuid;
 
-#[derive(PartialEq, Debug, Clone, Serialize)]
+#[derive(PartialEq, Debug, Clone)]
 pub struct Attributes {
     pub(crate) id: String,
-    #[serde(rename = "type")]
     pub(crate) ty: String,
     pub(crate) source: String,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub(crate) datacontenttype: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub(crate) dataschema: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub(crate) subject: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub(crate) time: Option<DateTime<Utc>>,
 }
 

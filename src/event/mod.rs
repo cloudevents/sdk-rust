@@ -19,4 +19,5 @@ mod v10;
 
 pub use v10::Attributes as AttributesV10;
 pub use v10::EventBuilder as EventBuilderV10;
-pub(crate) use v10::EventDeserializer as EventDeseriazerV10;
+pub(crate) use v10::EventDeserializer as EventDeserializerV10;
+pub(crate) use v10::EventSerializer as EventSerializerV10;

@@ -50,7 +50,6 @@ dependencies = [
  "hostname",
  "rstest",
  "serde",
- "serde-transcode",
  "serde-value",
  "serde_json",
  "uuid",
@@ -249,15 +248,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "414115f25f818d7dfccec8ee535d76949ae78584fc4f79a6f45a904bf8ab4449"
 dependencies = [
  "serde_derive",
-]
-
-[[package]]
-name = "serde-transcode"
-version = "1.1.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "97528f0dfcf8ce2d51d995cb513a103b9cd301dc3f387a9cae5ef974381d4e1c"
-dependencies = [
- "serde",
 ]
 
 [[package]]

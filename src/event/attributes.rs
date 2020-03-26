@@ -57,10 +57,8 @@ pub(crate) trait DataAttributesWriter {
     fn set_dataschema(&mut self, dataschema: Option<impl Into<String>>);
 }
 
-#[derive(PartialEq, Debug, Clone, Serialize)]
-#[serde(tag = "specversion")]
+#[derive(PartialEq, Debug, Clone)]
 pub enum Attributes {
-    #[serde(rename = "1.0")]
     V10(AttributesV10),
 }
 

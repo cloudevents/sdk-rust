@@ -2,7 +2,9 @@ mod attributes;
 mod builder;
 mod data;
 mod event;
-mod extension_value;
+mod extensions;
+#[macro_use]
+mod serde;
 mod spec_version;
 
 pub use attributes::Attributes;
@@ -17,3 +19,4 @@ mod v10;
 
 pub use v10::Attributes as AttributesV10;
 pub use v10::EventBuilder as EventBuilderV10;
+pub(crate) use v10::EventDeserializer as EventDeseriazerV10;

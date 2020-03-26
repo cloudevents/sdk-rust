@@ -1,15 +1,14 @@
 use serde::de::Visitor;
-use serde::{Deserialize, Deserializer, Serialize, Serializer};
+use serde::{Serialize, Serializer};
 use std::convert::{Into, TryFrom};
 use std::fmt::{self, Formatter};
 
 /// Event [data attribute](https://github.com/cloudevents/spec/blob/master/spec.md#event-data) representation
 ///
-#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Clone, Serialize)]
 pub enum Data {
     #[serde(rename = "data_base64")]
     #[serde(serialize_with = "serialize_base64")]
-    #[serde(deserialize_with = "deserialize_base64")]
     Binary(Vec<u8>),
     #[serde(rename = "data")]
     Json(serde_json::Value),
@@ -42,30 +41,6 @@ where
     S: Serializer,
 {
     serializer.serialize_str(&base64::encode(&data))
-}
-
-struct Base64Visitor;
-
-impl<'de> Visitor<'de> for Base64Visitor {
-    type Value = Vec<u8>;
-
-    fn expecting(&self, formatter: &mut Formatter) -> fmt::Result {
-        formatter.write_str("a Base64 encoded string")
-    }
-
-    fn visit_str<E>(self, v: &str) -> Result<Self::Value, E>
-    where
-        E: serde::de::Error,
-    {
-        base64::decode(v).map_err(|e| serde::de::Error::custom(e.to_string()))
-    }
-}
-
-fn deserialize_base64<'de, D>(deserializer: D) -> Result<Vec<u8>, D::Error>
-where
-    D: Deserializer<'de>,
-{
-    deserializer.deserialize_str(Base64Visitor)
 }
 
 impl Into<Data> for serde_json::Value {

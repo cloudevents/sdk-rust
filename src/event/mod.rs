@@ -6,6 +6,7 @@ mod extensions;
 #[macro_use]
 mod serde;
 mod spec_version;
+mod deserializer;
 
 pub use attributes::Attributes;
 pub use attributes::{AttributesReader, AttributesWriter};

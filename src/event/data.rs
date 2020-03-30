@@ -31,6 +31,18 @@ impl Data {
     {
         Ok(base64::decode(&i)?.into())
     }
+
+    pub fn from_binary<I>(content_type: Option<&str>, i: I) -> Result<Self, serde_json::Error>
+        where
+            I: AsRef<[u8]>,
+    {
+        let is_json = is_json_content_type(content_type.unwrap_or("application/json"));
+        if is_json {
+            serde_json::from_slice::<serde_json::Value>(i.as_ref()).map(Data::Json)
+        } else {
+            Ok(Data::Binary(i.as_ref().to_vec()))
+        }
+    }
 }
 
 pub(crate) fn is_json_content_type(ct: &str) -> bool {

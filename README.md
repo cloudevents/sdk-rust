@@ -2,10 +2,19 @@
 
 Work in progress SDK for [CloudEvents](https://github.com/cloudevents/spec)
 
-## Status
+## Spec support
 
-This SDK current supports the following versions of CloudEvents:
-- TBD
+|                               |  [v0.3](https://github.com/cloudevents/spec/tree/v0.3) | [v1.0](https://github.com/cloudevents/spec/tree/v1.0) |
+| :---------------------------: | :----------------------------------------------------------------------------: | :---------------------------------------------------------------------------------: |
+| CloudEvents Core              | :x: | :heavy_check_mark: |
+| AMQP Protocol Binding         | :x: | :x:  |
+| AVRO Event Format             | :x: | :x: |
+| HTTP Protocol Binding         | :x: | :x: |
+| JSON Event Format             | :x: | :heavy_check_mark: |
+| Kafka Protocol Binding        | :x: | :x: |
+| MQTT Protocol Binding         | :x: | :x: |
+| NATS Protocol Binding         | :x: | :x: |
+| Web hook                      | :x: | :x: |
 
 ## Development & Contributing
 

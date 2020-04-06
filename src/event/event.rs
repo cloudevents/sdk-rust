@@ -5,7 +5,7 @@ use super::{
 use crate::event::attributes::DataAttributesWriter;
 use chrono::{DateTime, Utc};
 use delegate::delegate;
-use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
 use std::convert::TryFrom;
 
 /// Data structure that represents a [CloudEvent](https://github.com/cloudevents/spec/blob/master/spec.md).
@@ -32,15 +32,11 @@ use std::convert::TryFrom;
 /// let data: serde_json::Value = e.try_get_data().unwrap().unwrap();
 /// println!("Event data: {}", data)
 /// ```
-#[derive(PartialEq, Debug, Clone, Serialize, Deserialize)]
+#[derive(PartialEq, Debug, Clone)]
 pub struct Event {
-    #[serde(skip_serializing_if = "Option::is_none")]
-    #[serde(alias = "data_base64")]
-    #[serde(alias = "data")]
-    #[serde(flatten)]
-    pub data: Option<Data>,
-    #[serde(flatten)]
     pub attributes: Attributes,
+    pub data: Option<Data>,
+    pub extensions: HashMap<String, ExtensionValue>,
 }
 
 impl AttributesReader for Event {
@@ -54,8 +50,6 @@ impl AttributesReader for Event {
             fn get_dataschema(&self) -> Option<&str>;
             fn get_subject(&self) -> Option<&str>;
             fn get_time(&self) -> Option<&DateTime<Utc>>;
-            fn get_extension(&self, extension_name: &str) -> Option<&ExtensionValue>;
-            fn get_extensions(&self) -> Vec<(&str, &ExtensionValue)>;
         }
     }
 }
@@ -68,15 +62,6 @@ impl AttributesWriter for Event {
             fn set_type(&mut self, ty: impl Into<String>);
             fn set_subject(&mut self, subject: Option<impl Into<String>>);
             fn set_time(&mut self, time: Option<impl Into<DateTime<Utc>>>);
-            fn set_extension<'name, 'event: 'name>(
-                &'event mut self,
-                extension_name: &'name str,
-                extension_value: impl Into<ExtensionValue>,
-            );
-            fn remove_extension<'name, 'event: 'name>(
-                &'event mut self,
-                extension_name: &'name str,
-            ) -> Option<ExtensionValue>;
         }
     }
 }
@@ -86,6 +71,7 @@ impl Default for Event {
         Event {
             attributes: Attributes::V10(AttributesV10::default()),
             data: None,
+            extensions: HashMap::default(),
         }
     }
 }
@@ -155,6 +141,35 @@ impl Event {
             None => None,
         }
         .transpose()
+    }
+
+    /// Get the [extension](https://github.com/cloudevents/spec/blob/master/spec.md#extension-context-attributes) named `extension_name`
+    pub fn get_extension(&self, extension_name: &str) -> Option<&ExtensionValue> {
+        self.extensions.get(extension_name)
+    }
+
+    /// Get all the [extensions](https://github.com/cloudevents/spec/blob/master/spec.md#extension-context-attributes)
+    pub fn get_extensions(&self) -> Vec<(&str, &ExtensionValue)> {
+        self.extensions
+            .iter()
+            .map(|(k, v)| (k.as_str(), v))
+            .collect()
+    }
+
+    pub fn set_extension<'name, 'event: 'name>(
+        &'event mut self,
+        extension_name: &'name str,
+        extension_value: impl Into<ExtensionValue>,
+    ) {
+        self.extensions
+            .insert(extension_name.to_owned(), extension_value.into());
+    }
+
+    pub fn remove_extension<'name, 'event: 'name>(
+        &'event mut self,
+        extension_name: &'name str,
+    ) -> Option<ExtensionValue> {
+        self.extensions.remove(extension_name)
     }
 }
 

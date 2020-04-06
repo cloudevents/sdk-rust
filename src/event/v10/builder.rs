@@ -1,6 +1,7 @@
 use super::Attributes as AttributesV10;
 use crate::event::{Attributes, AttributesWriter, Data, Event, ExtensionValue};
 use chrono::{DateTime, Utc};
+use std::collections::HashMap;
 
 pub struct EventBuilder {
     event: Event,
@@ -17,6 +18,7 @@ impl EventBuilder {
             event: Event {
                 attributes: Attributes::V10(AttributesV10::default()),
                 data: None,
+                extensions: HashMap::new(),
             },
         }
     }

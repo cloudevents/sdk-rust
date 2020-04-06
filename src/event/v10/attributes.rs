@@ -1,27 +1,18 @@
 use crate::event::attributes::DataAttributesWriter;
-use crate::event::{AttributesReader, AttributesWriter, ExtensionValue, SpecVersion};
+use crate::event::{AttributesReader, AttributesWriter, SpecVersion};
 use chrono::{DateTime, Utc};
 use hostname::get_hostname;
-use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
 use uuid::Uuid;
 
-#[derive(PartialEq, Debug, Clone, Serialize, Deserialize)]
+#[derive(PartialEq, Debug, Clone)]
 pub struct Attributes {
-    id: String,
-    #[serde(rename = "type")]
-    ty: String,
-    source: String,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    datacontenttype: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    dataschema: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    subject: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    time: Option<DateTime<Utc>>,
-    #[serde(flatten)]
-    extensions: HashMap<String, ExtensionValue>,
+    pub(crate) id: String,
+    pub(crate) ty: String,
+    pub(crate) source: String,
+    pub(crate) datacontenttype: Option<String>,
+    pub(crate) dataschema: Option<String>,
+    pub(crate) subject: Option<String>,
+    pub(crate) time: Option<DateTime<Utc>>,
 }
 
 impl AttributesReader for Attributes {
@@ -65,17 +56,6 @@ impl AttributesReader for Attributes {
     fn get_time(&self) -> Option<&DateTime<Utc>> {
         self.time.as_ref()
     }
-
-    fn get_extension(&self, extension_name: &str) -> Option<&ExtensionValue> {
-        self.extensions.get(extension_name)
-    }
-
-    fn get_extensions(&self) -> Vec<(&str, &ExtensionValue)> {
-        self.extensions
-            .iter()
-            .map(|(k, v)| (k.as_str(), v))
-            .collect()
-    }
 }
 
 impl AttributesWriter for Attributes {
@@ -97,22 +77,6 @@ impl AttributesWriter for Attributes {
 
     fn set_time(&mut self, time: Option<impl Into<DateTime<Utc>>>) {
         self.time = time.map(Into::into)
-    }
-
-    fn set_extension<'name, 'event: 'name>(
-        &'event mut self,
-        extension_name: &'name str,
-        extension_value: impl Into<ExtensionValue>,
-    ) {
-        self.extensions
-            .insert(extension_name.to_owned(), extension_value.into());
-    }
-
-    fn remove_extension<'name, 'event: 'name>(
-        &'event mut self,
-        extension_name: &'name str,
-    ) -> Option<ExtensionValue> {
-        self.extensions.remove(extension_name)
     }
 }
 
@@ -136,7 +100,6 @@ impl Default for Attributes {
             dataschema: None,
             subject: None,
             time: None,
-            extensions: HashMap::new(),
         }
     }
 }

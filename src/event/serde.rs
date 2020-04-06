@@ -1,4 +1,4 @@
-use super::{Attributes, Data, Event, EventDeserializerV10, EventSerializerV10};
+use super::{Attributes, Data, Event, EventDeserializerV03, EventDeserializerV10, EventSerializerV03, EventSerializerV10};
 use crate::event::ExtensionValue;
 use serde::de::{Error, IntoDeserializer, Unexpected};
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
@@ -71,6 +71,7 @@ impl<'de> Deserialize<'de> for Event {
             match parse_field!(map, "specversion", String, <D as Deserializer<'de>>::Error)?
                 .as_str()
             {
+                "0.3" => Ok(EventDeserializerV03 {}),
                 "1.0" => Ok(EventDeserializerV10 {}),
                 s => Err(<D as Deserializer<'de>>::Error::unknown_variant(
                     s,
@@ -100,6 +101,9 @@ impl Serialize for Event {
         S: Serializer,
     {
         match &self.attributes {
+            Attributes::V03(a) => {
+                EventSerializerV03::serialize(a, &self.data, &self.extensions, serializer)
+            }
             Attributes::V10(a) => {
                 EventSerializerV10::serialize(a, &self.data, &self.extensions, serializer)
             }

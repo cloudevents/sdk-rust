@@ -100,6 +100,7 @@ impl<S: serde::Serializer> crate::event::serde::EventSerializer<S, Attributes> f
         }
         match data {
             Some(Data::Json(j)) => state.serialize_entry("data", j)?,
+            Some(Data::String(s)) => state.serialize_entry("data", s)?,
             Some(Data::Binary(v)) => state.serialize_entry("data_base64", &base64::encode(v))?,
             _ => (),
         };

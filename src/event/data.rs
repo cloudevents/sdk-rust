@@ -1,10 +1,13 @@
 use std::convert::{Into, TryFrom};
 
 /// Event [data attribute](https://github.com/cloudevents/spec/blob/master/spec.md#event-data) representation
-///
 #[derive(Debug, PartialEq, Clone)]
 pub enum Data {
+    /// Event has a binary payload
     Binary(Vec<u8>),
+    /// Event has a non-json string payload
+    String(String),
+    /// Event has a json payload
     Json(serde_json::Value),
 }
 
@@ -44,40 +47,40 @@ impl Into<Data> for Vec<u8> {
 
 impl Into<Data> for String {
     fn into(self) -> Data {
-        Data::Json(self.into())
+        Data::String(self)
     }
 }
 
-impl TryFrom<Data> for serde_json::Value {
-    type Error = serde_json::Error;
-
-    fn try_from(value: Data) -> Result<Self, Self::Error> {
-        match value {
-            Data::Binary(v) => Ok(serde_json::from_slice(&v)?),
-            Data::Json(v) => Ok(v),
-        }
-    }
-}
-
-impl TryFrom<Data> for Vec<u8> {
-    type Error = serde_json::Error;
-
-    fn try_from(value: Data) -> Result<Self, Self::Error> {
-        match value {
-            Data::Binary(v) => Ok(serde_json::from_slice(&v)?),
-            Data::Json(v) => Ok(serde_json::to_vec(&v)?),
-        }
-    }
-}
-
-impl TryFrom<Data> for String {
-    type Error = std::string::FromUtf8Error;
-
-    fn try_from(value: Data) -> Result<Self, Self::Error> {
-        match value {
-            Data::Binary(v) => Ok(String::from_utf8(v)?),
-            Data::Json(serde_json::Value::String(s)) => Ok(s), // Return the string without quotes
-            Data::Json(v) => Ok(v.to_string()),
-        }
-    }
-}
+// impl TryFrom<Data> for serde_json::Value {
+//     type Error = serde_json::Error;
+//
+//     fn try_from(value: Data) -> Result<Self, Self::Error> {
+//         match value {
+//             Data::Binary(v) => Ok(serde_json::from_slice(&v)?),
+//             Data::Json(v) => Ok(v),
+//         }
+//     }
+// }
+//
+// impl TryFrom<Data> for Vec<u8> {
+//     type Error = serde_json::Error;
+//
+//     fn try_from(value: Data) -> Result<Self, Self::Error> {
+//         match value {
+//             Data::Binary(v) => Ok(serde_json::from_slice(&v)?),
+//             Data::Json(v) => Ok(serde_json::to_vec(&v)?),
+//         }
+//     }
+// }
+//
+// impl TryFrom<Data> for String {
+//     type Error = std::string::FromUtf8Error;
+//
+//     fn try_from(value: Data) -> Result<Self, Self::Error> {
+//         match value {
+//             Data::Binary(v) => Ok(String::from_utf8(v)?),
+//             Data::Json(serde_json::Value::String(s)) => Ok(s), // Return the string without quotes
+//             Data::Json(v) => Ok(v.to_string()),
+//         }
+//     }
+// }

@@ -14,20 +14,28 @@ pub fn source() -> String {
     "http://localhost".to_string()
 }
 
-pub fn datacontenttype() -> String {
+pub fn json_datacontenttype() -> String {
     "application/json".to_string()
+}
+
+pub fn xml_datacontenttype() -> String {
+    "application/xml".to_string()
 }
 
 pub fn dataschema() -> String {
     "http://localhost/schema".to_string()
 }
 
-pub fn data() -> Value {
+pub fn json_data() -> Value {
     json!({"hello": "world"})
 }
 
-pub fn data_base_64() -> Vec<u8> {
+pub fn json_data_base64() -> Vec<u8> {
     serde_json::to_vec(&json!({"hello": "world"})).unwrap()
+}
+
+pub fn xml_data() -> String {
+    "<hello>world</hello>".to_string()
 }
 
 pub fn subject() -> String {
@@ -116,7 +124,7 @@ pub fn full_v1_json_data() -> Event {
         .extension(&string_ext_name, string_ext_value)
         .extension(&bool_ext_name, bool_ext_value)
         .extension(&int_ext_name, int_ext_value)
-        .data_with_schema(datacontenttype(), dataschema(), data())
+        .data_with_schema(json_datacontenttype(), dataschema(), json_data())
         .build()
 }
 
@@ -141,30 +149,10 @@ pub fn full_v1_json_data_json() -> Value {
     })
 }
 
-pub fn full_v1_binary_data() -> Event {
+pub fn full_v1_json_base64_data_json() -> Value {
     let (string_ext_name, string_ext_value) = string_extension();
     let (bool_ext_name, bool_ext_value) = bool_extension();
     let (int_ext_name, int_ext_value) = int_extension();
-
-    EventBuilder::v10()
-        .id(id())
-        .source(source())
-        .ty(ty())
-        .subject(subject())
-        .time(time())
-        .extension(&string_ext_name, string_ext_value)
-        .extension(&bool_ext_name, bool_ext_value)
-        .extension(&int_ext_name, int_ext_value)
-        .data_with_schema(datacontenttype(), dataschema(), data_base_64())
-        .build()
-}
-
-pub fn full_v1_base64_data_json() -> Value {
-    let (string_ext_name, string_ext_value) = string_extension();
-    let (bool_ext_name, bool_ext_value) = bool_extension();
-    let (int_ext_name, int_ext_value) = int_extension();
-
-    let d = base64::encode(&data_base_64());
 
     json!({
         "specversion": "1.0",
@@ -178,6 +166,82 @@ pub fn full_v1_base64_data_json() -> Value {
         int_ext_name: int_ext_value,
         "datacontenttype": datacontenttype(),
         "dataschema": dataschema(),
-        "data_base64": d
+        "data_base64": base64::encode(&json_data_base64())
+    })
+}
+
+pub fn full_v1_xml_string_data() -> Event {
+    let (string_ext_name, string_ext_value) = string_extension();
+    let (bool_ext_name, bool_ext_value) = bool_extension();
+    let (int_ext_name, int_ext_value) = int_extension();
+
+    EventBuilder::v10()
+        .id(id())
+        .source(source())
+        .ty(ty())
+        .subject(subject())
+        .time(time())
+        .extension(&string_ext_name, string_ext_value)
+        .extension(&bool_ext_name, bool_ext_value)
+        .extension(&int_ext_name, int_ext_value)
+        .data(xml_datacontenttype(), xml_data())
+        .build()
+}
+
+pub fn full_v1_xml_binary_data() -> Event {
+    let (string_ext_name, string_ext_value) = string_extension();
+    let (bool_ext_name, bool_ext_value) = bool_extension();
+    let (int_ext_name, int_ext_value) = int_extension();
+
+    EventBuilder::v10()
+        .id(id())
+        .source(source())
+        .ty(ty())
+        .subject(subject())
+        .time(time())
+        .extension(&string_ext_name, string_ext_value)
+        .extension(&bool_ext_name, bool_ext_value)
+        .extension(&int_ext_name, int_ext_value)
+        .data(xml_datacontenttype(), Vec::from(xml_data()))
+        .build()
+}
+
+pub fn full_v1_xml_string_data_json() -> Value {
+    let (string_ext_name, string_ext_value) = string_extension();
+    let (bool_ext_name, bool_ext_value) = bool_extension();
+    let (int_ext_name, int_ext_value) = int_extension();
+
+    json!({
+        "specversion": "1.0",
+        "id": id(),
+        "type": ty(),
+        "source": source(),
+        "subject": subject(),
+        "time": time(),
+        string_ext_name: string_ext_value,
+        bool_ext_name: bool_ext_value,
+        int_ext_name: int_ext_value,
+        "datacontenttype": xml_datacontenttype(),
+        "data": xml_data()
+    })
+}
+
+pub fn full_v1_xml_base64_data_json() -> Value {
+    let (string_ext_name, string_ext_value) = string_extension();
+    let (bool_ext_name, bool_ext_value) = bool_extension();
+    let (int_ext_name, int_ext_value) = int_extension();
+
+    json!({
+        "specversion": "1.0",
+        "id": id(),
+        "type": ty(),
+        "source": source(),
+        "subject": subject(),
+        "time": time(),
+        string_ext_name: string_ext_value,
+        bool_ext_name: bool_ext_value,
+        int_ext_name: int_ext_value,
+        "datacontenttype": xml_datacontenttype(),
+        "data_base64": base64::encode(Vec::from(xml_data()))
     })
 }

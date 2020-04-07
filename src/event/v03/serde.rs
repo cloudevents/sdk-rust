@@ -11,7 +11,6 @@ pub(crate) struct EventDeserializer {}
 
 impl crate::event::serde::EventDeserializer for EventDeserializer {
     fn deserialize_attributes<E: serde::de::Error>(
-        &self,
         map: &mut BTreeMap<String, Value>,
     ) -> Result<crate::event::Attributes, E> {
         Ok(crate::event::Attributes::V03(Attributes {
@@ -34,7 +33,6 @@ impl crate::event::serde::EventDeserializer for EventDeserializer {
     }
 
     fn deserialize_data<E: serde::de::Error>(
-        &self,
         map: &mut BTreeMap<String, Value>,
     ) -> Result<Option<Data>, E> {
         let data = map.remove("data");
@@ -89,8 +87,8 @@ impl<S: serde::Serializer> crate::event::serde::EventSerializer<S, Attributes> f
         if let Some(datacontenttype) = &attributes.datacontenttype {
             state.serialize_entry("datacontenttype", datacontenttype)?;
         }
-        if let Some(dataschema) = &attributes.schemaurl {
-            state.serialize_entry("dataschema", dataschema)?;
+        if let Some(schemaurl) = &attributes.schemaurl {
+            state.serialize_entry("schemaurl", schemaurl)?;
         }
         if let Some(subject) = &attributes.subject {
             state.serialize_entry("subject", subject)?;

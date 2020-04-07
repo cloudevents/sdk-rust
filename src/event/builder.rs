@@ -1,4 +1,4 @@
-use super::{EventBuilderV10, EventBuilderV03};
+use super::{EventBuilderV03, EventBuilderV10};
 
 /// Builder to create [`Event`]:
 /// ```

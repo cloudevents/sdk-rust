@@ -1,5 +1,4 @@
 use chrono::{DateTime, TimeZone, Utc};
-use cloudevents::{Event, EventBuilder};
 use serde_json::{json, Value};
 
 pub fn id() -> String {

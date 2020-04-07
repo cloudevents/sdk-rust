@@ -51,12 +51,10 @@ macro_rules! parse_data_string {
 }
 
 macro_rules! parse_json_data_base64 {
-    ($in:ident, $error:ty) => {
-        {
-            let data = parse_data_base64!($in, $error)?;
-            serde_json::from_slice(&data).map_err(|e| <$error>::custom(e))
-        }
-    };
+    ($in:ident, $error:ty) => {{
+        let data = parse_data_base64!($in, $error)?;
+        serde_json::from_slice(&data).map_err(|e| <$error>::custom(e))
+    }};
 }
 
 macro_rules! parse_data_base64 {

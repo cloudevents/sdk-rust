@@ -7,7 +7,6 @@ use serde::ser::SerializeMap;
 use serde::{Deserialize, Serializer};
 use serde_value::Value;
 use std::collections::{BTreeMap, HashMap};
-use std::convert::TryInto;
 
 pub(crate) struct EventDeserializer {}
 

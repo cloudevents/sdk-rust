@@ -1,7 +1,6 @@
-use chrono::{DateTime, TimeZone, Utc};
+use super::*;
 use cloudevents::{Event, EventBuilder};
 use serde_json::{json, Value};
-use super::*;
 
 pub fn minimal() -> Event {
     EventBuilder::v10()

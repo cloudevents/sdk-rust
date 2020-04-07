@@ -1,10 +1,9 @@
-use chrono::{DateTime, TimeZone, Utc};
+use super::*;
 use cloudevents::{Event, EventBuilder};
 use serde_json::{json, Value};
-use super::*;
 
 pub fn minimal() -> Event {
-    EventBuilder::v10()
+    EventBuilder::v03()
         .id(id())
         .source(source())
         .ty(ty())
@@ -13,7 +12,7 @@ pub fn minimal() -> Event {
 
 pub fn minimal_json() -> Value {
     json!({
-        "specversion": "1.0",
+        "specversion": "0.3",
         "id": id(),
         "type": ty(),
         "source": source(),
@@ -25,7 +24,7 @@ pub fn full_no_data() -> Event {
     let (bool_ext_name, bool_ext_value) = bool_extension();
     let (int_ext_name, int_ext_value) = int_extension();
 
-    EventBuilder::v10()
+    EventBuilder::v03()
         .id(id())
         .source(source())
         .ty(ty())
@@ -43,7 +42,7 @@ pub fn full_no_data_json() -> Value {
     let (int_ext_name, int_ext_value) = int_extension();
 
     json!({
-        "specversion": "1.0",
+        "specversion": "0.3",
         "id": id(),
         "type": ty(),
         "source": source(),
@@ -60,7 +59,7 @@ pub fn full_json_data() -> Event {
     let (bool_ext_name, bool_ext_value) = bool_extension();
     let (int_ext_name, int_ext_value) = int_extension();
 
-    EventBuilder::v10()
+    EventBuilder::v03()
         .id(id())
         .source(source())
         .ty(ty())
@@ -79,7 +78,7 @@ pub fn full_json_data_json() -> Value {
     let (int_ext_name, int_ext_value) = int_extension();
 
     json!({
-        "specversion": "1.0",
+        "specversion": "0.3",
         "id": id(),
         "type": ty(),
         "source": source(),
@@ -89,7 +88,7 @@ pub fn full_json_data_json() -> Value {
         bool_ext_name: bool_ext_value,
         int_ext_name: int_ext_value,
         "datacontenttype": json_datacontenttype(),
-        "dataschema": dataschema(),
+        "schemaurl": dataschema(),
         "data": json_data()
     })
 }
@@ -100,7 +99,7 @@ pub fn full_json_base64_data_json() -> Value {
     let (int_ext_name, int_ext_value) = int_extension();
 
     json!({
-        "specversion": "1.0",
+        "specversion": "0.3",
         "id": id(),
         "type": ty(),
         "source": source(),
@@ -110,8 +109,9 @@ pub fn full_json_base64_data_json() -> Value {
         bool_ext_name: bool_ext_value,
         int_ext_name: int_ext_value,
         "datacontenttype": json_datacontenttype(),
-        "dataschema": dataschema(),
-        "data_base64": base64::encode(&json_data_binary())
+        "schemaurl": dataschema(),
+        "datacontentencoding": "base64",
+        "data": base64::encode(&json_data_binary())
     })
 }
 
@@ -120,7 +120,7 @@ pub fn full_xml_string_data() -> Event {
     let (bool_ext_name, bool_ext_value) = bool_extension();
     let (int_ext_name, int_ext_value) = int_extension();
 
-    EventBuilder::v10()
+    EventBuilder::v03()
         .id(id())
         .source(source())
         .ty(ty())
@@ -138,7 +138,7 @@ pub fn full_xml_binary_data() -> Event {
     let (bool_ext_name, bool_ext_value) = bool_extension();
     let (int_ext_name, int_ext_value) = int_extension();
 
-    EventBuilder::v10()
+    EventBuilder::v03()
         .id(id())
         .source(source())
         .ty(ty())
@@ -157,7 +157,7 @@ pub fn full_xml_string_data_json() -> Value {
     let (int_ext_name, int_ext_value) = int_extension();
 
     json!({
-        "specversion": "1.0",
+        "specversion": "0.3",
         "id": id(),
         "type": ty(),
         "source": source(),
@@ -177,7 +177,7 @@ pub fn full_xml_base64_data_json() -> Value {
     let (int_ext_name, int_ext_value) = int_extension();
 
     json!({
-        "specversion": "1.0",
+        "specversion": "0.3",
         "id": id(),
         "type": ty(),
         "source": source(),
@@ -187,6 +187,7 @@ pub fn full_xml_base64_data_json() -> Value {
         bool_ext_name: bool_ext_value,
         int_ext_name: int_ext_value,
         "datacontenttype": xml_datacontenttype(),
-        "data_base64": base64::encode(Vec::from(xml_data()))
+        "datacontentencoding": "base64",
+        "data": base64::encode(Vec::from(xml_data()))
     })
 }

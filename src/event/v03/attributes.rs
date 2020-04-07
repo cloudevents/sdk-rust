@@ -25,7 +25,7 @@ impl AttributesReader for Attributes {
     }
 
     fn get_specversion(&self) -> SpecVersion {
-        SpecVersion::V10
+        SpecVersion::V03
     }
 
     fn get_type(&self) -> &str {

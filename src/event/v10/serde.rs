@@ -6,6 +6,8 @@ use serde::ser::SerializeMap;
 use serde::{Deserialize, Serializer};
 use serde_value::Value;
 use std::collections::{BTreeMap, HashMap};
+use crate::event::data::is_json_content_type;
+use std::convert::TryInto;
 
 pub(crate) struct EventDeserializer {}
 
@@ -33,27 +35,25 @@ impl crate::event::serde::EventDeserializer for EventDeserializer {
     }
 
     fn deserialize_data<E: serde::de::Error>(
+        content_type: &str,
         map: &mut BTreeMap<String, Value>,
     ) -> Result<Option<Data>, E> {
         let data = map.remove("data");
         let data_base64 = map.remove("data_base64");
 
-        match (data, data_base64) {
-            (Some(d), None) => Ok(Some(Data::Json(
-                serde_json::Value::deserialize(d.into_deserializer()).map_err(|e| E::custom(e))?,
-            ))),
-            (None, Some(d)) => match d {
-                Value::String(s) => Ok(Some(Data::from_base64(s.clone()).map_err(|e| {
-                    E::invalid_value(Unexpected::Str(&s), &e.to_string().as_str())
-                })?)),
-                other => Err(E::invalid_type(
-                    crate::event::serde::value_to_unexpected(&other),
-                    &"a string",
-                )),
+        let is_json = is_json_content_type(content_type);
+
+        Ok(match (data, data_base64, is_json) {
+            (Some(d), None, true) => Some(Data::Json(parse_data_json!(d, E)?)),
+            (Some(d), None, false) => Some(Data::String(parse_data_string!(d, E)?)),
+            (None, Some(d), true) => {
+                let data = parse_data_base64!(d, E)?;
+                Some(Data::Json(serde_json::from_slice(&data).map_err(|e| E::custom(e))?))
             },
-            (Some(_), Some(_)) => Err(E::custom("Cannot have both data and data_base64 field")),
-            (None, None) => Ok(None),
-        }
+            (None, Some(d), false) => Some(Data::Binary(parse_data_base64!(d, E)?)),
+            (Some(_), Some(_), _) => Err(E::custom("Cannot have both data and data_base64 field"))?,
+            (None, None, _) => None,
+        })
     }
 }
 

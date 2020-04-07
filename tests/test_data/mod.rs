@@ -30,7 +30,7 @@ pub fn json_data() -> Value {
     json!({"hello": "world"})
 }
 
-pub fn json_data_base64() -> Vec<u8> {
+pub fn json_data_binary() -> Vec<u8> {
     serde_json::to_vec(&json!({"hello": "world"})).unwrap()
 }
 
@@ -143,9 +143,9 @@ pub fn full_v1_json_data_json() -> Value {
         string_ext_name: string_ext_value,
         bool_ext_name: bool_ext_value,
         int_ext_name: int_ext_value,
-        "datacontenttype": datacontenttype(),
+        "datacontenttype": json_datacontenttype(),
         "dataschema": dataschema(),
-        "data": data()
+        "data": json_data()
     })
 }
 
@@ -164,9 +164,9 @@ pub fn full_v1_json_base64_data_json() -> Value {
         string_ext_name: string_ext_value,
         bool_ext_name: bool_ext_value,
         int_ext_name: int_ext_value,
-        "datacontenttype": datacontenttype(),
+        "datacontenttype": json_datacontenttype(),
         "dataschema": dataschema(),
-        "data_base64": base64::encode(&json_data_base64())
+        "data_base64": base64::encode(&json_data_binary())
     })
 }
 

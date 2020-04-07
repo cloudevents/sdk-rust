@@ -33,6 +33,7 @@ impl crate::event::serde::EventDeserializer for EventDeserializer {
     }
 
     fn deserialize_data<E: serde::de::Error>(
+        content_type: &str,
         map: &mut BTreeMap<String, Value>,
     ) -> Result<Option<Data>, E> {
         let data = map.remove("data");

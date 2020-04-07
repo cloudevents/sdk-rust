@@ -1,5 +1,5 @@
 use super::{Attributes, Data, Event, EventDeserializerV03, EventDeserializerV10, EventSerializerV03, EventSerializerV10};
-use crate::event::ExtensionValue;
+use crate::event::{ExtensionValue, AttributesReader};
 use serde::de::{Error, IntoDeserializer, Unexpected};
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use serde_value::Value;
@@ -28,19 +28,55 @@ macro_rules! parse_field {
     };
 }
 
+macro_rules! parse_data_json {
+    ($in:ident, $error:ty) => {
+        Ok(serde_json::Value::deserialize($in.into_deserializer()).map_err(|e| <$error>::custom(e))?)
+    };
+}
+
+macro_rules! parse_data_string {
+    ($in:ident, $error:ty) => {
+        match $in {
+                Value::String(s) => Ok(s),
+                other => Err(E::invalid_type(
+                    crate::event::serde::value_to_unexpected(&other),
+                    &"a string",
+                )),
+            }
+    };
+}
+
+macro_rules! parse_data_base64 {
+    ($in:ident, $error:ty) => {
+        match $in {
+                Value::String(s) => base64::decode(&s).map_err(|e| {
+                    <$error>::invalid_value(serde::de::Unexpected::Str(&s), &e.to_string().as_str())
+                }),
+                other => Err(E::invalid_type(
+                    crate::event::serde::value_to_unexpected(&other),
+                    &"a string",
+                )),
+            }
+    };
+}
+
 pub(crate) trait EventDeserializer {
     fn deserialize_attributes<E: serde::de::Error>(
         map: &mut BTreeMap<String, Value>,
     ) -> Result<Attributes, E>;
 
     fn deserialize_data<E: serde::de::Error>(
+        content_type: &str,
         map: &mut BTreeMap<String, Value>,
     ) -> Result<Option<Data>, E>;
 
     fn deserialize_event<E: serde::de::Error>(mut map: BTreeMap<String, Value>) -> Result<Event, E>
     {
         let attributes = Self::deserialize_attributes(&mut map)?;
-        let data = Self::deserialize_data(&mut map)?;
+        let data = Self::deserialize_data(
+            attributes.get_datacontenttype().unwrap_or("application/json"),
+            &mut map
+        )?;
         let extensions = map
             .into_iter()
             .map(|(k, v)| Ok((k, ExtensionValue::deserialize(v.into_deserializer())?)))

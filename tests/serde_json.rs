@@ -10,11 +10,11 @@ use test_data::*;
 #[rstest(
     in_event,
     out_json,
-    case::minimal_v1(minimal_v1(), minimal_v1_json()),
-    case::full_v1_no_data(full_v1_no_data(), full_v1_no_data_json()),
-    case::full_v1_with_json_data(full_v1_json_data(), full_v1_json_data_json()),
-    case::full_v1_with_xml_string_data(full_v1_xml_string_data(), full_v1_xml_string_data_json()),
-    case::full_v1_with_xml_base64_data(full_v1_xml_binary_data(), full_v1_xml_base64_data_json())
+    case::minimal_v1(v10::minimal(), v10::minimal_json()),
+    case::full_v1_no_data(v10::full_no_data(), v10::full_no_data_json()),
+    case::full_v1_with_json_data(v10::full_json_data(), v10::full_json_data_json()),
+    case::full_v1_with_xml_string_data(v10::full_xml_string_data(), v10::full_xml_string_data_json()),
+    case::full_v1_with_xml_base64_data(v10::full_xml_binary_data(), v10::full_xml_base64_data_json())
 )]
 fn serialize_should_succeed(in_event: Event, out_json: Value) {
     // Event -> serde_json::Value
@@ -39,12 +39,12 @@ fn serialize_should_succeed(in_event: Event, out_json: Value) {
 #[rstest(
     in_json,
     out_event,
-    case::minimal_v1(minimal_v1_json(), minimal_v1()),
-    case::full_v1_no_data(full_v1_no_data_json(), full_v1_no_data()),
-    case::full_v1_with_json_data(full_v1_json_data_json(), full_v1_json_data()),
-    case::full_v1_with_json_base64_data(full_v1_json_base64_data_json(), full_v1_json_data()),
-    case::full_v1_with_xml_string_data(full_v1_xml_string_data_json(), full_v1_xml_string_data()),
-    case::full_v1_with_xml_base64_data(full_v1_xml_base64_data_json(), full_v1_xml_binary_data())
+    case::minimal_v1(v10::minimal_json(), v10::minimal()),
+    case::full_v1_no_data(v10::full_no_data_json(), v10::full_no_data()),
+    case::full_v1_with_json_data(v10::full_json_data_json(), v10::full_json_data()),
+    case::full_v1_with_json_base64_data(v10::full_json_base64_data_json(), v10::full_json_data()),
+    case::full_v1_with_xml_string_data(v10::full_xml_string_data_json(), v10::full_xml_string_data()),
+    case::full_v1_with_xml_base64_data(v10::full_xml_base64_data_json(), v10::full_xml_binary_data())
 )]
 fn deserialize_should_succeed(in_json: Value, out_event: Event) {
     let deserialize_result: Result<Event, serde_json::Error> = serde_json::from_value(in_json);

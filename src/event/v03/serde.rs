@@ -72,11 +72,8 @@ impl<S: serde::Serializer> crate::event::serde::EventSerializer<S, Attributes> f
                 1
             } else {
                 0
-            } + if attributes.schemaurl.is_some() {
-                1
-            } else {
-                0
-            } + if attributes.subject.is_some() { 1 } else { 0 }
+            } + if attributes.schemaurl.is_some() { 1 } else { 0 }
+                + if attributes.subject.is_some() { 1 } else { 0 }
                 + if attributes.time.is_some() { 1 } else { 0 }
                 + if data.is_some() { 1 } else { 0 }
                 + extensions.len();

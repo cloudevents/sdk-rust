@@ -14,7 +14,7 @@ use test_data::*;
     case::full_v1_no_data(full_v1_no_data(), full_v1_no_data_json()),
     case::full_v1_with_json_data(full_v1_json_data(), full_v1_json_data_json()),
     case::full_v1_with_xml_string_data(full_v1_xml_string_data(), full_v1_xml_string_data_json()),
-    case::full_v1_with_xml_base64_data(full_v1_xml_binary_data(), full_v1_xml_base64_data_json()),
+    case::full_v1_with_xml_base64_data(full_v1_xml_binary_data(), full_v1_xml_base64_data_json())
 )]
 fn serialize_should_succeed(in_event: Event, out_json: Value) {
     // Event -> serde_json::Value
@@ -47,10 +47,8 @@ fn serialize_should_succeed(in_event: Event, out_json: Value) {
     case::full_v1_with_xml_base64_data(full_v1_xml_base64_data_json(), full_v1_xml_binary_data())
 )]
 fn deserialize_should_succeed(in_json: Value, out_event: Event) {
-    let deserialize_result: Result<Event, serde_json::Error> =
-        serde_json::from_value(in_json);
+    let deserialize_result: Result<Event, serde_json::Error> = serde_json::from_value(in_json);
     assert_ok!(&deserialize_result);
     let deserialize_json = deserialize_result.unwrap();
     assert_eq!(deserialize_json, out_event)
 }
-

@@ -1,4 +1,5 @@
 use super::Attributes;
+use crate::event::data::is_json_content_type;
 use crate::event::{Data, ExtensionValue};
 use chrono::{DateTime, Utc};
 use serde::de::{IntoDeserializer, Unexpected};
@@ -6,7 +7,6 @@ use serde::ser::SerializeMap;
 use serde::{Deserialize, Serializer};
 use serde_value::Value;
 use std::collections::{BTreeMap, HashMap};
-use crate::event::data::is_json_content_type;
 use std::convert::TryInto;
 
 pub(crate) struct EventDeserializer {}
@@ -48,8 +48,10 @@ impl crate::event::serde::EventDeserializer for EventDeserializer {
             (Some(d), None, false) => Some(Data::String(parse_data_string!(d, E)?)),
             (None, Some(d), true) => {
                 let data = parse_data_base64!(d, E)?;
-                Some(Data::Json(serde_json::from_slice(&data).map_err(|e| E::custom(e))?))
-            },
+                Some(Data::Json(
+                    serde_json::from_slice(&data).map_err(|e| E::custom(e))?,
+                ))
+            }
             (None, Some(d), false) => Some(Data::Binary(parse_data_base64!(d, E)?)),
             (Some(_), Some(_), _) => Err(E::custom("Cannot have both data and data_base64 field"))?,
             (None, None, _) => None,

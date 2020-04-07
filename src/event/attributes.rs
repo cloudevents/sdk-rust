@@ -1,4 +1,4 @@
-use super::{SpecVersion, AttributesV10, AttributesV03};
+use super::{AttributesV03, AttributesV10, SpecVersion};
 use chrono::{DateTime, Utc};
 
 /// Trait to get [CloudEvents Context attributes](https://github.com/cloudevents/spec/blob/master/spec.md#context-attributes).

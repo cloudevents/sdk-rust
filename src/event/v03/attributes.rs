@@ -1,6 +1,6 @@
-use crate::event::attributes::{DataAttributesWriter, AttributesConverter};
-use crate::event::{AttributesReader, AttributesWriter, SpecVersion};
+use crate::event::attributes::{AttributesConverter, DataAttributesWriter};
 use crate::event::AttributesV10;
+use crate::event::{AttributesReader, AttributesWriter, SpecVersion};
 use chrono::{DateTime, Utc};
 use hostname::get_hostname;
 use uuid::Uuid;
@@ -118,7 +118,7 @@ impl AttributesConverter for Attributes {
             datacontenttype: self.datacontenttype,
             dataschema: self.schemaurl,
             subject: self.subject,
-            time: self.time
+            time: self.time,
         }
     }
 }

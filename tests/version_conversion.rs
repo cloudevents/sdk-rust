@@ -1,6 +1,6 @@
 mod test_data;
+use cloudevents::event::{EventBuilderV03, EventBuilderV10};
 use test_data::*;
-use cloudevents::event::{EventBuilderV10, EventBuilderV03};
 
 #[test]
 fn v10_to_v03() {

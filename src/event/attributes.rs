@@ -29,7 +29,7 @@ pub trait AttributesWriter {
     fn set_time(&mut self, time: Option<impl Into<DateTime<Utc>>>);
 }
 
-pub (crate) trait AttributesConverter {
+pub(crate) trait AttributesConverter {
     fn into_v03(self) -> AttributesV03;
     fn into_v10(self) -> AttributesV10;
 }
@@ -160,13 +160,13 @@ impl Attributes {
     pub fn into_v10(self) -> Self {
         match self {
             Attributes::V03(v03) => Attributes::V10(v03.into_v10()),
-            _ => self
+            _ => self,
         }
     }
     pub fn into_v03(self) -> Self {
         match self {
             Attributes::V10(v10) => Attributes::V03(v10.into_v03()),
-            _ => self
+            _ => self,
         }
     }
 }

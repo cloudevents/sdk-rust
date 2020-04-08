@@ -8,10 +8,15 @@ pub struct EventBuilder {
 }
 
 impl EventBuilder {
-    // This works as soon as we have an event version converter
-    // pub fn from(event: Event) -> Self {
-    //     EventBuilder { event }
-    // }
+    pub fn from(event: Event) -> Self {
+        EventBuilder {
+            event: Event {
+                attributes: event.attributes.into_v10(),
+                data: event.data,
+                extensions: event.extensions,
+            },
+        }
+    }
 
     pub fn new() -> Self {
         EventBuilder {

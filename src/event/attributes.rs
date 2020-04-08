@@ -29,6 +29,11 @@ pub trait AttributesWriter {
     fn set_time(&mut self, time: Option<impl Into<DateTime<Utc>>>);
 }
 
+pub (crate) trait AttributesConverter {
+    fn into_v03(self) -> AttributesV03;
+    fn into_v10(self) -> AttributesV10;
+}
+
 pub(crate) trait DataAttributesWriter {
     fn set_datacontenttype(&mut self, datacontenttype: Option<impl Into<String>>);
     fn set_dataschema(&mut self, dataschema: Option<impl Into<String>>);
@@ -147,6 +152,21 @@ impl DataAttributesWriter for Attributes {
         match self {
             Attributes::V03(a) => a.set_dataschema(dataschema),
             Attributes::V10(a) => a.set_dataschema(dataschema),
+        }
+    }
+}
+
+impl Attributes {
+    pub fn into_v10(self) -> Self {
+        match self {
+            Attributes::V03(v03) => Attributes::V10(v03.into_v10()),
+            _ => self
+        }
+    }
+    pub fn into_v03(self) -> Self {
+        match self {
+            Attributes::V10(v10) => Attributes::V03(v10.into_v03()),
+            _ => self
         }
     }
 }

@@ -1,5 +1,6 @@
-use crate::event::attributes::DataAttributesWriter;
+use crate::event::attributes::{DataAttributesWriter, AttributesConverter};
 use crate::event::{AttributesReader, AttributesWriter, SpecVersion};
+use crate::event::AttributesV10;
 use chrono::{DateTime, Utc};
 use hostname::get_hostname;
 use uuid::Uuid;
@@ -100,6 +101,24 @@ impl Default for Attributes {
             schemaurl: None,
             subject: None,
             time: None,
+        }
+    }
+}
+
+impl AttributesConverter for Attributes {
+    fn into_v03(self) -> Self {
+        self
+    }
+
+    fn into_v10(self) -> AttributesV10 {
+        AttributesV10 {
+            id: self.id,
+            ty: self.ty,
+            source: self.source,
+            datacontenttype: self.datacontenttype,
+            dataschema: self.schemaurl,
+            subject: self.subject,
+            time: self.time
         }
     }
 }

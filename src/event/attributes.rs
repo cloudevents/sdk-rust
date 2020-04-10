@@ -1,6 +1,79 @@
 use super::{AttributesV03, AttributesV10, SpecVersion};
 use chrono::{DateTime, Utc};
 
+macro_rules! attributes_def {
+    // struct attributes expansion
+    (@struct_gen $struct_name:ident {$(,)*} -> { $($out:tt)* }) => {
+        #[derive(PartialEq, Debug, Clone)]
+        pub struct $struct_name {
+            $($out)*
+        }
+    };
+    (@struct_gen $struct_name:ident {$element_name:ident $(as $_element_lit:literal)?: $element_ty:ty $({$($opts:tt)*})?, $($tail:tt)*} -> {}) => {
+        attributes_def!(@struct_gen $struct_name { $($tail)* } -> {pub(crate) $element_name: $element_ty});
+    };
+    (@struct_gen $struct_name:ident {$element_name:ident $(as $_element_lit:literal)?: $element_ty:ty $({$($opts:tt)*})?, $($tail:tt)*} -> {$($out:tt)*}) => {
+        attributes_def!(@struct_gen $struct_name { $($tail)* } -> {$($out)*, pub(crate) $element_name: $element_ty});
+    };
+
+    // count attributes
+    (@count_attrs ) => {0usize};
+    (@count_attrs $_element_name:ident $(as $_element_lit:literal)?: $element_ty:ty $({$($opts:tt)*})?, $($tail:tt)*) => {1usize + attributes_def!{@count_attrs $($tail)* }};
+
+    // names expansion
+    (@attributes_gen {} -> {$($out:expr)*} ) => {
+        [$($out),*]
+    };
+    (@attributes_gen { $element_name:ident: $_element_ty:ty $({$($_opts:tt)*})?, $($tail:tt)* } -> {$($out:tt)*}) => {
+        attributes_def!(@attributes_gen {$($tail)*} -> {$($out)* stringify!($element_name)})
+    };
+    (@attributes_gen { $_element_name:ident as $element_lit:literal: $_element_ty:ty $({$($_opts:tt)*})? , $($tail:tt)* } -> {$($out:tt)*}) => {
+        attributes_def!(@attributes_gen {$($tail)*} -> {$($out)* $element_lit})
+    };
+
+    // attribute names expansion
+    (@attribute_names_gen $attr_vec_name:ident { $($attrs:tt)* }) => {
+        pub const $attr_vec_name: [&'static str; attributes_def!(@count_attrs $($attrs)*)] = attributes_def!(@attributes_gen { $($attrs)* } -> {});
+    };
+
+    // default trait implementation expansion
+    (@default_gen $struct_name:ident {$(,)*} -> { $($out:tt)* }) => {
+        impl Default for $struct_name {
+            fn default() -> Self {
+                $struct_name {
+                    $($out)*
+                }
+            }
+        }
+    };
+    (@default_gen $struct_name:ident {
+        $element_name:ident $(as $_element_lit:literal)?: $_element_ty:ty, $($tail:tt)*
+    } -> { $($out:tt)* } ) => {
+        attributes_def!(@default_gen $struct_name { $($tail)* } -> {$($out)* $element_name: attributes_def!(@default_gen_walk_opts {}), });
+    };
+    (@default_gen $struct_name:ident {
+        $element_name:ident $(as $_element_lit:literal)?: $_element_ty:ty {$($opts:tt)*}, $($tail:tt)*
+    } -> { $($out:tt)* } ) => {
+        attributes_def!(@default_gen $struct_name { $($tail)* } -> {$($out)* $element_name: attributes_def!(@default_gen_walk_opts {$($opts)*}), });
+    };
+    (@default_gen_walk_opts {default: $default_expr:expr, $($tail:tt)*}) => {
+        $default_expr
+    };
+    (@default_gen_walk_opts {$_opt_key:ident: $_opt_val:ident, $($tail:tt)*}) => {
+        attributes_def!(@default_gen_walk_opts {$($tail)*})
+    };
+    (@default_gen_walk_opts {}) => {
+        Default::default()
+    };
+
+    // Real macro input
+    ($struct_name:ident, $attr_names:ident, { $($tt:tt)* }) => {
+        attributes_def!(@attribute_names_gen $attr_names { $($tt)* });
+        attributes_def!(@struct_gen $struct_name { $($tt)* } -> {});
+        attributes_def!(@default_gen $struct_name { $($tt)* } -> {});
+    };
+}
+
 /// Trait to get [CloudEvents Context attributes](https://github.com/cloudevents/spec/blob/master/spec.md#context-attributes).
 pub trait AttributesReader {
     /// Get the [id](https://github.com/cloudevents/spec/blob/master/spec.md#id).

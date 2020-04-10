@@ -4,16 +4,25 @@ use chrono::{DateTime, Utc};
 use hostname::get_hostname;
 use uuid::Uuid;
 
-#[derive(PartialEq, Debug, Clone)]
-pub struct Attributes {
-    pub(crate) id: String,
-    pub(crate) ty: String,
-    pub(crate) source: String,
-    pub(crate) datacontenttype: Option<String>,
-    pub(crate) dataschema: Option<String>,
-    pub(crate) subject: Option<String>,
-    pub(crate) time: Option<DateTime<Utc>>,
-}
+attributes_def!(
+    Attributes,
+    ATTRIBUTES_NAMES,
+    {
+        id: String {
+            default: Uuid::new_v4().to_string(),
+        },
+        ty as "type": String {
+            default: "rust.generated".to_string(),
+        },
+        source: String {
+            default: get_hostname().unwrap_or("http://localhost/".to_string()),
+        },
+        datacontenttype: Option<String>,
+        dataschema: Option<String>,
+        subject: Option<String>,
+        time: Option<DateTime<Utc>>,
+    }
+);
 
 impl AttributesReader for Attributes {
     fn get_id(&self) -> &str {
@@ -33,24 +42,15 @@ impl AttributesReader for Attributes {
     }
 
     fn get_datacontenttype(&self) -> Option<&str> {
-        match self.datacontenttype.as_ref() {
-            Some(s) => Some(&s),
-            None => None,
-        }
+        self.datacontenttype.as_deref()
     }
 
     fn get_dataschema(&self) -> Option<&str> {
-        match self.dataschema.as_ref() {
-            Some(s) => Some(&s),
-            None => None,
-        }
+        self.dataschema.as_deref()
     }
 
     fn get_subject(&self) -> Option<&str> {
-        match self.subject.as_ref() {
-            Some(s) => Some(&s),
-            None => None,
-        }
+        self.subject.as_deref()
     }
 
     fn get_time(&self) -> Option<&DateTime<Utc>> {
@@ -87,20 +87,6 @@ impl DataAttributesWriter for Attributes {
 
     fn set_dataschema(&mut self, dataschema: Option<impl Into<String>>) {
         self.dataschema = dataschema.map(Into::into)
-    }
-}
-
-impl Default for Attributes {
-    fn default() -> Self {
-        Attributes {
-            id: Uuid::new_v4().to_string(),
-            ty: "type".to_string(),
-            source: get_hostname().unwrap_or("http://localhost/".to_string()),
-            datacontenttype: None,
-            dataschema: None,
-            subject: None,
-            time: None,
-        }
     }
 }
 

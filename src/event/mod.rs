@@ -1,3 +1,4 @@
+#[macro_use]
 mod attributes;
 mod builder;
 mod data;

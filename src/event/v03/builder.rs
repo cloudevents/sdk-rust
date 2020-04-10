@@ -1,4 +1,4 @@
-use super::Attributes as AttributesV10;
+use super::Attributes as AttributesV03;
 use crate::event::{Attributes, AttributesWriter, Data, Event, ExtensionValue};
 use chrono::{DateTime, Utc};
 use std::collections::HashMap;
@@ -11,7 +11,7 @@ impl EventBuilder {
     pub fn from(event: Event) -> Self {
         EventBuilder {
             event: Event {
-                attributes: event.attributes.into_v10(),
+                attributes: event.attributes.into_v03(),
                 data: event.data,
                 extensions: event.extensions,
             },
@@ -21,7 +21,7 @@ impl EventBuilder {
     pub fn new() -> Self {
         EventBuilder {
             event: Event {
-                attributes: Attributes::V10(AttributesV10::default()),
+                attributes: Attributes::V03(AttributesV03::default()),
                 data: None,
                 extensions: HashMap::new(),
             },
@@ -70,11 +70,11 @@ impl EventBuilder {
     pub fn data_with_schema(
         mut self,
         datacontenttype: impl Into<String>,
-        dataschema: impl Into<String>,
+        schemaurl: impl Into<String>,
         data: impl Into<Data>,
     ) -> Self {
         self.event
-            .write_data_with_schema(datacontenttype, dataschema, data);
+            .write_data_with_schema(datacontenttype, schemaurl, data);
         return self;
     }
 
@@ -113,7 +113,7 @@ mod tests {
             .data_with_schema(content_type, schema, data.clone())
             .build();
 
-        assert_eq!(SpecVersion::V10, event.get_specversion());
+        assert_eq!(SpecVersion::V03, event.get_specversion());
         assert_eq!(id, event.get_id());
         assert_eq!(source, event.get_source());
         assert_eq!(ty, event.get_type());

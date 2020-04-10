@@ -1,10 +1,13 @@
 use std::convert::{Into, TryFrom};
 
 /// Event [data attribute](https://github.com/cloudevents/spec/blob/master/spec.md#event-data) representation
-///
 #[derive(Debug, PartialEq, Clone)]
 pub enum Data {
+    /// Event has a binary payload
     Binary(Vec<u8>),
+    /// Event has a non-json string payload
+    String(String),
+    /// Event has a json payload
     Json(serde_json::Value),
 }
 
@@ -30,6 +33,10 @@ impl Data {
     }
 }
 
+pub(crate) fn is_json_content_type(ct: &str) -> bool {
+    ct == "application/json" || ct == "text/json" || ct.ends_with("+json")
+}
+
 impl Into<Data> for serde_json::Value {
     fn into(self) -> Data {
         Data::Json(self)
@@ -44,7 +51,7 @@ impl Into<Data> for Vec<u8> {
 
 impl Into<Data> for String {
     fn into(self) -> Data {
-        Data::Json(self.into())
+        Data::String(self)
     }
 }
 
@@ -55,6 +62,7 @@ impl TryFrom<Data> for serde_json::Value {
         match value {
             Data::Binary(v) => Ok(serde_json::from_slice(&v)?),
             Data::Json(v) => Ok(v),
+            Data::String(s) => Ok(serde_json::from_str(&s)?),
         }
     }
 }
@@ -66,6 +74,7 @@ impl TryFrom<Data> for Vec<u8> {
         match value {
             Data::Binary(v) => Ok(serde_json::from_slice(&v)?),
             Data::Json(v) => Ok(serde_json::to_vec(&v)?),
+            Data::String(s) => Ok(s.into_bytes()),
         }
     }
 }
@@ -76,8 +85,8 @@ impl TryFrom<Data> for String {
     fn try_from(value: Data) -> Result<Self, Self::Error> {
         match value {
             Data::Binary(v) => Ok(String::from_utf8(v)?),
-            Data::Json(serde_json::Value::String(s)) => Ok(s), // Return the string without quotes
             Data::Json(v) => Ok(v.to_string()),
+            Data::String(s) => Ok(s),
         }
     }
 }

@@ -1,5 +1,6 @@
 use crate::event::attributes::{AttributesConverter, DataAttributesWriter};
-use crate::event::{AttributesReader, AttributesV03, AttributesWriter, SpecVersion};
+use crate::event::AttributesV10;
+use crate::event::{AttributesReader, AttributesWriter, SpecVersion};
 use chrono::{DateTime, Utc};
 use hostname::get_hostname;
 use uuid::Uuid;
@@ -10,7 +11,7 @@ pub struct Attributes {
     pub(crate) ty: String,
     pub(crate) source: String,
     pub(crate) datacontenttype: Option<String>,
-    pub(crate) dataschema: Option<String>,
+    pub(crate) schemaurl: Option<String>,
     pub(crate) subject: Option<String>,
     pub(crate) time: Option<DateTime<Utc>>,
 }
@@ -25,7 +26,7 @@ impl AttributesReader for Attributes {
     }
 
     fn get_specversion(&self) -> SpecVersion {
-        SpecVersion::V10
+        SpecVersion::V03
     }
 
     fn get_type(&self) -> &str {
@@ -40,7 +41,7 @@ impl AttributesReader for Attributes {
     }
 
     fn get_dataschema(&self) -> Option<&str> {
-        match self.dataschema.as_ref() {
+        match self.schemaurl.as_ref() {
             Some(s) => Some(&s),
             None => None,
         }
@@ -86,7 +87,7 @@ impl DataAttributesWriter for Attributes {
     }
 
     fn set_dataschema(&mut self, dataschema: Option<impl Into<String>>) {
-        self.dataschema = dataschema.map(Into::into)
+        self.schemaurl = dataschema.map(Into::into)
     }
 }
 
@@ -97,7 +98,7 @@ impl Default for Attributes {
             ty: "type".to_string(),
             source: get_hostname().unwrap_or("http://localhost/".to_string()),
             datacontenttype: None,
-            dataschema: None,
+            schemaurl: None,
             subject: None,
             time: None,
         }
@@ -105,17 +106,17 @@ impl Default for Attributes {
 }
 
 impl AttributesConverter for Attributes {
-    fn into_v10(self) -> Self {
+    fn into_v03(self) -> Self {
         self
     }
 
-    fn into_v03(self) -> AttributesV03 {
-        AttributesV03 {
+    fn into_v10(self) -> AttributesV10 {
+        AttributesV10 {
             id: self.id,
             ty: self.ty,
             source: self.source,
             datacontenttype: self.datacontenttype,
-            schemaurl: self.dataschema,
+            dataschema: self.schemaurl,
             subject: self.subject,
             time: self.time,
         }

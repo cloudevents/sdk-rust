@@ -91,6 +91,46 @@ macro_rules! parse_data_base64 {
     };
 }
 
+macro_rules! parse_data_json {
+    ($in:ident, $error:ty) => {
+        Ok(serde_json::Value::deserialize($in.into_deserializer())
+            .map_err(|e| <$error>::custom(e))?)
+    };
+}
+
+macro_rules! parse_data_string {
+    ($in:ident, $error:ty) => {
+        match $in {
+            Value::String(s) => Ok(s),
+            other => Err(E::invalid_type(
+                crate::event::serde::value_to_unexpected(&other),
+                &"a string",
+            )),
+        }
+    };
+}
+
+macro_rules! parse_json_data_base64 {
+    ($in:ident, $error:ty) => {{
+        let data = parse_data_base64!($in, $error)?;
+        serde_json::from_slice(&data).map_err(|e| <$error>::custom(e))
+    }};
+}
+
+macro_rules! parse_data_base64 {
+    ($in:ident, $error:ty) => {
+        match $in {
+            Value::String(s) => base64::decode(&s).map_err(|e| {
+                <$error>::invalid_value(serde::de::Unexpected::Str(&s), &e.to_string().as_str())
+            }),
+            other => Err(E::invalid_type(
+                crate::event::serde::value_to_unexpected(&other),
+                &"a string",
+            )),
+        }
+    };
+}
+
 pub(crate) trait EventDeserializer {
     fn deserialize_attributes<E: serde::de::Error>(
         map: &mut BTreeMap<String, Value>,
@@ -194,6 +234,9 @@ impl Serialize for Event {
         S: Serializer,
     {
         match &self.attributes {
+            Attributes::V03(a) => {
+                EventSerializerV03::serialize(a, &self.data, &self.extensions, serializer)
+            }
             Attributes::V10(a) => {
                 EventSerializerV10::serialize(a, &self.data, &self.extensions, serializer)
             }

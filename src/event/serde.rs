@@ -1,11 +1,14 @@
-use super::{Attributes, Data, Event, EventDeserializerV10, EventSerializerV10};
-use crate::event::ExtensionValue;
+use super::{
+    Attributes, Data, Event, EventDeserializerV03, EventDeserializerV10, EventSerializerV03,
+    EventSerializerV10,
+};
+use crate::event::{AttributesReader, ExtensionValue};
 use serde::de::{Error, IntoDeserializer, Unexpected};
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use serde_value::Value;
 use std::collections::{BTreeMap, HashMap};
 
-const SPEC_VERSIONS: [&'static str; 1] = ["1.0"];
+const SPEC_VERSIONS: [&'static str; 2] = ["0.3", "1.0"];
 
 macro_rules! parse_optional_field {
     ($map:ident, $name:literal, $value_variant:ident, $error:ty) => {
@@ -28,16 +31,78 @@ macro_rules! parse_field {
     };
 }
 
+macro_rules! parse_data_json {
+    ($in:ident, $error:ty) => {
+        Ok(serde_json::Value::deserialize($in.into_deserializer())
+            .map_err(|e| <$error>::custom(e))?)
+    };
+}
+
+macro_rules! parse_data_string {
+    ($in:ident, $error:ty) => {
+        match $in {
+            Value::String(s) => Ok(s),
+            other => Err(E::invalid_type(
+                crate::event::serde::value_to_unexpected(&other),
+                &"a string",
+            )),
+        }
+    };
+}
+
+macro_rules! parse_json_data_base64 {
+    ($in:ident, $error:ty) => {{
+        let data = parse_data_base64!($in, $error)?;
+        serde_json::from_slice(&data).map_err(|e| <$error>::custom(e))
+    }};
+}
+
+macro_rules! parse_data_base64 {
+    ($in:ident, $error:ty) => {
+        match $in {
+            Value::String(s) => base64::decode(&s).map_err(|e| {
+                <$error>::invalid_value(serde::de::Unexpected::Str(&s), &e.to_string().as_str())
+            }),
+            other => Err(E::invalid_type(
+                crate::event::serde::value_to_unexpected(&other),
+                &"a string",
+            )),
+        }
+    };
+}
+
 pub(crate) trait EventDeserializer {
     fn deserialize_attributes<E: serde::de::Error>(
-        &self,
         map: &mut BTreeMap<String, Value>,
     ) -> Result<Attributes, E>;
 
     fn deserialize_data<E: serde::de::Error>(
-        &self,
+        content_type: &str,
         map: &mut BTreeMap<String, Value>,
     ) -> Result<Option<Data>, E>;
+
+    fn deserialize_event<E: serde::de::Error>(
+        mut map: BTreeMap<String, Value>,
+    ) -> Result<Event, E> {
+        let attributes = Self::deserialize_attributes(&mut map)?;
+        let data = Self::deserialize_data(
+            attributes
+                .get_datacontenttype()
+                .unwrap_or("application/json"),
+            &mut map,
+        )?;
+        let extensions = map
+            .into_iter()
+            .map(|(k, v)| Ok((k, ExtensionValue::deserialize(v.into_deserializer())?)))
+            .collect::<Result<HashMap<String, ExtensionValue>, serde_value::DeserializerError>>()
+            .map_err(|e| E::custom(e))?;
+
+        Ok(Event {
+            attributes,
+            data,
+            extensions,
+        })
+    }
 }
 
 pub(crate) trait EventSerializer<S: Serializer, A: Sized> {
@@ -67,30 +132,11 @@ impl<'de> Deserialize<'de> for Event {
             })
             .collect::<Result<BTreeMap<String, Value>, <D as Deserializer<'de>>::Error>>()?;
 
-        let event_deserializer =
-            match parse_field!(map, "specversion", String, <D as Deserializer<'de>>::Error)?
-                .as_str()
-            {
-                "1.0" => Ok(EventDeserializerV10 {}),
-                s => Err(<D as Deserializer<'de>>::Error::unknown_variant(
-                    s,
-                    &SPEC_VERSIONS,
-                )),
-            }?;
-
-        let attributes = event_deserializer.deserialize_attributes(&mut map)?;
-        let data = event_deserializer.deserialize_data(&mut map)?;
-        let extensions = map
-            .into_iter()
-            .map(|(k, v)| Ok((k, ExtensionValue::deserialize(v.into_deserializer())?)))
-            .collect::<Result<HashMap<String, ExtensionValue>, serde_value::DeserializerError>>()
-            .map_err(|e| <D as Deserializer<'de>>::Error::custom(e))?;
-
-        Ok(Event {
-            attributes,
-            data,
-            extensions,
-        })
+        match parse_field!(map, "specversion", String, <D as Deserializer<'de>>::Error)?.as_str() {
+            "0.3" => EventDeserializerV03::deserialize_event(map),
+            "1.0" => EventDeserializerV10::deserialize_event(map),
+            s => Err(D::Error::unknown_variant(s, &SPEC_VERSIONS)),
+        }
     }
 }
 
@@ -100,6 +146,9 @@ impl Serialize for Event {
         S: Serializer,
     {
         match &self.attributes {
+            Attributes::V03(a) => {
+                EventSerializerV03::serialize(a, &self.data, &self.extensions, serializer)
+            }
             Attributes::V10(a) => {
                 EventSerializerV10::serialize(a, &self.data, &self.extensions, serializer)
             }

@@ -15,6 +15,13 @@ pub use event::Event;
 pub use extension_value::ExtensionValue;
 pub use spec_version::SpecVersion;
 
+mod v03;
+
+pub use v03::Attributes as AttributesV03;
+pub use v03::EventBuilder as EventBuilderV03;
+pub(crate) use v03::EventDeserializer as EventDeserializerV03;
+pub(crate) use v03::EventSerializer as EventSerializerV03;
+
 mod v10;
 
 pub use v10::Attributes as AttributesV10;

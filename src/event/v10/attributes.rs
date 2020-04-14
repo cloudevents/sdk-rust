@@ -1,6 +1,7 @@
-use crate::event::attributes::{AttributesConverter, DataAttributesWriter};
+use crate::event::attributes::{AttributesConverter, AttributeValue, DataAttributesWriter};
 use crate::event::{AttributesReader, AttributesV03, AttributesWriter, SpecVersion};
 use chrono::{DateTime, Utc};
+use chrono::NaiveDate;
 use hostname::get_hostname;
 use url::Url;
 use uuid::Uuid;
@@ -14,6 +15,66 @@ pub struct Attributes {
     pub(crate) dataschema: Option<Url>,
     pub(crate) subject: Option<String>,
     pub(crate) time: Option<DateTime<Utc>>,
+}
+
+impl<'a> IntoIterator for &'a Attributes {
+    type Item = (&'a str, AttributeValue<'a>);
+    type IntoIter = AttributesIntoIterator<'a>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        AttributesIntoIterator {
+            attributes: self,
+            index: 0,
+        }
+    }
+}
+
+fn time_to_string(input:&Option<DateTime<Utc>>) -> &str {
+    let result = match *input {
+        Some(x) => &x.to_rfc2822(),
+        None => "",
+    };
+    result
+}
+
+fn option_to_time(input:&Option<DateTime<Utc>>) -> &DateTime<Utc> {
+    let result = match *input {
+        Some(x) => &x,
+        None => &DateTime::<Utc>::from_utc(NaiveDate::from_ymd(1970, 1, 1).and_hms(0, 0, 0), Utc),
+    };
+    result
+}
+
+fn option_to_string(input:&Option<String>) -> &str {
+    let result = match *input {
+        Some(x) => &x[..],
+        None => "",
+    };
+    result
+}
+
+struct AttributesIntoIterator<'a> {
+    attributes: &'a Attributes,
+    index: usize,
+}
+
+impl<'a> Iterator for AttributesIntoIterator<'a> {
+    type Item = (&'a str, AttributeValue<'a>);
+    fn next(&mut self) -> Option<Self::Item> {
+        let result = match self.index {
+            0 => ("id", AttributeValue::String(&self.attributes.id[..])),
+            1 => ("ty", AttributeValue::String(&self.attributes.ty[..])),
+            2 => ("source", AttributeValue::String(&self.attributes.source[..])),
+            3 => ("datacontenttype", AttributeValue::String(option_to_string(&self.attributes.datacontenttype))),
+            4 => ("dataschema", AttributeValue::String(option_to_string(&self.attributes.dataschema))),
+            5 => ("subject", AttributeValue::String(option_to_string(&self.attributes.subject))),
+            6 => ("time", AttributeValue::Time(option_to_time(&self.attributes.time))),
+            7 => ("extensions",self.attributes.extensions),
+            _ => return None,
+        };
+        self.index += 1;
+        Some(result)
+    }
 }
 
 impl AttributesReader for Attributes {

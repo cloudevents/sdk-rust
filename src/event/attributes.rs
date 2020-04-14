@@ -4,21 +4,6 @@ use url::Url;
 use serde::{Deserialize, Serialize};
 use std::fmt;
 
-impl ExactSizeIterator for Iter {
-    type Item = (&'a str, AttributeValue<'a>);
-
-    fn next(&mut self) -> Option<u32> {
-        let new_next = self.curr + self.next;
-
-        self.curr = self.next;
-        self.next = new_next;
-
-        // Since there's no endpoint to a Fibonacci sequence, the `Iterator`
-        // will never return `None`, and `Some` is always returned.
-        Some(self.curr)
-    }
-}
-
 pub enum AttributeValue<'a> {
     SpecVersion(SpecVersion),
     String(&'a str),

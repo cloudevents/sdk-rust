@@ -37,14 +37,6 @@ impl<'a> IntoIterator for &'a Attributes {
     }
 }
 
-fn time_to_string(input:&Option<DateTime<Utc>>) -> &str {
-    let result = match *input {
-        Some(x) => &x.to_rfc2822(),
-        None => "",
-    };
-    result
-}
-
 fn option_to_time(input:&Option<DateTime<Utc>>) -> &DateTime<Utc> {
     let result = match *input {
         Some(x) => &x,
@@ -70,14 +62,13 @@ impl<'a> Iterator for AttributesIntoIterator<'a> {
     type Item = (&'a str, AttributeValue<'a>);
     fn next(&mut self) -> Option<Self::Item> {
         let result = match self.index {
-            0 => ("id", AttributeValue::String(&self.attributes.id[..])),
-            1 => ("ty", AttributeValue::String(&self.attributes.ty[..])),
-            2 => ("source", AttributeValue::String(&self.attributes.source[..])),
+            0 => ("id", AttributeValue::String(&self.attributes.id)),
+            1 => ("ty", AttributeValue::String(&self.attributes.ty)),
+            2 => ("source", AttributeValue::String(&self.attributes.source)),
             3 => ("datacontenttype", AttributeValue::String(option_to_string(&self.attributes.datacontenttype))),
             4 => ("dataschema", AttributeValue::String(option_to_string(&self.attributes.dataschema))),
             5 => ("subject", AttributeValue::String(option_to_string(&self.attributes.subject))),
             6 => ("time", AttributeValue::Time(option_to_time(&self.attributes.time))),
-            7 => ("extensions",self.attributes.extensions),
             _ => return None,
         };
         self.index += 1;

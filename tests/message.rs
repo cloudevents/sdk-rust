@@ -1,34 +1,42 @@
 mod test_data;
 use test_data::*;
 use cloudevents::Event;
-use cloudevents::message::{BinaryDeserializer, StructuredDeserializer, BinaryVisitor, MessageAttributeValue, Error, SerializationResult};
+use cloudevents::message::{BinaryDeserializer, StructuredDeserializer, BinaryVisitor, MessageAttributeValue, Error, SerializationResult, DeserializationResult, MessageDeserializer};
 
 #[test]
-fn message_v03_roundtrip_structured() {
-    let mut out_event = Event::default();
-    v03::full_json_data().deserialize_structured(&mut out_event);
-    assert_eq!(v03::full_json_data(), out_event)
+fn message_v03_roundtrip_structured() -> DeserializationResult {
+    assert_eq!(
+        v03::full_json_data(),
+        StructuredDeserializer::into_event(v03::full_json_data())?
+    );
+    Ok(())
 }
 
 #[test]
-fn message_v03_roundtrip_binary() {
-    let mut out_event = Event::default();
-    v03::full_json_data().deserialize_binary(&mut out_event);
-    assert_eq!(v03::full_json_data(), out_event)
+fn message_v03_roundtrip_binary() -> DeserializationResult {
+    assert_eq!(
+        v03::full_json_data(),
+        BinaryDeserializer::into_event(v03::full_json_data())?
+    );
+    Ok(())
 }
 
 #[test]
-fn message_v10_roundtrip_structured() {
-    let mut out_event = Event::default();
-    v10::full_json_data().deserialize_structured(&mut out_event);
-    assert_eq!(v10::full_json_data(), out_event)
+fn message_v10_roundtrip_structured() -> DeserializationResult {
+    assert_eq!(
+        v10::full_json_data(),
+        StructuredDeserializer::into_event(v10::full_json_data())?
+    );
+    Ok(())
 }
 
 #[test]
-fn message_v10_roundtrip_binary() {
-    let mut out_event = Event::default();
-    v10::full_json_data().deserialize_binary(&mut out_event);
-    assert_eq!(v10::full_json_data(), out_event)
+fn message_v10_roundtrip_binary() -> DeserializationResult {
+    assert_eq!(
+        v10::full_json_data(),
+        BinaryDeserializer::into_event(v10::full_json_data())?
+    );
+    Ok(())
 }
 
 #[test]

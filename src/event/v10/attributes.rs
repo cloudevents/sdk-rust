@@ -1,7 +1,6 @@
 use crate::event::attributes::{AttributesConverter, AttributeValue, DataAttributesWriter};
 use crate::event::{AttributesReader, AttributesV03, AttributesWriter, SpecVersion};
 use chrono::{DateTime, Utc};
-use chrono::NaiveDate;
 use hostname::get_hostname;
 use url::Url;
 use uuid::Uuid;
@@ -29,42 +28,42 @@ impl<'a> IntoIterator for &'a Attributes {
     }
 }
 
-fn option_to_time(input:&Option<DateTime<Utc>>) -> &DateTime<Utc> {
-    let result = match *input {
-        Some(x) => &x,
-        None => &DateTime::<Utc>::from_utc(NaiveDate::from_ymd(1970, 1, 1).and_hms(0, 0, 0), Utc),
-    };
-    result
-}
-
-fn option_to_string(input:&Option<String>) -> &str {
-    let result = match *input {
-        Some(x) => &x[..],
-        None => "",
-    };
-    result
-}
-
 struct AttributesIntoIterator<'a> {
     attributes: &'a Attributes,
     index: usize,
+}
+
+fn option_checker_string<'a>(attribute_type: &str,input:Option<&String>) -> Option<&'a str,AttributeValue<'a>> {
+    let result = match input {
+        Some(x) => Some((attribute_type,AttributeValue::String(x))),
+        None => None,
+    };
+    result
+}
+
+fn option_checker_time<'a>(attribute_type: &str,input:Option<&DateTime<Utc>>) -> Option<&'a str,AttributeValue<'a>> {
+    let result = match input {
+        Some(x) => Some((attribute_type,AttributeValue::Time(x))),
+        None => None,
+    };
+    result
 }
 
 impl<'a> Iterator for AttributesIntoIterator<'a> {
     type Item = (&'a str, AttributeValue<'a>);
     fn next(&mut self) -> Option<Self::Item> {
         let result = match self.index {
-            0 => ("id", AttributeValue::String(&self.attributes.id)),
-            1 => ("ty", AttributeValue::String(&self.attributes.ty)),
-            2 => ("source", AttributeValue::String(&self.attributes.source)),
-            3 => ("datacontenttype", AttributeValue::String(option_to_string(&self.attributes.datacontenttype))),
-            4 => ("dataschema", AttributeValue::String(option_to_string(&self.attributes.dataschema))),
-            5 => ("subject", AttributeValue::String(option_to_string(&self.attributes.subject))),
-            6 => ("time", AttributeValue::Time(option_to_time(&self.attributes.time))),
+            0 => Some(("id", AttributeValue::String(&self.attributes.id))),
+            1 => Some(("ty", AttributeValue::String(&self.attributes.ty))),        
+            2 => Some(("source", AttributeValue::String(&self.attributes.source))),
+            3 => option_checker_string("datacontenttype",self.attributes.get_datacontenttype()), 
+            4 => option_checker_string("dataschema",self.attributes.dataschema.get_dataschema()),
+            5 => option_checker_string("subject",self.attributes.subject.get_subject()),
+            6 => option_checker_time("time",self.attributes.time.get_time()),
             _ => return None,
         };
         self.index += 1;
-        Some(result)
+        result
     }
 }
 

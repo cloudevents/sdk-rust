@@ -1,5 +1,5 @@
-use crate::event::attributes::DataAttributesWriter;
-use crate::event::{AttributesReader, AttributesWriter, ExtensionValue, SpecVersion};
+use crate::event::attributes::{AttributesConverter, AttributeValue, DataAttributesWriter};
+use crate::event::{AttributesReader, AttributesV03, AttributesWriter, SpecVersion};
 use chrono::{DateTime, Utc};
 use hostname::get_hostname;
 use std::collections::HashMap;
@@ -15,6 +15,57 @@ pub struct Attributes {
     subject: Option<String>,
     time: Option<DateTime<Utc>>,
     extensions: HashMap<String, ExtensionValue>,
+}
+
+impl<'a> IntoIterator for &'a Attributes {
+    type Item = (&'a str, AttributeValue<'a>);
+    type IntoIter = AttributesIntoIterator<'a>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        AttributesIntoIterator {
+            attributes: self,
+            index: 0,
+        }
+    }
+}
+
+struct AttributesIntoIterator<'a> {
+    attributes: &'a Attributes,
+    index: usize,
+}
+
+fn option_checker_string<'a>(attribute_type: &str,input:Option<&String>) -> Option<&'a str,AttributeValue<'a>> {
+    let result = match input {
+        Some(x) => Some((attribute_type,AttributeValue::String(x))),
+        None => None,
+    };
+    result
+}
+
+fn option_checker_time<'a>(attribute_type: &str,input:Option<&DateTime<Utc>>) -> Option<&'a str,AttributeValue<'a>> {
+    let result = match input {
+        Some(x) => Some((attribute_type,AttributeValue::Time(x))),
+        None => None,
+    };
+    result
+}
+
+impl<'a> Iterator for AttributesIntoIterator<'a> {
+    type Item = (&'a str, AttributeValue<'a>);
+    fn next(&mut self) -> Option<Self::Item> {
+        let result = match self.index {
+            0 => Some(("id", AttributeValue::String(&self.attributes.id))),
+            1 => Some(("ty", AttributeValue::String(&self.attributes.ty))),        
+            2 => Some(("source", AttributeValue::String(&self.attributes.source))),
+            3 => option_checker_string("datacontenttype",self.attributes.get_datacontenttype()), 
+            4 => option_checker_string("dataschema",self.attributes.dataschema.get_dataschema()),
+            5 => option_checker_string("subject",self.attributes.subject.get_subject()),
+            6 => option_checker_time("time",self.attributes.time.get_time()),
+            _ => return None,
+        };
+        self.index += 1;
+        result
+    }
 }
 
 impl AttributesReader for Attributes {

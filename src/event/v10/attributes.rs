@@ -79,12 +79,12 @@ impl<'a> IntoIterator for &'a Attributes {
     }
 }
 
-struct AttributesIntoIterator<'a> {
+pub struct AttributesIntoIterator<'a> {
     attributes: &'a Attributes,
     index: usize,
 }
 
-fn option_checker_string<'a>(attribute_type: &str,input:Option<&String>) -> Option<&'a str,AttributeValue<'a>> {
+fn option_checker_string<'a>(attribute_type: &'a str,input:Option<&'a str>) -> Option<(&'a str,AttributeValue<'a>)> {
     let result = match input {
         Some(x) => Some((attribute_type,AttributeValue::String(x))),
         None => None,
@@ -92,7 +92,7 @@ fn option_checker_string<'a>(attribute_type: &str,input:Option<&String>) -> Opti
     result
 }
 
-fn option_checker_time<'a>(attribute_type: &str,input:Option<&DateTime<Utc>>) -> Option<&'a str,AttributeValue<'a>> {
+fn option_checker_time<'a>(attribute_type: &'a str,input:Option<&'a DateTime<Utc>>) -> Option<(&'a str,AttributeValue<'a>)> {
     let result = match input {
         Some(x) => Some((attribute_type,AttributeValue::Time(x))),
         None => None,
@@ -108,9 +108,9 @@ impl<'a> Iterator for AttributesIntoIterator<'a> {
             1 => Some(("ty", AttributeValue::String(&self.attributes.ty))),        
             2 => Some(("source", AttributeValue::String(&self.attributes.source))),
             3 => option_checker_string("datacontenttype",self.attributes.get_datacontenttype()), 
-            4 => option_checker_string("dataschema",self.attributes.dataschema.get_dataschema()),
-            5 => option_checker_string("subject",self.attributes.subject.get_subject()),
-            6 => option_checker_time("time",self.attributes.time.get_time()),
+            4 => option_checker_string("dataschema",self.attributes.get_dataschema()),
+            5 => option_checker_string("subject",self.attributes.get_subject()),
+            6 => option_checker_time("time",self.attributes.get_time()),
             _ => return None,
         };
         self.index += 1;
@@ -150,14 +150,6 @@ impl AttributesReader for Attributes {
     fn get_time(&self) -> Option<&DateTime<Utc>> {
         self.time.as_ref()
     }
-
-    fn get_extension(&self, extension_name: &str) -> Option<&ExtensionValue> {
-        self.extensions.get(extension_name)
-    }
-
-    fn iter_extensions(&self) -> std::collections::hash_map::Iter<String, ExtensionValue> {
-        self.extensions.iter()
-    }
 }
 
 impl AttributesWriter for Attributes {
@@ -179,22 +171,6 @@ impl AttributesWriter for Attributes {
 
     fn set_time(&mut self, time: Option<impl Into<DateTime<Utc>>>) {
         self.time = time.map(Into::into)
-    }
-
-    fn set_extension<'name, 'event: 'name>(
-        &'event mut self,
-        extension_name: &'name str,
-        extension_value: impl Into<ExtensionValue>,
-    ) {
-        self.extensions
-            .insert(extension_name.to_owned(), extension_value.into());
-    }
-
-    fn remove_extension<'name, 'event: 'name>(
-        &'event mut self,
-        extension_name: &'name str,
-    ) -> Option<ExtensionValue> {
-        self.extensions.remove(extension_name)
     }
 }
 
@@ -225,7 +201,24 @@ impl Default for Attributes {
             dataschema: None,
             subject: None,
             time: None,
-            extensions: HashMap::new(),
+        }
+    }
+}
+
+impl AttributesConverter for Attributes {
+    fn into_v10(self) -> Self {
+        self
+    }
+
+    fn into_v03(self) -> AttributesV03 {
+        AttributesV03 {
+            id: self.id,
+            ty: self.ty,
+            source: self.source,
+            datacontenttype: self.datacontenttype,
+            schemaurl: self.dataschema,
+            subject: self.subject,
+            time: self.time,
         }
     }
 }

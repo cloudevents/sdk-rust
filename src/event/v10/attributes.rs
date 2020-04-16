@@ -62,6 +62,9 @@ impl<'a> Iterator for AttributesIntoIterator<'a> {
             _ => return None,
         };
         self.index += 1;
+        if result.is_none() {
+            return self.next()
+        }
         result
     }
 }

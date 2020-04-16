@@ -112,10 +112,6 @@ mod tests {
         assert_eq!(ty, event.get_type());
         assert_eq!(subject, event.get_subject().unwrap());
         assert_eq!(time, event.get_time().unwrap().clone());
-        assert_eq!(
-            ExtensionValue::from(extension_value),
-            event.get_extension(extension_name).unwrap().clone()
-        );
         assert_eq!(content_type, event.get_datacontenttype().unwrap());
         assert_eq!(schema, event.get_dataschema().unwrap());
 

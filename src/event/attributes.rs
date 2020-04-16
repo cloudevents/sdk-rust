@@ -23,6 +23,11 @@ impl fmt::Display for AttributeValue<'_> {
     }
 }
 
+pub(crate) trait AttributesConverter {
+    fn into_v03(self) -> AttributesV03;
+    fn into_v10(self) -> AttributesV10;
+}
+
 /// Trait to get [CloudEvents Context attributes](https://github.com/cloudevents/spec/blob/master/spec.md#context-attributes).
 pub trait AttributesReader {
     /// Get the [id](https://github.com/cloudevents/spec/blob/master/spec.md#id).
@@ -41,10 +46,6 @@ pub trait AttributesReader {
     fn get_subject(&self) -> Option<&str>;
     /// Get the [time](https://github.com/cloudevents/spec/blob/master/spec.md#time).
     fn get_time(&self) -> Option<&DateTime<Utc>>;
-    /// Get the [extension](https://github.com/cloudevents/spec/blob/master/spec.md#extension-context-attributes) named `extension_name`
-    fn get_extension(&self, extension_name: &str) -> Option<&ExtensionValue>;
-    /// Get all the [extensions](https://github.com/cloudevents/spec/blob/master/spec.md#extension-context-attributes)
-    fn iter_extensions(&self) -> std::collections::hash_map::Iter<String, ExtensionValue>;
 }
 
 pub trait AttributesWriter {
@@ -120,18 +121,6 @@ impl AttributesReader for Attributes {
     fn get_time(&self) -> Option<&DateTime<Utc>> {
         match self {
             Attributes::V10(a) => a.get_time(),
-        }
-    }
-
-    fn get_extension(&self, extension_name: &str) -> Option<&ExtensionValue> {
-        match self {
-            Attributes::V10(a) => a.get_extension(extension_name),
-        }
-    }
-
-    fn iter_extensions(&self) -> std::collections::hash_map::Iter<String, ExtensionValue> {
-        match self {
-            Attributes::V10(a) => a.iter_extensions(),
         }
     }
 }

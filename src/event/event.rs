@@ -48,8 +48,6 @@ impl AttributesReader for Event {
             fn get_dataschema(&self) -> Option<&str>;
             fn get_subject(&self) -> Option<&str>;
             fn get_time(&self) -> Option<&DateTime<Utc>>;
-            fn get_extension(&self, extension_name: &str) -> Option<&ExtensionValue>;
-            fn iter_extensions(&self) -> std::collections::hash_map::Iter<String, ExtensionValue>;
         }
     }
 }

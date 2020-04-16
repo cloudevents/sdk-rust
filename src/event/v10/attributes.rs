@@ -1,69 +1,20 @@
-use crate::event::attributes::{AttributesConverter, AttributeValue, DataAttributesWriter};
-use crate::event::{AttributesReader, AttributesV03, AttributesWriter, SpecVersion};
+use crate::event::attributes::DataAttributesWriter;
+use crate::event::{AttributesReader, AttributesWriter, ExtensionValue, SpecVersion};
 use chrono::{DateTime, Utc};
 use hostname::get_hostname;
+use std::collections::HashMap;
 use uuid::Uuid;
 
 #[derive(PartialEq, Debug, Clone)]
 pub struct Attributes {
-    pub(crate) id: String,
-    pub(crate) ty: String,
-    pub(crate) source: String,
-    pub(crate) datacontenttype: Option<String>,
-    pub(crate) dataschema: Option<String>,
-    pub(crate) subject: Option<String>,
-    pub(crate) time: Option<DateTime<Utc>>,
-}
-
-impl<'a> IntoIterator for &'a Attributes {
-    type Item = (&'a str, AttributeValue<'a>);
-    type IntoIter = AttributesIntoIterator<'a>;
-
-    fn into_iter(self) -> Self::IntoIter {
-        AttributesIntoIterator {
-            attributes: self,
-            index: 0,
-        }
-    }
-}
-
-struct AttributesIntoIterator<'a> {
-    attributes: &'a Attributes,
-    index: usize,
-}
-
-fn option_checker_string<'a>(attribute_type: &str,input:Option<&String>) -> Option<&'a str,AttributeValue<'a>> {
-    let result = match input {
-        Some(x) => Some((attribute_type,AttributeValue::String(x))),
-        None => None,
-    };
-    result
-}
-
-fn option_checker_time<'a>(attribute_type: &str,input:Option<&DateTime<Utc>>) -> Option<&'a str,AttributeValue<'a>> {
-    let result = match input {
-        Some(x) => Some((attribute_type,AttributeValue::Time(x))),
-        None => None,
-    };
-    result
-}
-
-impl<'a> Iterator for AttributesIntoIterator<'a> {
-    type Item = (&'a str, AttributeValue<'a>);
-    fn next(&mut self) -> Option<Self::Item> {
-        let result = match self.index {
-            0 => Some(("id", AttributeValue::String(&self.attributes.id))),
-            1 => Some(("ty", AttributeValue::String(&self.attributes.ty))),        
-            2 => Some(("source", AttributeValue::String(&self.attributes.source))),
-            3 => option_checker_string("datacontenttype",self.attributes.get_datacontenttype()), 
-            4 => option_checker_string("dataschema",self.attributes.dataschema.get_dataschema()),
-            5 => option_checker_string("subject",self.attributes.subject.get_subject()),
-            6 => option_checker_time("time",self.attributes.time.get_time()),
-            _ => return None,
-        };
-        self.index += 1;
-        result
-    }
+    id: String,
+    ty: String,
+    source: String,
+    datacontenttype: Option<String>,
+    dataschema: Option<String>,
+    subject: Option<String>,
+    time: Option<DateTime<Utc>>,
+    extensions: HashMap<String, ExtensionValue>,
 }
 
 impl AttributesReader for Attributes {
@@ -107,6 +58,14 @@ impl AttributesReader for Attributes {
     fn get_time(&self) -> Option<&DateTime<Utc>> {
         self.time.as_ref()
     }
+
+    fn get_extension(&self, extension_name: &str) -> Option<&ExtensionValue> {
+        self.extensions.get(extension_name)
+    }
+
+    fn iter_extensions(&self) -> std::collections::hash_map::Iter<String, ExtensionValue> {
+        self.extensions.iter()
+    }
 }
 
 impl AttributesWriter for Attributes {
@@ -128,6 +87,22 @@ impl AttributesWriter for Attributes {
 
     fn set_time(&mut self, time: Option<impl Into<DateTime<Utc>>>) {
         self.time = time.map(Into::into)
+    }
+
+    fn set_extension<'name, 'event: 'name>(
+        &'event mut self,
+        extension_name: &'name str,
+        extension_value: impl Into<ExtensionValue>,
+    ) {
+        self.extensions
+            .insert(extension_name.to_owned(), extension_value.into());
+    }
+
+    fn remove_extension<'name, 'event: 'name>(
+        &'event mut self,
+        extension_name: &'name str,
+    ) -> Option<ExtensionValue> {
+        self.extensions.remove(extension_name)
     }
 }
 
@@ -151,24 +126,7 @@ impl Default for Attributes {
             dataschema: None,
             subject: None,
             time: None,
-        }
-    }
-}
-
-impl AttributesConverter for Attributes {
-    fn into_v10(self) -> Self {
-        self
-    }
-
-    fn into_v03(self) -> AttributesV03 {
-        AttributesV03 {
-            id: self.id,
-            ty: self.ty,
-            source: self.source,
-            datacontenttype: self.datacontenttype,
-            schemaurl: self.dataschema,
-            subject: self.subject,
-            time: self.time,
+            extensions: HashMap::new(),
         }
     }
 }

@@ -9,22 +9,16 @@ pub struct EventBuilder {
 }
 
 impl EventBuilder {
-    pub fn from(event: Event) -> Self {
-        EventBuilder {
-            event: Event {
-                attributes: event.attributes.into_v10(),
-                data: event.data,
-                extensions: event.extensions,
-            },
-        }
-    }
+    // This works as soon as we have an event version converter
+    // pub fn from(event: Event) -> Self {
+    //     EventBuilder { event }
+    // }
 
     pub fn new() -> Self {
         EventBuilder {
             event: Event {
                 attributes: Attributes::V10(AttributesV10::default()),
                 data: None,
-                extensions: HashMap::new(),
             },
         }
     }

@@ -1,5 +1,5 @@
-use crate::event::attributes::{AttributesConverter, AttributeValue, DataAttributesWriter};
-use crate::event::{AttributesReader, AttributesV03, AttributesWriter, SpecVersion};
+use crate::event::attributes::DataAttributesWriter;
+use crate::event::{AttributesReader, AttributesWriter, ExtensionValue, SpecVersion};
 use chrono::{DateTime, Utc};
 use hostname::get_hostname;
 use url::Url;
@@ -99,6 +99,14 @@ impl AttributesReader for Attributes {
     fn get_time(&self) -> Option<&DateTime<Utc>> {
         self.time.as_ref()
     }
+
+    fn get_extension(&self, extension_name: &str) -> Option<&ExtensionValue> {
+        self.extensions.get(extension_name)
+    }
+
+    fn iter_extensions(&self) -> std::collections::hash_map::Iter<String, ExtensionValue> {
+        self.extensions.iter()
+    }
 }
 
 impl AttributesWriter for Attributes {
@@ -120,6 +128,22 @@ impl AttributesWriter for Attributes {
 
     fn set_time(&mut self, time: Option<impl Into<DateTime<Utc>>>) {
         self.time = time.map(Into::into)
+    }
+
+    fn set_extension<'name, 'event: 'name>(
+        &'event mut self,
+        extension_name: &'name str,
+        extension_value: impl Into<ExtensionValue>,
+    ) {
+        self.extensions
+            .insert(extension_name.to_owned(), extension_value.into());
+    }
+
+    fn remove_extension<'name, 'event: 'name>(
+        &'event mut self,
+        extension_name: &'name str,
+    ) -> Option<ExtensionValue> {
+        self.extensions.remove(extension_name)
     }
 }
 
@@ -150,24 +174,7 @@ impl Default for Attributes {
             dataschema: None,
             subject: None,
             time: None,
-        }
-    }
-}
-
-impl AttributesConverter for Attributes {
-    fn into_v10(self) -> Self {
-        self
-    }
-
-    fn into_v03(self) -> AttributesV03 {
-        AttributesV03 {
-            id: self.id,
-            ty: self.ty,
-            source: self.source,
-            datacontenttype: self.datacontenttype,
-            schemaurl: self.dataschema,
-            subject: self.subject,
-            time: self.time,
+            extensions: HashMap::new(),
         }
     }
 }

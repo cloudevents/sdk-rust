@@ -1,4 +1,3 @@
-use serde::{Deserialize, Serialize};
 use std::convert::TryFrom;
 use std::fmt;
 
@@ -6,9 +5,7 @@ pub(crate) const SPEC_VERSIONS: [&'static str; 2] = ["0.3", "1.0"];
 
 #[derive(PartialEq, Debug, Clone)]
 pub enum SpecVersion {
-    #[serde(rename = "0.3")]
     V03,
-    #[serde(rename = "1.0")]
     V10,
 }
 

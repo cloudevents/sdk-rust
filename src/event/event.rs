@@ -5,6 +5,7 @@ use super::{
 use crate::event::attributes::DataAttributesWriter;
 use chrono::{DateTime, Utc};
 use delegate::delegate;
+use std::collections::HashMap;
 use std::convert::TryFrom;
 use url::Url;
 
@@ -36,6 +37,7 @@ use url::Url;
 pub struct Event {
     pub attributes: Attributes,
     pub data: Option<Data>,
+    pub extensions: HashMap<String, ExtensionValue>,
 }
 
 impl AttributesReader for Event {
@@ -61,15 +63,6 @@ impl AttributesWriter for Event {
             fn set_type(&mut self, ty: impl Into<String>);
             fn set_subject(&mut self, subject: Option<impl Into<String>>);
             fn set_time(&mut self, time: Option<impl Into<DateTime<Utc>>>);
-            fn set_extension<'name, 'event: 'name>(
-                &'event mut self,
-                extension_name: &'name str,
-                extension_value: impl Into<ExtensionValue>,
-            );
-            fn remove_extension<'name, 'event: 'name>(
-                &'event mut self,
-                extension_name: &'name str,
-            ) -> Option<ExtensionValue>;
         }
     }
 }
@@ -79,6 +72,7 @@ impl Default for Event {
         Event {
             attributes: Attributes::V10(AttributesV10::default()),
             data: None,
+            extensions: HashMap::default(),
         }
     }
 }
@@ -139,22 +133,49 @@ impl Event {
         }
     }
 
-    pub fn try_get_data<T: Sized + TryFrom<Data, Error = E>, E: std::error::Error>(
-        &self,
-    ) -> Option<Result<T, E>> {
+    pub fn try_get_data<T: Sized + TryFrom<Data>>(&self) -> Result<Option<T>, T::Error> {
         match self.data.as_ref() {
             Some(d) => Some(T::try_from(d.clone())),
             None => None,
         }
+        .transpose()
     }
 
-    pub fn into_data<T: Sized + TryFrom<Data, Error = E>, E: std::error::Error>(
-        self,
-    ) -> Option<Result<T, E>> {
+    pub fn into_data<T: Sized + TryFrom<Data>>(self) -> Result<Option<T>, T::Error> {
         match self.data {
             Some(d) => Some(T::try_from(d)),
             None => None,
         }
+        .transpose()
+    }
+
+    /// Get the [extension](https://github.com/cloudevents/spec/blob/master/spec.md#extension-context-attributes) named `extension_name`
+    pub fn get_extension(&self, extension_name: &str) -> Option<&ExtensionValue> {
+        self.extensions.get(extension_name)
+    }
+
+    /// Get all the [extensions](https://github.com/cloudevents/spec/blob/master/spec.md#extension-context-attributes)
+    pub fn get_extensions(&self) -> Vec<(&str, &ExtensionValue)> {
+        self.extensions
+            .iter()
+            .map(|(k, v)| (k.as_str(), v))
+            .collect()
+    }
+
+    pub fn set_extension<'name, 'event: 'name>(
+        &'event mut self,
+        extension_name: &'name str,
+        extension_value: impl Into<ExtensionValue>,
+    ) {
+        self.extensions
+            .insert(extension_name.to_owned(), extension_value.into());
+    }
+
+    pub fn remove_extension<'name, 'event: 'name>(
+        &'event mut self,
+        extension_name: &'name str,
+    ) -> Option<ExtensionValue> {
+        self.extensions.remove(extension_name)
     }
 }
 
@@ -196,9 +217,7 @@ mod tests {
 
         e.remove_data();
 
-        assert!(e
-            .try_get_data::<serde_json::Value, serde_json::Error>()
-            .is_none());
+        assert!(e.try_get_data::<serde_json::Value>().unwrap().is_none());
         assert!(e.get_dataschema().is_none());
         assert!(e.get_datacontenttype().is_none());
     }

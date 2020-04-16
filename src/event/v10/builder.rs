@@ -9,16 +9,22 @@ pub struct EventBuilder {
 }
 
 impl EventBuilder {
-    // This works as soon as we have an event version converter
-    // pub fn from(event: Event) -> Self {
-    //     EventBuilder { event }
-    // }
+    pub fn from(event: Event) -> Self {
+        EventBuilder {
+            event: Event {
+                attributes: event.attributes.into_v10(),
+                data: event.data,
+                extensions: event.extensions,
+            },
+        }
+    }
 
     pub fn new() -> Self {
         EventBuilder {
             event: Event {
                 attributes: Attributes::V10(AttributesV10::default()),
                 data: None,
+                extensions: HashMap::new(),
             },
         }
     }
@@ -114,6 +120,10 @@ mod tests {
         assert_eq!(ty, event.get_type());
         assert_eq!(subject, event.get_subject().unwrap());
         assert_eq!(time, event.get_time().unwrap().clone());
+        assert_eq!(
+            ExtensionValue::from(extension_value),
+            event.get_extension(extension_name).unwrap().clone()
+        );
         assert_eq!(content_type, event.get_datacontenttype().unwrap());
         assert_eq!(schema, event.get_dataschema().unwrap().clone());
 

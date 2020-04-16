@@ -1,6 +1,5 @@
 use super::{AttributesV03, AttributesV10, SpecVersion};
 use chrono::{DateTime, Utc};
-use serde::{Deserialize, Serialize};
 use std::fmt;
 
 pub enum AttributeValue<'a> {

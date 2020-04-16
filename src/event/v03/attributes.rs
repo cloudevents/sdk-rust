@@ -3,15 +3,16 @@ use crate::event::AttributesV10;
 use crate::event::{AttributesReader, AttributesWriter, SpecVersion};
 use chrono::{DateTime, Utc};
 use hostname::get_hostname;
+use url::Url;
 use uuid::Uuid;
 
 #[derive(PartialEq, Debug, Clone)]
 pub struct Attributes {
     pub(crate) id: String,
     pub(crate) ty: String,
-    pub(crate) source: String,
+    pub(crate) source: Url,
     pub(crate) datacontenttype: Option<String>,
-    pub(crate) schemaurl: Option<String>,
+    pub(crate) schemaurl: Option<Url>,
     pub(crate) subject: Option<String>,
     pub(crate) time: Option<DateTime<Utc>>,
 }
@@ -21,7 +22,7 @@ impl AttributesReader for Attributes {
         &self.id
     }
 
-    fn get_source(&self) -> &str {
+    fn get_source(&self) -> &Url {
         &self.source
     }
 
@@ -34,24 +35,15 @@ impl AttributesReader for Attributes {
     }
 
     fn get_datacontenttype(&self) -> Option<&str> {
-        match self.datacontenttype.as_ref() {
-            Some(s) => Some(&s),
-            None => None,
-        }
+        self.datacontenttype.as_deref()
     }
 
-    fn get_dataschema(&self) -> Option<&str> {
-        match self.schemaurl.as_ref() {
-            Some(s) => Some(&s),
-            None => None,
-        }
+    fn get_dataschema(&self) -> Option<&Url> {
+        self.schemaurl.as_ref()
     }
 
     fn get_subject(&self) -> Option<&str> {
-        match self.subject.as_ref() {
-            Some(s) => Some(&s),
-            None => None,
-        }
+        self.subject.as_deref()
     }
 
     fn get_time(&self) -> Option<&DateTime<Utc>> {
@@ -64,7 +56,7 @@ impl AttributesWriter for Attributes {
         self.id = id.into()
     }
 
-    fn set_source(&mut self, source: impl Into<String>) {
+    fn set_source(&mut self, source: impl Into<Url>) {
         self.source = source.into()
     }
 
@@ -86,7 +78,7 @@ impl DataAttributesWriter for Attributes {
         self.datacontenttype = datacontenttype.map(Into::into)
     }
 
-    fn set_dataschema(&mut self, dataschema: Option<impl Into<String>>) {
+    fn set_dataschema(&mut self, dataschema: Option<impl Into<Url>>) {
         self.schemaurl = dataschema.map(Into::into)
     }
 }
@@ -96,7 +88,14 @@ impl Default for Attributes {
         Attributes {
             id: Uuid::new_v4().to_string(),
             ty: "type".to_string(),
-            source: get_hostname().unwrap_or("http://localhost/".to_string()),
+            source: Url::parse(
+                format!(
+                    "http://{}",
+                    get_hostname().unwrap_or("localhost".to_string())
+                )
+                .as_ref(),
+            )
+            .unwrap(),
             datacontenttype: None,
             schemaurl: None,
             subject: None,

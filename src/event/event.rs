@@ -7,6 +7,7 @@ use chrono::{DateTime, Utc};
 use delegate::delegate;
 use std::collections::HashMap;
 use std::convert::TryFrom;
+use url::Url;
 
 /// Data structure that represents a [CloudEvent](https://github.com/cloudevents/spec/blob/master/spec.md).
 /// It provides methods to get the attributes through [`AttributesReader`]
@@ -43,11 +44,11 @@ impl AttributesReader for Event {
     delegate! {
         to self.attributes {
             fn get_id(&self) -> &str;
-            fn get_source(&self) -> &str;
+            fn get_source(&self) -> &Url;
             fn get_specversion(&self) -> SpecVersion;
             fn get_type(&self) -> &str;
             fn get_datacontenttype(&self) -> Option<&str>;
-            fn get_dataschema(&self) -> Option<&str>;
+            fn get_dataschema(&self) -> Option<&Url>;
             fn get_subject(&self) -> Option<&str>;
             fn get_time(&self) -> Option<&DateTime<Utc>>;
         }
@@ -58,7 +59,7 @@ impl AttributesWriter for Event {
     delegate! {
         to self.attributes {
             fn set_id(&mut self, id: impl Into<String>);
-            fn set_source(&mut self, source: impl Into<String>);
+            fn set_source(&mut self, source: impl Into<Url>);
             fn set_type(&mut self, ty: impl Into<String>);
             fn set_subject(&mut self, subject: Option<impl Into<String>>);
             fn set_time(&mut self, time: Option<impl Into<DateTime<Utc>>>);
@@ -79,7 +80,7 @@ impl Default for Event {
 impl Event {
     pub fn remove_data(&mut self) {
         self.data = None;
-        self.attributes.set_dataschema(None as Option<String>);
+        self.attributes.set_dataschema(None as Option<Url>);
         self.attributes.set_datacontenttype(None as Option<String>);
     }
 
@@ -95,7 +96,7 @@ impl Event {
     /// ```
     pub fn write_data(&mut self, datacontenttype: impl Into<String>, data: impl Into<Data>) {
         self.attributes.set_datacontenttype(Some(datacontenttype));
-        self.attributes.set_dataschema(None as Option<&str>);
+        self.attributes.set_dataschema(None as Option<Url>);
         self.data = Some(data.into());
     }
 
@@ -105,14 +106,19 @@ impl Event {
     /// use cloudevents::Event;
     /// use serde_json::json;
     /// use std::convert::Into;
+    /// use url::Url;
     ///
     /// let mut e = Event::default();
-    /// e.write_data_with_schema("application/json", "http://myapplication.com/schema", json!({}))
+    /// e.write_data_with_schema(
+    ///     "application/json",
+    ///     Url::parse("http://myapplication.com/schema").unwrap(),
+    ///     json!({})
+    /// )
     /// ```
     pub fn write_data_with_schema(
         &mut self,
         datacontenttype: impl Into<String>,
-        dataschema: impl Into<String>,
+        dataschema: impl Into<Url>,
         data: impl Into<Data>,
     ) {
         self.attributes.set_datacontenttype(Some(datacontenttype));
@@ -186,14 +192,17 @@ mod tests {
         let mut e = Event::default();
         e.write_data_with_schema(
             "application/json",
-            "http://localhost:8080/schema",
+            Url::parse("http://localhost:8080/schema").unwrap(),
             expected_data.clone(),
         );
 
         let data: serde_json::Value = e.try_get_data().unwrap().unwrap();
         assert_eq!(expected_data, data);
         assert_eq!("application/json", e.get_datacontenttype().unwrap());
-        assert_eq!("http://localhost:8080/schema", e.get_dataschema().unwrap())
+        assert_eq!(
+            &Url::parse("http://localhost:8080/schema").unwrap(),
+            e.get_dataschema().unwrap()
+        )
     }
 
     #[test]

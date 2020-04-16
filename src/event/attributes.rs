@@ -1,12 +1,13 @@
 use super::{AttributesV03, AttributesV10, SpecVersion};
 use chrono::{DateTime, Utc};
+use url::Url;
 
 /// Trait to get [CloudEvents Context attributes](https://github.com/cloudevents/spec/blob/master/spec.md#context-attributes).
 pub trait AttributesReader {
     /// Get the [id](https://github.com/cloudevents/spec/blob/master/spec.md#id).
     fn get_id(&self) -> &str;
     /// Get the [source](https://github.com/cloudevents/spec/blob/master/spec.md#source-1).
-    fn get_source(&self) -> &str;
+    fn get_source(&self) -> &Url;
     /// Get the [specversion](https://github.com/cloudevents/spec/blob/master/spec.md#specversion).
     fn get_specversion(&self) -> SpecVersion;
     /// Get the [type](https://github.com/cloudevents/spec/blob/master/spec.md#type).
@@ -14,7 +15,7 @@ pub trait AttributesReader {
     /// Get the [datacontenttype](https://github.com/cloudevents/spec/blob/master/spec.md#datacontenttype).
     fn get_datacontenttype(&self) -> Option<&str>;
     /// Get the [dataschema](https://github.com/cloudevents/spec/blob/master/spec.md#dataschema).
-    fn get_dataschema(&self) -> Option<&str>;
+    fn get_dataschema(&self) -> Option<&Url>;
     /// Get the [subject](https://github.com/cloudevents/spec/blob/master/spec.md#subject).
     fn get_subject(&self) -> Option<&str>;
     /// Get the [time](https://github.com/cloudevents/spec/blob/master/spec.md#time).
@@ -23,7 +24,7 @@ pub trait AttributesReader {
 
 pub trait AttributesWriter {
     fn set_id(&mut self, id: impl Into<String>);
-    fn set_source(&mut self, source: impl Into<String>);
+    fn set_source(&mut self, source: impl Into<Url>);
     fn set_type(&mut self, ty: impl Into<String>);
     fn set_subject(&mut self, subject: Option<impl Into<String>>);
     fn set_time(&mut self, time: Option<impl Into<DateTime<Utc>>>);
@@ -36,7 +37,7 @@ pub(crate) trait AttributesConverter {
 
 pub(crate) trait DataAttributesWriter {
     fn set_datacontenttype(&mut self, datacontenttype: Option<impl Into<String>>);
-    fn set_dataschema(&mut self, dataschema: Option<impl Into<String>>);
+    fn set_dataschema(&mut self, dataschema: Option<impl Into<Url>>);
 }
 
 #[derive(PartialEq, Debug, Clone)]
@@ -53,7 +54,7 @@ impl AttributesReader for Attributes {
         }
     }
 
-    fn get_source(&self) -> &str {
+    fn get_source(&self) -> &Url {
         match self {
             Attributes::V03(a) => a.get_source(),
             Attributes::V10(a) => a.get_source(),
@@ -81,7 +82,7 @@ impl AttributesReader for Attributes {
         }
     }
 
-    fn get_dataschema(&self) -> Option<&str> {
+    fn get_dataschema(&self) -> Option<&Url> {
         match self {
             Attributes::V03(a) => a.get_dataschema(),
             Attributes::V10(a) => a.get_dataschema(),
@@ -111,7 +112,7 @@ impl AttributesWriter for Attributes {
         }
     }
 
-    fn set_source(&mut self, source: impl Into<String>) {
+    fn set_source(&mut self, source: impl Into<Url>) {
         match self {
             Attributes::V03(a) => a.set_source(source),
             Attributes::V10(a) => a.set_source(source),
@@ -148,7 +149,7 @@ impl DataAttributesWriter for Attributes {
         }
     }
 
-    fn set_dataschema(&mut self, dataschema: Option<impl Into<String>>) {
+    fn set_dataschema(&mut self, dataschema: Option<impl Into<Url>>) {
         match self {
             Attributes::V03(a) => a.set_dataschema(dataschema),
             Attributes::V10(a) => a.set_dataschema(dataschema),

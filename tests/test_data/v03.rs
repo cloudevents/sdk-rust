@@ -1,11 +1,13 @@
 use super::*;
 use cloudevents::{Event, EventBuilder};
 use serde_json::{json, Value};
+use std::convert::TryInto;
+use url::Url;
 
 pub fn minimal() -> Event {
     EventBuilder::v03()
         .id(id())
-        .source(source())
+        .source(Url::parse(source().as_ref()).unwrap())
         .ty(ty())
         .build()
 }
@@ -26,7 +28,7 @@ pub fn full_no_data() -> Event {
 
     EventBuilder::v03()
         .id(id())
-        .source(source())
+        .source(Url::parse(source().as_ref()).unwrap())
         .ty(ty())
         .subject(subject())
         .time(time())
@@ -61,14 +63,18 @@ pub fn full_json_data() -> Event {
 
     EventBuilder::v03()
         .id(id())
-        .source(source())
+        .source(Url::parse(source().as_ref()).unwrap())
         .ty(ty())
         .subject(subject())
         .time(time())
         .extension(&string_ext_name, string_ext_value)
         .extension(&bool_ext_name, bool_ext_value)
         .extension(&int_ext_name, int_ext_value)
-        .data_with_schema(json_datacontenttype(), dataschema(), json_data())
+        .data_with_schema(
+            json_datacontenttype(),
+            Url::parse(dataschema().as_ref()).unwrap(),
+            json_data(),
+        )
         .build()
 }
 
@@ -122,7 +128,7 @@ pub fn full_xml_string_data() -> Event {
 
     EventBuilder::v03()
         .id(id())
-        .source(source())
+        .source(Url::parse(source().as_ref()).unwrap())
         .ty(ty())
         .subject(subject())
         .time(time())
@@ -140,7 +146,7 @@ pub fn full_xml_binary_data() -> Event {
 
     EventBuilder::v03()
         .id(id())
-        .source(source())
+        .source(Url::parse(source().as_ref()).unwrap())
         .ty(ty())
         .subject(subject())
         .time(time())

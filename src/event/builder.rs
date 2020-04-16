@@ -4,10 +4,11 @@ use super::{EventBuilderV03, EventBuilderV10};
 /// ```
 /// use cloudevents::EventBuilder;
 /// use chrono::Utc;
+/// use url::Url;
 ///
 /// let event = EventBuilder::v10()
 ///     .id("my_event.my_application")
-///     .source("http://localhost:8080")
+///     .source(Url::parse("http://localhost:8080").unwrap())
 ///     .time(Utc::now())
 ///     .build();
 /// ```

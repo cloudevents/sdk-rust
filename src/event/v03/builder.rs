@@ -2,6 +2,7 @@ use super::Attributes as AttributesV03;
 use crate::event::{Attributes, AttributesWriter, Data, Event, ExtensionValue};
 use chrono::{DateTime, Utc};
 use std::collections::HashMap;
+use url::Url;
 
 pub struct EventBuilder {
     event: Event,
@@ -33,7 +34,7 @@ impl EventBuilder {
         return self;
     }
 
-    pub fn source(mut self, source: impl Into<String>) -> Self {
+    pub fn source(mut self, source: impl Into<Url>) -> Self {
         self.event.set_source(source);
         return self;
     }
@@ -70,7 +71,7 @@ impl EventBuilder {
     pub fn data_with_schema(
         mut self,
         datacontenttype: impl Into<String>,
-        schemaurl: impl Into<String>,
+        schemaurl: impl Into<Url>,
         data: impl Into<Data>,
     ) -> Self {
         self.event
@@ -91,31 +92,31 @@ mod tests {
     #[test]
     fn build_event() {
         let id = "aaa";
-        let source = "http://localhost:8080";
+        let source = Url::parse("http://localhost:8080").unwrap();
         let ty = "bbb";
         let subject = "francesco";
         let time: DateTime<Utc> = Utc::now();
         let extension_name = "ext";
         let extension_value = 10i64;
         let content_type = "application/json";
-        let schema = "http://localhost:8080/schema";
+        let schema = Url::parse("http://localhost:8080/schema").unwrap();
         let data = serde_json::json!({
             "hello": "world"
         });
 
         let event = EventBuilder::new()
             .id(id)
-            .source(source)
+            .source(source.clone())
             .ty(ty)
             .subject(subject)
             .time(time)
             .extension(extension_name, extension_value)
-            .data_with_schema(content_type, schema, data.clone())
+            .data_with_schema(content_type, schema.clone(), data.clone())
             .build();
 
         assert_eq!(SpecVersion::V03, event.get_specversion());
         assert_eq!(id, event.get_id());
-        assert_eq!(source, event.get_source());
+        assert_eq!(source, event.get_source().clone());
         assert_eq!(ty, event.get_type());
         assert_eq!(subject, event.get_subject().unwrap());
         assert_eq!(time, event.get_time().unwrap().clone());
@@ -124,7 +125,7 @@ mod tests {
             event.get_extension(extension_name).unwrap().clone()
         );
         assert_eq!(content_type, event.get_datacontenttype().unwrap());
-        assert_eq!(schema, event.get_dataschema().unwrap());
+        assert_eq!(schema, event.get_dataschema().unwrap().clone());
 
         let event_data: serde_json::Value = event.try_get_data().unwrap().unwrap();
         assert_eq!(data, event_data);

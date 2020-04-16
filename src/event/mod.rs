@@ -2,7 +2,7 @@ mod attributes;
 mod builder;
 mod data;
 mod event;
-mod extension_value;
+mod extensions;
 mod spec_version;
 
 pub use attributes::Attributes;

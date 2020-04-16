@@ -1,5 +1,4 @@
-use super::SpecVersion;
-use crate::event::{AttributesV10, ExtensionValue};
+use super::{AttributesV03, AttributesV10, SpecVersion};
 use chrono::{DateTime, Utc};
 use std::fmt;
 
@@ -21,11 +20,6 @@ impl fmt::Display for AttributeValue<'_> {
             AttributeValue::Time(s) => f.write_str(&s.to_rfc2822()),
         }
     }
-}
-
-pub(crate) trait AttributesConverter {
-    fn into_v03(self) -> AttributesV03;
-    fn into_v10(self) -> AttributesV10;
 }
 
 /// Trait to get [CloudEvents Context attributes](https://github.com/cloudevents/spec/blob/master/spec.md#context-attributes).
@@ -54,15 +48,11 @@ pub trait AttributesWriter {
     fn set_type(&mut self, ty: impl Into<String>);
     fn set_subject(&mut self, subject: Option<impl Into<String>>);
     fn set_time(&mut self, time: Option<impl Into<DateTime<Utc>>>);
-    fn set_extension<'name, 'event: 'name>(
-        &'event mut self,
-        extension_name: &'name str,
-        extension_value: impl Into<ExtensionValue>,
-    );
-    fn remove_extension<'name, 'event: 'name>(
-        &'event mut self,
-        extension_name: &'name str,
-    ) -> Option<ExtensionValue>;
+}
+
+pub(crate) trait AttributesConverter {
+    fn into_v03(self) -> AttributesV03;
+    fn into_v10(self) -> AttributesV10;
 }
 
 pub(crate) trait DataAttributesWriter {
@@ -72,54 +62,63 @@ pub(crate) trait DataAttributesWriter {
 
 #[derive(PartialEq, Debug, Clone)]
 pub enum Attributes {
+    V03(AttributesV03),
     V10(AttributesV10),
 }
 
 impl AttributesReader for Attributes {
     fn get_id(&self) -> &str {
         match self {
+            Attributes::V03(a) => a.get_id(),
             Attributes::V10(a) => a.get_id(),
         }
     }
 
     fn get_source(&self) -> &str {
         match self {
+            Attributes::V03(a) => a.get_source(),
             Attributes::V10(a) => a.get_source(),
         }
     }
 
     fn get_specversion(&self) -> SpecVersion {
         match self {
+            Attributes::V03(a) => a.get_specversion(),
             Attributes::V10(a) => a.get_specversion(),
         }
     }
 
     fn get_type(&self) -> &str {
         match self {
+            Attributes::V03(a) => a.get_type(),
             Attributes::V10(a) => a.get_type(),
         }
     }
 
     fn get_datacontenttype(&self) -> Option<&str> {
         match self {
+            Attributes::V03(a) => a.get_datacontenttype(),
             Attributes::V10(a) => a.get_datacontenttype(),
         }
     }
 
     fn get_dataschema(&self) -> Option<&str> {
         match self {
+            Attributes::V03(a) => a.get_dataschema(),
             Attributes::V10(a) => a.get_dataschema(),
         }
     }
 
     fn get_subject(&self) -> Option<&str> {
         match self {
+            Attributes::V03(a) => a.get_subject(),
             Attributes::V10(a) => a.get_subject(),
         }
     }
 
     fn get_time(&self) -> Option<&DateTime<Utc>> {
         match self {
+            Attributes::V03(a) => a.get_time(),
             Attributes::V10(a) => a.get_time(),
         }
     }
@@ -128,50 +127,36 @@ impl AttributesReader for Attributes {
 impl AttributesWriter for Attributes {
     fn set_id(&mut self, id: impl Into<String>) {
         match self {
+            Attributes::V03(a) => a.set_id(id),
             Attributes::V10(a) => a.set_id(id),
         }
     }
 
     fn set_source(&mut self, source: impl Into<String>) {
         match self {
+            Attributes::V03(a) => a.set_source(source),
             Attributes::V10(a) => a.set_source(source),
         }
     }
 
     fn set_type(&mut self, ty: impl Into<String>) {
         match self {
+            Attributes::V03(a) => a.set_type(ty),
             Attributes::V10(a) => a.set_type(ty),
         }
     }
 
     fn set_subject(&mut self, subject: Option<impl Into<String>>) {
         match self {
+            Attributes::V03(a) => a.set_subject(subject),
             Attributes::V10(a) => a.set_subject(subject),
         }
     }
 
     fn set_time(&mut self, time: Option<impl Into<DateTime<Utc>>>) {
         match self {
+            Attributes::V03(a) => a.set_time(time),
             Attributes::V10(a) => a.set_time(time),
-        }
-    }
-
-    fn set_extension<'name, 'event: 'name>(
-        &'event mut self,
-        extension_name: &'name str,
-        extension_value: impl Into<ExtensionValue>,
-    ) {
-        match self {
-            Attributes::V10(a) => a.set_extension(extension_name, extension_value),
-        }
-    }
-
-    fn remove_extension<'name, 'event: 'name>(
-        &'event mut self,
-        extension_name: &'name str,
-    ) -> Option<ExtensionValue> {
-        match self {
-            Attributes::V10(a) => a.remove_extension(extension_name),
         }
     }
 }
@@ -179,13 +164,30 @@ impl AttributesWriter for Attributes {
 impl DataAttributesWriter for Attributes {
     fn set_datacontenttype(&mut self, datacontenttype: Option<impl Into<String>>) {
         match self {
+            Attributes::V03(a) => a.set_datacontenttype(datacontenttype),
             Attributes::V10(a) => a.set_datacontenttype(datacontenttype),
         }
     }
 
     fn set_dataschema(&mut self, dataschema: Option<impl Into<String>>) {
         match self {
+            Attributes::V03(a) => a.set_dataschema(dataschema),
             Attributes::V10(a) => a.set_dataschema(dataschema),
+        }
+    }
+}
+
+impl Attributes {
+    pub fn into_v10(self) -> Self {
+        match self {
+            Attributes::V03(v03) => Attributes::V10(v03.into_v10()),
+            _ => self,
+        }
+    }
+    pub fn into_v03(self) -> Self {
+        match self {
+            Attributes::V10(v10) => Attributes::V03(v10.into_v03()),
+            _ => self,
         }
     }
 }

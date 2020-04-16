@@ -1,5 +1,5 @@
-use chrono::{DateTime, Utc};
 use crate::event::ExtensionValue;
+use chrono::{DateTime, Utc};
 use std::convert::TryInto;
 
 pub enum MessageAttributeValue {
@@ -18,7 +18,9 @@ impl TryInto<DateTime<Utc>> for MessageAttributeValue {
     fn try_into(self) -> Result<DateTime<Utc>, Self::Error> {
         match self {
             MessageAttributeValue::DateTime(d) => Ok(d),
-            v => Ok(DateTime::<Utc>::from(DateTime::parse_from_rfc3339(v.to_string().as_ref())?))
+            v => Ok(DateTime::<Utc>::from(DateTime::parse_from_rfc3339(
+                v.to_string().as_ref(),
+            )?)),
         }
     }
 }

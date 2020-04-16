@@ -33,8 +33,8 @@ impl Data {
     }
 
     pub fn from_binary<I>(content_type: Option<&str>, i: I) -> Result<Self, serde_json::Error>
-        where
-            I: AsRef<[u8]>,
+    where
+        I: AsRef<[u8]>,
     {
         let is_json = is_json_content_type(content_type.unwrap_or("application/json"));
         if is_json {

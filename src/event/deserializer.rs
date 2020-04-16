@@ -1,13 +1,19 @@
-use crate::message::{StructuredDeserializer, BinaryDeserializer, StructuredVisitor, BinaryVisitor, MessageAttributeValue, DeserializationResult, SerializationResult};
-use super::Event;
-use std::borrow::Borrow;
-use super::{AttributesReader, Attributes};
 use super::Data;
+use super::Event;
+use super::{Attributes, AttributesReader};
 use crate::event::SpecVersion;
+use crate::message::{
+    BinaryDeserializer, BinaryVisitor, DeserializationResult, MessageAttributeValue,
+    SerializationResult, StructuredDeserializer, StructuredVisitor,
+};
+use std::borrow::Borrow;
 use std::io::Read;
 
 impl StructuredDeserializer for Event {
-    fn deserialize_structured<V: StructuredVisitor>(self, visitor: &mut V) -> DeserializationResult {
+    fn deserialize_structured<V: StructuredVisitor>(
+        self,
+        visitor: &mut V,
+    ) -> DeserializationResult {
         let vec: Vec<u8> = serde_json::to_vec(&self)?;
         visitor.visit_structured_event::<&[u8]>(vec.borrow())
     }
@@ -26,8 +32,8 @@ impl BinaryDeserializer for Event {
             Some(Data::Json(j)) => {
                 let vec: Vec<u8> = serde_json::to_vec(j)?;
                 visitor.set_body::<&[u8]>(vec.borrow())
-            },
-            None => Ok(())
+            }
+            None => Ok(()),
         }
     }
 }
@@ -37,11 +43,15 @@ pub(crate) trait AttributesDeserializer {
 }
 
 pub(crate) trait AttributesSerializer {
-    fn serialize_attribute(&mut self, name: &str, value: MessageAttributeValue) -> SerializationResult;
+    fn serialize_attribute(
+        &mut self,
+        name: &str,
+        value: MessageAttributeValue,
+    ) -> SerializationResult;
 }
 
 impl AttributesDeserializer for Attributes {
-    fn deserialize_attributes<V: BinaryVisitor>(self, visitor: &mut V) -> DeserializationResult{
+    fn deserialize_attributes<V: BinaryVisitor>(self, visitor: &mut V) -> DeserializationResult {
         match self {
             Attributes::V03(v03) => v03.deserialize_attributes(visitor),
             Attributes::V10(v10) => v10.deserialize_attributes(visitor),
@@ -50,7 +60,11 @@ impl AttributesDeserializer for Attributes {
 }
 
 impl AttributesSerializer for Attributes {
-    fn serialize_attribute(&mut self, name: &str, value: MessageAttributeValue) -> SerializationResult {
+    fn serialize_attribute(
+        &mut self,
+        name: &str,
+        value: MessageAttributeValue,
+    ) -> SerializationResult {
         match self {
             Attributes::V03(v03) => v03.serialize_attribute(name, value),
             Attributes::V10(v10) => v10.serialize_attribute(name, value),

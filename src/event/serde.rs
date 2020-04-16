@@ -133,7 +133,10 @@ impl<'de> Deserialize<'de> for Event {
         match parse_field!(map, "specversion", String, <D as Deserializer<'de>>::Error)?.as_str() {
             "0.3" => EventDeserializerV03::deserialize_event(map),
             "1.0" => EventDeserializerV10::deserialize_event(map),
-            s => Err(D::Error::unknown_variant(s, &super::spec_version::SPEC_VERSIONS)),
+            s => Err(D::Error::unknown_variant(
+                s,
+                &super::spec_version::SPEC_VERSIONS,
+            )),
         }
     }
 }

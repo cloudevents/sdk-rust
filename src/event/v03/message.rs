@@ -1,4 +1,6 @@
-use crate::message::{BinaryVisitor, MessageAttributeValue, DeserializationResult, SerializationResult, Error};
+use crate::message::{
+    BinaryVisitor, DeserializationResult, Error, MessageAttributeValue, SerializationResult,
+};
 use std::convert::TryInto;
 
 impl crate::event::deserializer::AttributesDeserializer for super::Attributes {
@@ -7,13 +9,22 @@ impl crate::event::deserializer::AttributesDeserializer for super::Attributes {
         visitor.set_attribute("type", MessageAttributeValue::String(self.ty))?;
         visitor.set_attribute("source", MessageAttributeValue::UriRef(self.source))?;
         if self.datacontenttype.is_some() {
-            visitor.set_attribute("datacontenttype", MessageAttributeValue::String(self.datacontenttype.unwrap()))?;
+            visitor.set_attribute(
+                "datacontenttype",
+                MessageAttributeValue::String(self.datacontenttype.unwrap()),
+            )?;
         }
         if self.schemaurl.is_some() {
-            visitor.set_attribute("schemaurl", MessageAttributeValue::Uri(self.schemaurl.unwrap()))?;
+            visitor.set_attribute(
+                "schemaurl",
+                MessageAttributeValue::Uri(self.schemaurl.unwrap()),
+            )?;
         }
         if self.subject.is_some() {
-            visitor.set_attribute("subject", MessageAttributeValue::String(self.subject.unwrap()))?;
+            visitor.set_attribute(
+                "subject",
+                MessageAttributeValue::String(self.subject.unwrap()),
+            )?;
         }
         if self.time.is_some() {
             visitor.set_attribute("time", MessageAttributeValue::DateTime(self.time.unwrap()))?;
@@ -23,7 +34,11 @@ impl crate::event::deserializer::AttributesDeserializer for super::Attributes {
 }
 
 impl crate::event::deserializer::AttributesSerializer for super::Attributes {
-    fn serialize_attribute(&mut self, name: &str, value: MessageAttributeValue) -> SerializationResult {
+    fn serialize_attribute(
+        &mut self,
+        name: &str,
+        value: MessageAttributeValue,
+    ) -> SerializationResult {
         match name {
             "id" => self.id = value.to_string(),
             "type" => self.ty = value.to_string(),
@@ -32,7 +47,11 @@ impl crate::event::deserializer::AttributesSerializer for super::Attributes {
             "schemaurl" => self.schemaurl = Some(value.to_string()),
             "subject" => self.subject = Some(value.to_string()),
             "time" => self.time = Some(value.try_into()?),
-            _ => return Err(Error::UnrecognizedAttributeName {name: name.to_string()})
+            _ => {
+                return Err(Error::UnrecognizedAttributeName {
+                    name: name.to_string(),
+                })
+            }
         };
         Ok(())
     }

@@ -13,7 +13,7 @@ pub use attributes::{AttributesReader, AttributesWriter};
 pub use builder::EventBuilder;
 pub use data::Data;
 pub use event::Event;
-pub use extension_value::ExtensionValue;
+pub use extensions::ExtensionValue;
 pub use spec_version::SpecVersion;
 
 mod v10;

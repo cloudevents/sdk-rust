@@ -19,7 +19,7 @@ impl fmt::Display for AttributeValue<'_> {
             AttributeValue::String(s) => f.write_str(s),
             AttributeValue::URI(s) => f.write_str(s),
             AttributeValue::URIRef(s) => f.write_str(s),
-            AttributeValue::Time(s) => f.write_str(&s.to_rfc2822()),
+            AttributeValue::Time(s) => f.write_str(&s.to_rfc3339()),
         }
     }
 }

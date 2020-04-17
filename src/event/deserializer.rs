@@ -15,7 +15,7 @@ impl StructuredDeserializer for Event {
         visitor: &mut V,
     ) -> DeserializationResult {
         let vec: Vec<u8> = serde_json::to_vec(&self)?;
-        visitor.visit_structured_event::<&[u8]>(vec.borrow())
+        visitor.set_structured_event::<&[u8]>(vec.borrow())
     }
 }
 
@@ -73,7 +73,7 @@ impl AttributesSerializer for Attributes {
 }
 
 impl StructuredVisitor for Event {
-    fn visit_structured_event<R: Read>(&mut self, reader: R) -> SerializationResult {
+    fn set_structured_event<R: Read>(&mut self, reader: R) -> SerializationResult {
         let new_event: Event = serde_json::from_reader(reader)?;
         self.attributes = new_event.attributes;
         self.data = new_event.data;

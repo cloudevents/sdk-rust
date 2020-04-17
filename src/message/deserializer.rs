@@ -40,7 +40,7 @@ where
 }
 
 pub trait StructuredVisitor {
-    fn visit_structured_event<R: Read>(&mut self, reader: R) -> SerializationResult;
+    fn set_structured_event<R: Read>(&mut self, reader: R) -> SerializationResult;
 }
 
 pub trait BinaryDeserializer

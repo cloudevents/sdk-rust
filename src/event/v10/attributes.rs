@@ -32,22 +32,6 @@ pub struct AttributesIntoIterator<'a> {
     index: usize,
 }
 
-fn option_checker_string<'a>(attribute_type: &'a str,input:Option<&'a str>) -> Option<(&'a str,AttributeValue<'a>)> {
-    let result = match input {
-        Some(x) => Some((attribute_type,AttributeValue::String(x))),
-        None => None,
-    };
-    result
-}
-
-fn option_checker_time<'a>(attribute_type: &'a str,input:Option<&'a DateTime<Utc>>) -> Option<(&'a str,AttributeValue<'a>)> {
-    let result = match input {
-        Some(x) => Some((attribute_type,AttributeValue::Time(x))),
-        None => None,
-    };
-    result
-}
-
 impl<'a> Iterator for AttributesIntoIterator<'a> {
     type Item = (&'a str, AttributeValue<'a>);
     fn next(&mut self) -> Option<Self::Item> {
@@ -55,10 +39,10 @@ impl<'a> Iterator for AttributesIntoIterator<'a> {
             0 => Some(("id", AttributeValue::String(&self.attributes.id))),
             1 => Some(("ty", AttributeValue::String(&self.attributes.ty))),        
             2 => Some(("source", AttributeValue::String(&self.attributes.source))),
-            3 => option_checker_string("datacontenttype",self.attributes.get_datacontenttype()), 
-            4 => option_checker_string("dataschema",self.attributes.get_dataschema()),
-            5 => option_checker_string("subject",self.attributes.get_subject()),
-            6 => option_checker_time("time",self.attributes.get_time()),
+            3 => self.attributes.datacontenttype.as_ref().map(|v| ("datacontenttype", AttributeValue::String(v))), 
+            4 => self.attributes.dataschema.as_ref().map(|v| ("dataschema", AttributeValue::String(v))),
+            5 => self.attributes.subject.as_ref().map(|v| ("subject", AttributeValue::String(v))),
+            6 => self.attributes.time.as_ref().map(|v| ("time", AttributeValue::Time(v))),
             _ => return None,
         };
         self.index += 1;

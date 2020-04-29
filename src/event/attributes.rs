@@ -4,6 +4,7 @@ use url::Url;
 use serde::{Deserialize, Serialize};
 use std::fmt;
 
+#[derive(Debug, PartialEq)]
 pub enum AttributeValue<'a> {
     SpecVersion(SpecVersion),
     String(&'a str),

@@ -1,5 +1,6 @@
 use crate::event::ExtensionValue;
 use chrono::{DateTime, Utc};
+use url::Url;
 use std::convert::TryInto;
 
 pub enum MessageAttributeValue {
@@ -7,8 +8,8 @@ pub enum MessageAttributeValue {
     Integer(i64),
     String(String),
     Binary(Vec<u8>),
-    Uri(String),
-    UriRef(String),
+    Uri(Url),
+    UriRef(Url),
     DateTime(DateTime<Utc>),
 }
 
@@ -25,6 +26,18 @@ impl TryInto<DateTime<Utc>> for MessageAttributeValue {
     }
 }
 
+impl TryInto<Url> for MessageAttributeValue {
+    type Error = super::Error;
+
+    fn try_into(self) -> Result<Url, Self::Error> {
+        match self {
+            MessageAttributeValue::Uri(u) => Ok(u),
+            MessageAttributeValue::UriRef(u) => Ok(u),
+            v => Ok(Url::parse(v.to_string().as_ref())?),
+        }
+    }
+}
+
 impl ToString for MessageAttributeValue {
     fn to_string(&self) -> String {
         match self {
@@ -32,8 +45,8 @@ impl ToString for MessageAttributeValue {
             MessageAttributeValue::Integer(i) => i.to_string(),
             MessageAttributeValue::String(s) => s.clone(),
             MessageAttributeValue::Binary(v) => base64::encode(v),
-            MessageAttributeValue::Uri(s) => s.clone(),
-            MessageAttributeValue::UriRef(s) => s.clone(),
+            MessageAttributeValue::Uri(u) => u.to_string(),
+            MessageAttributeValue::UriRef(u) => u.to_string(),
             MessageAttributeValue::DateTime(d) => d.to_rfc3339(),
         }
     }

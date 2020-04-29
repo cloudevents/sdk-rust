@@ -177,7 +177,7 @@ impl AttributesConverter for Attributes {
 }
 
 #[test]
-fn iterator_test() {
+fn iterator_test_V10() {
     let a = Attributes {
         id: String::from("1"),
         ty: String::from("someType"),

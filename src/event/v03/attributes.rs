@@ -1,7 +1,7 @@
-use crate::event::attributes::{AttributesConverter, DataAttributesWriter};
+use crate::event::attributes::{AttributesConverter, AttributeValue, DataAttributesWriter};
 use crate::event::AttributesV10;
 use crate::event::{AttributesReader, AttributesWriter, SpecVersion};
-use chrono::{DateTime, Utc};
+use chrono::{DateTime, Utc, NaiveDateTime};
 use hostname::get_hostname;
 use uuid::Uuid;
 
@@ -14,6 +14,60 @@ pub struct Attributes {
     pub(crate) schemaurl: Option<String>,
     pub(crate) subject: Option<String>,
     pub(crate) time: Option<DateTime<Utc>>,
+}
+
+impl<'a> IntoIterator for &'a Attributes {
+    type Item = (&'a str, AttributeValue<'a>);
+    type IntoIter = AttributesIntoIterator<'a>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        AttributesIntoIterator {
+            attributes: self,
+            index: 0,
+        }
+    }
+}
+
+pub struct AttributesIntoIterator<'a> {
+    attributes: &'a Attributes,
+    index: usize,
+}
+
+impl<'a> Iterator for AttributesIntoIterator<'a> {
+    type Item = (&'a str, AttributeValue<'a>);
+    fn next(&mut self) -> Option<Self::Item> {
+        let result = match self.index {
+            0 => Some(("id", AttributeValue::String(&self.attributes.id))),
+            1 => Some(("ty", AttributeValue::String(&self.attributes.ty))),
+            2 => Some(("source", AttributeValue::String(&self.attributes.source))),
+            3 => self
+                .attributes
+                .datacontenttype
+                .as_ref()
+                .map(|v| ("datacontenttype", AttributeValue::String(v))),
+            4 => self
+                .attributes
+                .schemaurl
+                .as_ref()
+                .map(|v| ("dataschema", AttributeValue::String(v))),
+            5 => self
+                .attributes
+                .subject
+                .as_ref()
+                .map(|v| ("subject", AttributeValue::String(v))),
+            6 => self
+                .attributes
+                .time
+                .as_ref()
+                .map(|v| ("time", AttributeValue::Time(v))),
+            _ => return None,
+        };
+        self.index += 1;
+        if result.is_none() {
+            return self.next();
+        }
+        result
+    }
 }
 
 impl AttributesReader for Attributes {
@@ -122,3 +176,33 @@ impl AttributesConverter for Attributes {
         }
     }
 }
+
+#[test]
+fn iterator_test_V03() {
+    let a = Attributes {
+        id: String::from("1"),
+        ty: String::from("someType"),
+        source: String::from("Test"),
+        datacontenttype: None,
+        schemaurl: None,
+        subject: None,
+        time: Some(DateTime::<Utc>::from_utc(
+            NaiveDateTime::from_timestamp(61, 0),
+            Utc,
+        )),
+    };
+    let b = &mut a.into_iter();
+    let time = DateTime::<Utc>::from_utc(NaiveDateTime::from_timestamp(61, 0), Utc);
+
+    assert_eq!(("id", AttributeValue::String("1")), b.next().unwrap());
+    assert_eq!(
+        ("ty", AttributeValue::String("someType")),
+        b.next().unwrap()
+    );
+    assert_eq!(
+        ("source", AttributeValue::String("Test")),
+        b.next().unwrap()
+    );
+    assert_eq!(("time", AttributeValue::Time(&time)), b.next().unwrap());
+}
+

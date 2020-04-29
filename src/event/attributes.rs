@@ -8,7 +8,7 @@ pub enum AttributeValue<'a> {
     String(&'a str),
     URI(&'a str),
     URIRef(&'a str),
-    Time(&'a DateTime<Utc>)
+    Time(&'a DateTime<Utc>),
 }
 
 impl fmt::Display for AttributeValue<'_> {

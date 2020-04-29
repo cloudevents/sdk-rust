@@ -7,8 +7,8 @@ mod extensions;
 mod serde;
 mod spec_version;
 
+pub use attributes::AttributeValue;
 pub use attributes::Attributes;
-pub use attributes::AttributeValue as AttributeValue;
 pub use attributes::{AttributesReader, AttributesWriter};
 pub use builder::EventBuilder;
 pub use data::Data;

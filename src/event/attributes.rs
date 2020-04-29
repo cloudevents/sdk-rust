@@ -2,6 +2,7 @@ use super::{AttributesV03, AttributesV10, SpecVersion};
 use chrono::{DateTime, Utc};
 use std::fmt;
 
+#[derive(Debug, PartialEq)]
 pub enum AttributeValue<'a> {
     SpecVersion(SpecVersion),
     String(&'a str),

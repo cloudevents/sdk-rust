@@ -1,6 +1,6 @@
 use crate::event::attributes::{AttributesConverter, AttributeValue, DataAttributesWriter};
 use crate::event::{AttributesReader, AttributesV03, AttributesWriter, SpecVersion};
-use chrono::{DateTime, Utc};
+use chrono::{DateTime, Utc, NaiveDateTime};
 use hostname::get_hostname;
 use uuid::Uuid;
 
@@ -158,4 +158,24 @@ impl AttributesConverter for Attributes {
             time: self.time,
         }
     }
+}
+
+#[test]
+fn iterator_test(){
+    let a = Attributes{
+        id: String::from("1"),
+        ty: String::from("someType"),
+        source: String::from("Test"),
+        datacontenttype: None,
+        dataschema: None,
+        subject: None,
+        time: Some(DateTime::<Utc>::from_utc(NaiveDateTime::from_timestamp(61, 0), Utc)),
+    };
+    let b = &mut a.into_iter();
+    let time = DateTime::<Utc>::from_utc(NaiveDateTime::from_timestamp(61, 0), Utc);
+
+    assert_eq!(("id",AttributeValue::String("1")),b.next().unwrap());
+    assert_eq!(("ty",AttributeValue::String("someType")),b.next().unwrap());
+    assert_eq!(("source",AttributeValue::String("Test")),b.next().unwrap());
+    assert_eq!(("time",AttributeValue::Time(&time)),b.next().unwrap());
 }

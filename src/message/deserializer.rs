@@ -8,9 +8,12 @@ use std::io::Read;
 pub enum Error {
     #[snafu(display("Unrecognized attribute name: {}", name))]
     UnrecognizedAttributeName { name: String },
-    #[snafu(display("Error while decoding base64: {}", source))]
+    #[snafu(display("Error while parsing a time string: {}", source))]
     #[snafu(context(false))]
     ParseTimeError { source: chrono::ParseError },
+    #[snafu(display("Error while parsing a url: {}", source))]
+    #[snafu(context(false))]
+    ParseUrlError { source: url::ParseError },
     #[snafu(display("Error while decoding base64: {}", source))]
     #[snafu(context(false))]
     Base64DecodingError { source: base64::DecodeError },

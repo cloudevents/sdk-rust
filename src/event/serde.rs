@@ -20,11 +20,33 @@ macro_rules! parse_optional_field {
             })
             .transpose()
     };
+
+    ($map:ident, $name:literal, $value_variant:ident, $error:ty, $mapper:expr) => {
+        $map.remove($name)
+            .map(|val| match val {
+                Value::$value_variant(v) => $mapper(&v).map_err(|e| {
+                    <$error>::invalid_value(
+                        crate::event::serde::value_to_unexpected(&Value::$value_variant(v)),
+                        &e.to_string().as_str(),
+                    )
+                }),
+                other => Err(<$error>::invalid_type(
+                    crate::event::serde::value_to_unexpected(&other),
+                    &stringify!($value_variant),
+                )),
+            })
+            .transpose()
+    };
 }
 
 macro_rules! parse_field {
     ($map:ident, $name:literal, $value_variant:ident, $error:ty) => {
         parse_optional_field!($map, $name, $value_variant, $error)?
+            .ok_or_else(|| <$error>::missing_field($name))
+    };
+
+    ($map:ident, $name:literal, $value_variant:ident, $error:ty, $mapper:expr) => {
+        parse_optional_field!($map, $name, $value_variant, $error, $mapper)?
             .ok_or_else(|| <$error>::missing_field($name))
     };
 }

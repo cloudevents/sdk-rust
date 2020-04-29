@@ -10,7 +10,7 @@ pub fn ty() -> String {
 }
 
 pub fn source() -> String {
-    "http://localhost".to_string()
+    "http://localhost/".to_string()
 }
 
 pub fn json_datacontenttype() -> String {

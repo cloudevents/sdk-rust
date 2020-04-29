@@ -42,9 +42,9 @@ impl crate::event::deserializer::AttributesSerializer for super::Attributes {
         match name {
             "id" => self.id = value.to_string(),
             "type" => self.ty = value.to_string(),
-            "source" => self.source = value.to_string(),
+            "source" => self.source = value.try_into()?,
             "datacontenttype" => self.datacontenttype = Some(value.to_string()),
-            "dataschema" => self.dataschema = Some(value.to_string()),
+            "dataschema" => self.dataschema = Some(value.try_into()?),
             "subject" => self.subject = Some(value.to_string()),
             "time" => self.time = Some(value.try_into()?),
             _ => {

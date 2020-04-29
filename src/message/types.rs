@@ -1,7 +1,7 @@
 use crate::event::ExtensionValue;
 use chrono::{DateTime, Utc};
-use url::Url;
 use std::convert::TryInto;
+use url::Url;
 
 pub enum MessageAttributeValue {
     Boolean(bool),

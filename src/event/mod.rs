@@ -8,7 +8,6 @@ mod serde;
 mod deserializer;
 mod spec_version;
 
-pub use attributes::AttributeValue;
 pub use attributes::Attributes;
 pub use attributes::{AttributesReader, AttributesWriter};
 pub use builder::EventBuilder;

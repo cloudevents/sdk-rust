@@ -8,8 +8,6 @@ use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use serde_value::Value;
 use std::collections::{BTreeMap, HashMap};
 
-const SPEC_VERSIONS: [&'static str; 2] = ["0.3", "1.0"];
-
 macro_rules! parse_optional_field {
     ($map:ident, $name:literal, $value_variant:ident, $error:ty) => {
         $map.remove($name)
@@ -135,7 +133,10 @@ impl<'de> Deserialize<'de> for Event {
         match parse_field!(map, "specversion", String, <D as Deserializer<'de>>::Error)?.as_str() {
             "0.3" => EventDeserializerV03::deserialize_event(map),
             "1.0" => EventDeserializerV10::deserialize_event(map),
-            s => Err(D::Error::unknown_variant(s, &SPEC_VERSIONS)),
+            s => Err(D::Error::unknown_variant(
+                s,
+                &super::spec_version::SPEC_VERSIONS,
+            )),
         }
     }
 }

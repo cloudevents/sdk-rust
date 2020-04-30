@@ -195,7 +195,7 @@ fn iterator_test_V03() {
 
     assert_eq!(("id", AttributeValue::String("1")), b.next().unwrap());
     assert_eq!(
-        ("ty", AttributeValue::String("someType")),
+        ("type", AttributeValue::String("someType")),
         b.next().unwrap()
     );
     assert_eq!(

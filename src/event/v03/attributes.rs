@@ -39,7 +39,7 @@ impl<'a> Iterator for AttributesIntoIterator<'a> {
     fn next(&mut self) -> Option<Self::Item> {
         let result = match self.index {
             0 => Some(("id", AttributeValue::String(&self.attributes.id))),
-            1 => Some(("ty", AttributeValue::String(&self.attributes.ty))),
+            1 => Some(("type", AttributeValue::String(&self.attributes.ty))),
             2 => Some(("source", AttributeValue::URI(&self.attributes.source))),
             3 => self
                 .attributes
@@ -50,7 +50,7 @@ impl<'a> Iterator for AttributesIntoIterator<'a> {
                 .attributes
                 .schemaurl
                 .as_ref()
-                .map(|v| ("dataschema", AttributeValue::URI(v))),
+                .map(|v| ("schemaurl", AttributeValue::URIRef(v))),
             5 => self
                 .attributes
                 .subject
@@ -201,7 +201,7 @@ fn iterator_test_V03() {
     assert_eq!(
         (
             "source",
-            AttributeValue::URI(&Url::parse("https://example.net").unwrap())
+            AttributeValue::URIRef(&Url::parse("https://example.net").unwrap())
         ),
         b.next().unwrap()
     );

@@ -38,8 +38,8 @@ impl<'a> Iterator for AttributesIntoIterator<'a> {
     fn next(&mut self) -> Option<Self::Item> {
         let result = match self.index {
             0 => Some(("id", AttributeValue::String(&self.attributes.id))),
-            1 => Some(("ty", AttributeValue::String(&self.attributes.ty))),
-            2 => Some(("source", AttributeValue::URI(&self.attributes.source))),
+            1 => Some(("type", AttributeValue::String(&self.attributes.ty))),
+            2 => Some(("source", AttributeValue::URIRef(&self.attributes.source))),
             3 => self
                 .attributes
                 .datacontenttype
@@ -200,7 +200,7 @@ fn iterator_test_V10() {
     assert_eq!(
         (
             "source",
-            AttributeValue::URI(&Url::parse("https://example.net").unwrap())
+            AttributeValue::URIRef(&Url::parse("https://example.net").unwrap())
         ),
         b.next().unwrap()
     );

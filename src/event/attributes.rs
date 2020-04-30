@@ -1,6 +1,28 @@
 use super::{AttributesV03, AttributesV10, SpecVersion};
 use chrono::{DateTime, Utc};
+use std::fmt;
 use url::Url;
+
+#[derive(Debug, PartialEq)]
+pub enum AttributeValue<'a> {
+    SpecVersion(SpecVersion),
+    String(&'a str),
+    URI(&'a Url),
+    URIRef(&'a Url),
+    Time(&'a DateTime<Utc>),
+}
+
+impl fmt::Display for AttributeValue<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            AttributeValue::SpecVersion(s) => s.fmt(f),
+            AttributeValue::String(s) => f.write_str(s),
+            AttributeValue::URI(s) => f.write_str(&s.as_str()),
+            AttributeValue::URIRef(s) => f.write_str(&s.as_str()),
+            AttributeValue::Time(s) => f.write_str(&s.to_rfc3339()),
+        }
+    }
+}
 
 /// Trait to get [CloudEvents Context attributes](https://github.com/cloudevents/spec/blob/master/spec.md#context-attributes).
 pub trait AttributesReader {

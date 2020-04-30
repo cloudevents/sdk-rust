@@ -91,46 +91,6 @@ macro_rules! parse_data_base64 {
     };
 }
 
-macro_rules! parse_data_json {
-    ($in:ident, $error:ty) => {
-        Ok(serde_json::Value::deserialize($in.into_deserializer())
-            .map_err(|e| <$error>::custom(e))?)
-    };
-}
-
-macro_rules! parse_data_string {
-    ($in:ident, $error:ty) => {
-        match $in {
-            Value::String(s) => Ok(s),
-            other => Err(E::invalid_type(
-                crate::event::serde::value_to_unexpected(&other),
-                &"a string",
-            )),
-        }
-    };
-}
-
-macro_rules! parse_json_data_base64 {
-    ($in:ident, $error:ty) => {{
-        let data = parse_data_base64!($in, $error)?;
-        serde_json::from_slice(&data).map_err(|e| <$error>::custom(e))
-    }};
-}
-
-macro_rules! parse_data_base64 {
-    ($in:ident, $error:ty) => {
-        match $in {
-            Value::String(s) => base64::decode(&s).map_err(|e| {
-                <$error>::invalid_value(serde::de::Unexpected::Str(&s), &e.to_string().as_str())
-            }),
-            other => Err(E::invalid_type(
-                crate::event::serde::value_to_unexpected(&other),
-                &"a string",
-            )),
-        }
-    };
-}
-
 pub(crate) trait EventDeserializer {
     fn deserialize_attributes<E: serde::de::Error>(
         map: &mut BTreeMap<String, Value>,
@@ -174,15 +134,6 @@ pub(crate) trait EventSerializer<S: Serializer, A: Sized> {
     ) -> Result<<S as Serializer>::Ok, <S as Serializer>::Error>;
 }
 
-pub(crate) trait EventSerializer<S: Serializer, A: Sized> {
-    fn serialize(
-        attributes: &A,
-        data: &Option<Data>,
-        extensions: &HashMap<String, ExtensionValue>,
-        serializer: S,
-    ) -> Result<<S as Serializer>::Ok, <S as Serializer>::Error>;
-}
-
 impl<'de> Deserialize<'de> for Event {
     fn deserialize<D>(deserializer: D) -> Result<Self, <D as Deserializer<'de>>::Error>
     where
@@ -208,22 +159,6 @@ impl<'de> Deserialize<'de> for Event {
                 s,
                 &super::spec_version::SPEC_VERSIONS,
             )),
-        }
-    }
-}
-
-impl Serialize for Event {
-    fn serialize<S>(&self, serializer: S) -> Result<<S as Serializer>::Ok, <S as Serializer>::Error>
-    where
-        S: Serializer,
-    {
-        match &self.attributes {
-            Attributes::V03(a) => {
-                EventSerializerV03::serialize(a, &self.data, &self.extensions, serializer)
-            }
-            Attributes::V10(a) => {
-                EventSerializerV10::serialize(a, &self.data, &self.extensions, serializer)
-            }
         }
     }
 }

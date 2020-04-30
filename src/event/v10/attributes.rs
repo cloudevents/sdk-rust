@@ -28,60 +28,6 @@ impl<'a> IntoIterator for &'a Attributes {
     }
 }
 
-struct AttributesIntoIterator<'a> {
-    attributes: &'a Attributes,
-    index: usize,
-}
-
-fn option_checker_string<'a>(attribute_type: &str,input:Option<&String>) -> Option<&'a str,AttributeValue<'a>> {
-    let result = match input {
-        Some(x) => Some((attribute_type,AttributeValue::String(x))),
-        None => None,
-    };
-    result
-}
-
-fn option_checker_time<'a>(attribute_type: &str,input:Option<&DateTime<Utc>>) -> Option<&'a str,AttributeValue<'a>> {
-    let result = match input {
-        Some(x) => Some((attribute_type,AttributeValue::Time(x))),
-        None => None,
-    };
-    result
-}
-
-impl<'a> Iterator for AttributesIntoIterator<'a> {
-    type Item = (&'a str, AttributeValue<'a>);
-    fn next(&mut self) -> Option<Self::Item> {
-        let result = match self.index {
-            0 => Some(("id", AttributeValue::String(&self.attributes.id))),
-            1 => Some(("ty", AttributeValue::String(&self.attributes.ty))),        
-            2 => Some(("source", AttributeValue::String(&self.attributes.source))),
-            3 => option_checker_string("datacontenttype",self.attributes.get_datacontenttype()), 
-            4 => option_checker_string("dataschema",self.attributes.dataschema.get_dataschema()),
-            5 => option_checker_string("subject",self.attributes.subject.get_subject()),
-            6 => option_checker_time("time",self.attributes.time.get_time()),
-            _ => return None,
-        };
-        self.index += 1;
-        if result.is_none() {
-            return self.next()
-        }
-        result
-    }
-}
-
-impl<'a> IntoIterator for &'a Attributes {
-    type Item = (&'a str, AttributeValue<'a>);
-    type IntoIter = AttributesIntoIterator<'a>;
-
-    fn into_iter(self) -> Self::IntoIter {
-        AttributesIntoIterator {
-            attributes: self,
-            index: 0,
-        }
-    }
-}
-
 pub struct AttributesIntoIterator<'a> {
     attributes: &'a Attributes,
     index: usize,
@@ -93,7 +39,7 @@ impl<'a> Iterator for AttributesIntoIterator<'a> {
         let result = match self.index {
             0 => Some(("id", AttributeValue::String(&self.attributes.id))),
             1 => Some(("ty", AttributeValue::String(&self.attributes.ty))),
-            2 => Some(("source", AttributeValue::String(&self.attributes.source))),
+            2 => Some(("source", AttributeValue::URL(&self.attributes.source))),
             3 => self
                 .attributes
                 .datacontenttype
@@ -103,7 +49,7 @@ impl<'a> Iterator for AttributesIntoIterator<'a> {
                 .attributes
                 .dataschema
                 .as_ref()
-                .map(|v| ("dataschema", AttributeValue::String(v))),
+                .map(|v| ("dataschema", AttributeValue::URL(v))),
             5 => self
                 .attributes
                 .subject
@@ -234,7 +180,7 @@ fn iterator_test_V10() {
     let a = Attributes {
         id: String::from("1"),
         ty: String::from("someType"),
-        source: String::from("Test"),
+        source: Url::parse("https://example.net").unwrap(),
         datacontenttype: None,
         dataschema: None,
         subject: None,
@@ -252,7 +198,7 @@ fn iterator_test_V10() {
         b.next().unwrap()
     );
     assert_eq!(
-        ("source", AttributeValue::String("Test")),
+        ("source", AttributeValue::URL(&Url::parse("https://example.net").unwrap())),
         b.next().unwrap()
     );
     assert_eq!(("time", AttributeValue::Time(&time)), b.next().unwrap());

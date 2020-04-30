@@ -11,6 +11,7 @@ pub enum AttributeValue<'a> {
     URI(&'a str),
     URIRef(&'a str),
     Time(&'a DateTime<Utc>),
+    URL(&'a Url),
 }
 
 impl fmt::Display for AttributeValue<'_> {
@@ -21,6 +22,7 @@ impl fmt::Display for AttributeValue<'_> {
             AttributeValue::URI(s) => f.write_str(s),
             AttributeValue::URIRef(s) => f.write_str(s),
             AttributeValue::Time(s) => f.write_str(&s.to_rfc3339()),
+            AttributeValue::URL(s) => f.write_str(&s.as_str()),
         }
     }
 }

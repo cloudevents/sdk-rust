@@ -40,7 +40,7 @@ impl<'a> Iterator for AttributesIntoIterator<'a> {
         let result = match self.index {
             0 => Some(("id", AttributeValue::String(&self.attributes.id))),
             1 => Some(("ty", AttributeValue::String(&self.attributes.ty))),
-            2 => Some(("source", AttributeValue::String(&self.attributes.source))),
+            2 => Some(("source", AttributeValue::URL(&self.attributes.source))),
             3 => self
                 .attributes
                 .datacontenttype
@@ -50,7 +50,7 @@ impl<'a> Iterator for AttributesIntoIterator<'a> {
                 .attributes
                 .schemaurl
                 .as_ref()
-                .map(|v| ("dataschema", AttributeValue::String(v))),
+                .map(|v| ("dataschema", AttributeValue::URL(v))),
             5 => self
                 .attributes
                 .subject
@@ -181,7 +181,7 @@ fn iterator_test_V03() {
     let a = Attributes {
         id: String::from("1"),
         ty: String::from("someType"),
-        source: String::from("Test"),
+        source: Url::parse("https://example.net").unwrap(),
         datacontenttype: None,
         schemaurl: None,
         subject: None,
@@ -199,7 +199,7 @@ fn iterator_test_V03() {
         b.next().unwrap()
     );
     assert_eq!(
-        ("source", AttributeValue::String("Test")),
+        ("source", AttributeValue::URL(&Url::parse("https://example.net").unwrap())),
         b.next().unwrap()
     );
     assert_eq!(("time", AttributeValue::Time(&time)), b.next().unwrap());

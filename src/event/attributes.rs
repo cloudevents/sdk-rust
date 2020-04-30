@@ -1,8 +1,8 @@
 use super::{AttributesV03, AttributesV10, SpecVersion};
 use chrono::{DateTime, Utc};
-use url::Url;
 use serde::{Deserialize, Serialize};
 use std::fmt;
+use url::Url;
 
 #[derive(Debug, PartialEq)]
 pub enum AttributeValue<'a> {

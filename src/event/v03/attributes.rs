@@ -1,7 +1,7 @@
-use crate::event::attributes::{AttributesConverter, AttributeValue, DataAttributesWriter};
+use crate::event::attributes::{AttributeValue, AttributesConverter, DataAttributesWriter};
 use crate::event::AttributesV10;
 use crate::event::{AttributesReader, AttributesWriter, SpecVersion};
-use chrono::{DateTime, Utc, NaiveDateTime};
+use chrono::{DateTime, NaiveDateTime, Utc};
 use hostname::get_hostname;
 use url::Url;
 use uuid::Uuid;
@@ -199,9 +199,11 @@ fn iterator_test_V03() {
         b.next().unwrap()
     );
     assert_eq!(
-        ("source", AttributeValue::URI(&Url::parse("https://example.net").unwrap())),
+        (
+            "source",
+            AttributeValue::URI(&Url::parse("https://example.net").unwrap())
+        ),
         b.next().unwrap()
     );
     assert_eq!(("time", AttributeValue::Time(&time)), b.next().unwrap());
 }
-

@@ -1,9 +1,10 @@
 mod attributes;
 mod builder;
 mod message;
-mod serde;
+mod format;
 
-pub(crate) use crate::event::v10::serde::EventDeserializer;
-pub(crate) use crate::event::v10::serde::EventSerializer;
+pub(crate) use crate::event::v10::format::EventFormatDeserializer;
+pub(crate) use crate::event::v10::format::EventFormatSerializer;
+pub(crate) use attributes::ATTRIBUTE_NAMES;
 pub use attributes::Attributes;
 pub use builder::EventBuilder;

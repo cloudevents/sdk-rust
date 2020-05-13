@@ -1,10 +1,10 @@
 use crate::message::{
-    BinaryVisitor, DeserializationResult, Error, MessageAttributeValue, SerializationResult,
+    BinarySerializer, DeserializationResult, Error, MessageAttributeValue, SerializationResult,
 };
 use std::convert::TryInto;
 
 impl crate::event::deserializer::AttributesDeserializer for super::Attributes {
-    fn deserialize_attributes<V: BinaryVisitor>(self, visitor: &mut V) -> DeserializationResult {
+    fn deserialize_attributes<V: BinarySerializer>(self, visitor: &mut V) -> DeserializationResult {
         visitor.set_attribute("id", MessageAttributeValue::String(self.id))?;
         visitor.set_attribute("type", MessageAttributeValue::String(self.ty))?;
         visitor.set_attribute("source", MessageAttributeValue::UriRef(self.source))?;

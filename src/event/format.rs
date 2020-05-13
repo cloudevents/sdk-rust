@@ -1,6 +1,6 @@
 use super::{
-    Attributes, Data, Event, EventDeserializerV03, EventDeserializerV10, EventSerializerV03,
-    EventSerializerV10,
+    Attributes, Data, Event, EventFormatDeserializerV03, EventFormatDeserializerV10, EventFormatSerializerV03,
+    EventFormatSerializerV10,
 };
 use crate::event::{AttributesReader, ExtensionValue};
 use serde::de::{Error, IntoDeserializer, Unexpected};
@@ -14,7 +14,7 @@ macro_rules! parse_optional_field {
             .map(|val| match val {
                 Value::$value_variant(v) => Ok(v),
                 other => Err(<$error>::invalid_type(
-                    crate::event::serde::value_to_unexpected(&other),
+                    crate::event::format::value_to_unexpected(&other),
                     &stringify!($value_variant),
                 )),
             })
@@ -26,12 +26,12 @@ macro_rules! parse_optional_field {
             .map(|val| match val {
                 Value::$value_variant(v) => $mapper(&v).map_err(|e| {
                     <$error>::invalid_value(
-                        crate::event::serde::value_to_unexpected(&Value::$value_variant(v)),
+                        crate::event::format::value_to_unexpected(&Value::$value_variant(v)),
                         &e.to_string().as_str(),
                     )
                 }),
                 other => Err(<$error>::invalid_type(
-                    crate::event::serde::value_to_unexpected(&other),
+                    crate::event::format::value_to_unexpected(&other),
                     &stringify!($value_variant),
                 )),
             })
@@ -63,7 +63,7 @@ macro_rules! parse_data_string {
         match $in {
             Value::String(s) => Ok(s),
             other => Err(E::invalid_type(
-                crate::event::serde::value_to_unexpected(&other),
+                crate::event::format::value_to_unexpected(&other),
                 &"a string",
             )),
         }
@@ -84,14 +84,14 @@ macro_rules! parse_data_base64 {
                 <$error>::invalid_value(serde::de::Unexpected::Str(&s), &e.to_string().as_str())
             }),
             other => Err(E::invalid_type(
-                crate::event::serde::value_to_unexpected(&other),
+                crate::event::format::value_to_unexpected(&other),
                 &"a string",
             )),
         }
     };
 }
 
-pub(crate) trait EventDeserializer {
+pub(crate) trait EventFormatDeserializer {
     fn deserialize_attributes<E: serde::de::Error>(
         map: &mut BTreeMap<String, Value>,
     ) -> Result<Attributes, E>;
@@ -125,7 +125,7 @@ pub(crate) trait EventDeserializer {
     }
 }
 
-pub(crate) trait EventSerializer<S: Serializer, A: Sized> {
+pub(crate) trait EventFormatSerializer<S: Serializer, A: Sized> {
     fn serialize(
         attributes: &A,
         data: &Option<Data>,
@@ -153,8 +153,8 @@ impl<'de> Deserialize<'de> for Event {
             .collect::<Result<BTreeMap<String, Value>, <D as Deserializer<'de>>::Error>>()?;
 
         match parse_field!(map, "specversion", String, <D as Deserializer<'de>>::Error)?.as_str() {
-            "0.3" => EventDeserializerV03::deserialize_event(map),
-            "1.0" => EventDeserializerV10::deserialize_event(map),
+            "0.3" => EventFormatDeserializerV03::deserialize_event(map),
+            "1.0" => EventFormatDeserializerV10::deserialize_event(map),
             s => Err(D::Error::unknown_variant(
                 s,
                 &super::spec_version::SPEC_VERSIONS,
@@ -170,10 +170,10 @@ impl Serialize for Event {
     {
         match &self.attributes {
             Attributes::V03(a) => {
-                EventSerializerV03::serialize(a, &self.data, &self.extensions, serializer)
+                EventFormatSerializerV03::serialize(a, &self.data, &self.extensions, serializer)
             }
             Attributes::V10(a) => {
-                EventSerializerV10::serialize(a, &self.data, &self.extensions, serializer)
+                EventFormatSerializerV10::serialize(a, &self.data, &self.extensions, serializer)
             }
         }
     }

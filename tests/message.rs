@@ -1,6 +1,6 @@
 mod test_data;
 use cloudevents::message::{
-    BinaryDeserializer, BinaryVisitor, DeserializationResult, Error, MessageAttributeValue,
+    BinaryDeserializer, BinarySerializer, DeserializationResult, Error, MessageAttributeValue,
     MessageDeserializer, SerializationResult, StructuredDeserializer,
 };
 use cloudevents::Event;

@@ -6,6 +6,11 @@ use std::io::Read;
 
 #[derive(Debug, Snafu)]
 pub enum Error {
+    #[snafu(display("Wrong encoding"))]
+    WrongEncoding { },
+    #[snafu(display("{}", source))]
+    #[snafu(context(false))]
+    InvalidSpecVersion { source: crate::event::spec_version::InvalidSpecVersion },
     #[snafu(display("Unrecognized attribute name: {}", name))]
     UnrecognizedAttributeName { name: String },
     #[snafu(display("Error while parsing a time string: {}", source))]
@@ -23,6 +28,8 @@ pub enum Error {
     #[snafu(display("IO Error: {}", source))]
     #[snafu(context(false))]
     IOError { source: std::io::Error },
+    #[snafu(display("Other error: {}", source))]
+    Other { source: Box<dyn std::error::Error> },
 }
 
 pub type SerializationResult = Result<(), Error>;
@@ -32,8 +39,7 @@ pub trait StructuredDeserializer
 where
     Self: Sized,
 {
-    fn deserialize_structured<V: StructuredVisitor>(self, visitor: &mut V)
-        -> DeserializationResult;
+    fn deserialize_structured<V: StructuredSerializer>(self, serializer: &mut V) -> DeserializationResult;
 
     fn into_event(self) -> Result<Event, Error> {
         let mut ev = Event::default();
@@ -42,7 +48,7 @@ where
     }
 }
 
-pub trait StructuredVisitor {
+pub trait StructuredSerializer {
     fn set_structured_event<R: Read>(&mut self, reader: R) -> SerializationResult;
 }
 
@@ -50,7 +56,7 @@ pub trait BinaryDeserializer
 where
     Self: Sized,
 {
-    fn deserialize_binary<V: BinaryVisitor>(self, visitor: &mut V) -> DeserializationResult;
+    fn deserialize_binary<V: BinarySerializer>(self, serializer: &mut V) -> DeserializationResult;
 
     fn into_event(self) -> Result<Event, Error> {
         let mut ev = Event::default();
@@ -59,7 +65,7 @@ where
     }
 }
 
-pub trait BinaryVisitor {
+pub trait BinarySerializer {
     fn set_spec_version(&mut self, spec_version: SpecVersion) -> SerializationResult;
 
     fn set_attribute(&mut self, name: &str, value: MessageAttributeValue) -> SerializationResult;
@@ -81,35 +87,35 @@ where
         Ok(ev)
     }
 
-    fn deserialize_to_binary<T: BinaryVisitor>(self, visitor: &mut T) -> DeserializationResult {
+    fn deserialize_to_binary<T: BinarySerializer>(self, serializer: &mut T) -> DeserializationResult {
         if self.encoding() == Encoding::BINARY {
-            return self.deserialize_binary(visitor);
+            return self.deserialize_binary(serializer);
         }
 
         let ev = MessageDeserializer::into_event(self)?;
-        return ev.deserialize_binary(visitor);
+        return ev.deserialize_binary(serializer);
     }
 
-    fn deserialize_to_structured<T: StructuredVisitor>(
+    fn deserialize_to_structured<T: StructuredSerializer>(
         self,
-        visitor: &mut T,
+        serializer: &mut T,
     ) -> DeserializationResult {
         if self.encoding() == Encoding::STRUCTURED {
-            return self.deserialize_structured(visitor);
+            return self.deserialize_structured(serializer);
         }
 
         let ev = MessageDeserializer::into_event(self)?;
-        return ev.deserialize_structured(visitor);
+        return ev.deserialize_structured(serializer);
     }
 
-    fn deserialize_to<T: BinaryVisitor + StructuredVisitor>(
+    fn deserialize_to<T: BinarySerializer + StructuredSerializer>(
         self,
-        visitor: &mut T,
+        serializer: &mut T,
     ) -> DeserializationResult {
         if self.encoding() == Encoding::STRUCTURED {
-            self.deserialize_structured(visitor)
+            self.deserialize_structured(serializer)
         } else {
-            self.deserialize_binary(visitor)
+            self.deserialize_binary(serializer)
         }
     }
 }

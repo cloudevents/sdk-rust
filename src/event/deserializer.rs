@@ -3,14 +3,14 @@ use super::Event;
 use super::{Attributes, AttributesReader};
 use crate::event::SpecVersion;
 use crate::message::{
-    BinaryDeserializer, BinaryVisitor, DeserializationResult, MessageAttributeValue,
-    SerializationResult, StructuredDeserializer, StructuredVisitor,
+    BinaryDeserializer, BinarySerializer, DeserializationResult, MessageAttributeValue,
+    SerializationResult, StructuredDeserializer, StructuredSerializer,
 };
 use std::borrow::Borrow;
 use std::io::Read;
 
 impl StructuredDeserializer for Event {
-    fn deserialize_structured<V: StructuredVisitor>(
+    fn deserialize_structured<V: StructuredSerializer>(
         self,
         visitor: &mut V,
     ) -> DeserializationResult {
@@ -20,7 +20,7 @@ impl StructuredDeserializer for Event {
 }
 
 impl BinaryDeserializer for Event {
-    fn deserialize_binary<V: BinaryVisitor>(self, visitor: &mut V) -> DeserializationResult {
+    fn deserialize_binary<V: BinarySerializer>(self, visitor: &mut V) -> DeserializationResult {
         visitor.set_spec_version(self.get_specversion())?;
         self.attributes.deserialize_attributes(visitor)?;
         for (k, v) in self.extensions.into_iter() {
@@ -39,7 +39,7 @@ impl BinaryDeserializer for Event {
 }
 
 pub(crate) trait AttributesDeserializer {
-    fn deserialize_attributes<V: BinaryVisitor>(self, visitor: &mut V) -> DeserializationResult;
+    fn deserialize_attributes<V: BinarySerializer>(self, visitor: &mut V) -> DeserializationResult;
 }
 
 pub(crate) trait AttributesSerializer {
@@ -51,7 +51,7 @@ pub(crate) trait AttributesSerializer {
 }
 
 impl AttributesDeserializer for Attributes {
-    fn deserialize_attributes<V: BinaryVisitor>(self, visitor: &mut V) -> DeserializationResult {
+    fn deserialize_attributes<V: BinarySerializer>(self, visitor: &mut V) -> DeserializationResult {
         match self {
             Attributes::V03(v03) => v03.deserialize_attributes(visitor),
             Attributes::V10(v10) => v10.deserialize_attributes(visitor),
@@ -72,7 +72,7 @@ impl AttributesSerializer for Attributes {
     }
 }
 
-impl StructuredVisitor for Event {
+impl StructuredSerializer for Event {
     fn set_structured_event<R: Read>(&mut self, reader: R) -> SerializationResult {
         let new_event: Event = serde_json::from_reader(reader)?;
         self.attributes = new_event.attributes;
@@ -82,7 +82,7 @@ impl StructuredVisitor for Event {
     }
 }
 
-impl BinaryVisitor for Event {
+impl BinarySerializer for Event {
     fn set_spec_version(&mut self, spec_version: SpecVersion) -> SerializationResult {
         match spec_version {
             SpecVersion::V03 => self.attributes = self.attributes.clone().into_v03(),

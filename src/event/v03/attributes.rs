@@ -6,6 +6,8 @@ use hostname::get_hostname;
 use url::Url;
 use uuid::Uuid;
 
+pub(crate) const ATTRIBUTE_NAMES: [&'static str; 8] = ["specversion", "id", "type", "source", "datacontenttype", "schemaurl", "subject", "time"];
+
 #[derive(PartialEq, Debug, Clone)]
 pub struct Attributes {
     pub(crate) id: String,

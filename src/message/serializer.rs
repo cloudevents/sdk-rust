@@ -1,0 +1,19 @@
+use std::io::Read;
+use super::{SerializationResult, MessageAttributeValue, Error};
+use crate::event::SpecVersion;
+
+pub trait StructuredSerializer<RETURN: Sized> {
+    fn set_structured_event<R: Read>(self, reader: R) -> Result<RETURN, Error>;
+}
+
+pub trait BinarySerializer<RETURN: Sized> {
+    fn set_spec_version(&mut self, spec_version: SpecVersion) -> SerializationResult;
+
+    fn set_attribute(&mut self, name: &str, value: MessageAttributeValue) -> SerializationResult;
+
+    fn set_extension(&mut self, name: &str, value: MessageAttributeValue) -> SerializationResult;
+
+    fn set_body<R: Read>(&mut self, reader: R) -> SerializationResult;
+
+    fn end(self) -> Result<RETURN, Error>;
+}

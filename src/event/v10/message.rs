@@ -3,8 +3,8 @@ use crate::message::{
 };
 use std::convert::TryInto;
 
-impl crate::event::deserializer::AttributesDeserializer for super::Attributes {
-    fn deserialize_attributes<V: BinarySerializer>(self, visitor: &mut V) -> DeserializationResult {
+impl crate::event::message::AttributesDeserializer for super::Attributes {
+    fn deserialize_attributes<R: Sized, V: BinarySerializer<R>>(self, visitor: &mut V) -> DeserializationResult {
         visitor.set_attribute("id", MessageAttributeValue::String(self.id))?;
         visitor.set_attribute("type", MessageAttributeValue::String(self.ty))?;
         visitor.set_attribute("source", MessageAttributeValue::UriRef(self.source))?;
@@ -33,7 +33,7 @@ impl crate::event::deserializer::AttributesDeserializer for super::Attributes {
     }
 }
 
-impl crate::event::deserializer::AttributesSerializer for super::Attributes {
+impl crate::event::message::AttributesSerializer for super::Attributes {
     fn serialize_attribute(
         &mut self,
         name: &str,

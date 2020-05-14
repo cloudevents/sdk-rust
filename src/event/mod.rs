@@ -5,7 +5,7 @@ mod event;
 mod extensions;
 #[macro_use]
 mod format;
-mod deserializer;
+mod message;
 pub mod spec_version;
 
 pub use attributes::Attributes;

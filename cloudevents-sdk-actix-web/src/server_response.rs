@@ -57,7 +57,7 @@ impl <'a> BinarySerializer for HttpResponseSerializer<'a> {
 }
 
 impl <'a> StructuredSerializer for HttpResponseSerializer<'a> {
-    fn set_structured_event<R: Read>(&mut self, reader: R) -> SerializationResult {
+    fn set_structured_event<R: Read>(mut self, reader: R) -> SerializationResult {
         unimplemented!()
     }
 }

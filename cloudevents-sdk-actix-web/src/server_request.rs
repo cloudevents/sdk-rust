@@ -1,6 +1,6 @@
 use actix_web::http::HeaderName;
-use actix_web::{HttpMessage, HttpRequest, web, HttpResponse};
-use cloudevents::message::{BinaryDeserializer, BinarySerializer, DeserializationResult, Encoding, MessageDeserializer, StructuredDeserializer, StructuredSerializer, MessageAttributeValue};
+use actix_web::{HttpMessage, HttpRequest, web};
+use cloudevents::message::{BinaryDeserializer, BinarySerializer, Encoding, MessageDeserializer, StructuredDeserializer, StructuredSerializer, MessageAttributeValue, Error};
 use cloudevents::{Event, message};
 use actix_web::web::{BytesMut, Bytes};
 use futures::StreamExt;
@@ -24,9 +24,9 @@ impl HttpRequestMessage<'_> {
 }
 
 impl<'a> BinaryDeserializer for HttpRequestMessage<'a> {
-    fn deserialize_binary<V: BinarySerializer>(self, visitor: &mut V) -> DeserializationResult {
+    fn deserialize_binary<R: Sized, V: BinarySerializer<R>>(self, mut visitor: V) -> Result<R, Error> {
         if self.encoding() != Encoding::BINARY {
-            return DeserializationResult::Err(message::Error::WrongEncoding {})
+            return Err(message::Error::WrongEncoding {})
         }
 
         let spec_version = SpecVersion::try_from(
@@ -55,20 +55,20 @@ impl<'a> BinaryDeserializer for HttpRequestMessage<'a> {
         }
 
         if self.body_reader.len() != 0 {
-            visitor.set_body(self.body_reader.reader())?;
+            visitor.end_with_data(self.body_reader.reader())
+        } else {
+            visitor.end()
         }
-
-        DeserializationResult::Ok(())
     }
 }
 
 impl<'a> StructuredDeserializer for HttpRequestMessage<'a> {
-    fn deserialize_structured<V: StructuredSerializer>(
+    fn deserialize_structured<R: Sized, V: StructuredSerializer<R>>(
         self,
-        visitor: &mut V,
-    ) -> DeserializationResult {
+        visitor: V,
+    ) -> Result<R, Error> {
         if self.encoding() != Encoding::STRUCTURED {
-            return DeserializationResult::Err(message::Error::WrongEncoding {})
+            return Err(message::Error::WrongEncoding {})
         }
         visitor.set_structured_event(self.body_reader.reader())
     }

@@ -13,7 +13,7 @@ pub trait BinarySerializer<RETURN: Sized> {
 
     fn set_extension(&mut self, name: &str, value: MessageAttributeValue) -> SerializationResult;
 
-    fn set_body<R: Read>(&mut self, reader: R) -> SerializationResult;
+    fn end_with_data<R: Read>(self, reader: R) -> Result<RETURN, Error>;
 
     fn end(self) -> Result<RETURN, Error>;
 }

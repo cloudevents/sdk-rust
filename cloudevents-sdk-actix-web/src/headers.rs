@@ -57,4 +57,6 @@ lazy_static! {
         attributes_to_headers(&cloudevents::event::spec_version::ATTRIBUTE_NAMES);
     pub(crate) static ref SPEC_VERSION_HEADER: HeaderName =
         HeaderName::from_static("ce-specversion");
+    pub(crate) static ref CLOUDEVENTS_JSON_HEADER: HeaderValue =
+        HeaderValue::from_static("application/cloudevents+json");
 }

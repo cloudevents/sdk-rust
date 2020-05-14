@@ -24,15 +24,14 @@ impl BinaryDeserializer for Event {
             visitor.set_extension(&k, v.into())?;
         }
         match self.data.as_ref() {
-            Some(Data::String(s)) => visitor.set_body(s.as_bytes()),
-            Some(Data::Binary(v)) => visitor.set_body::<&[u8]>(v),
+            Some(Data::String(s)) => visitor.end_with_data(s.as_bytes()),
+            Some(Data::Binary(v)) => visitor.end_with_data::<&[u8]>(v),
             Some(Data::Json(j)) => {
                 let vec: Vec<u8> = serde_json::to_vec(j)?;
-                visitor.set_body::<&[u8]>(vec.borrow())
+                visitor.end_with_data::<&[u8]>(vec.borrow())
             }
-            None => Ok(()),
-        }?;
-        visitor.end()
+            None => visitor.end(),
+        }
     }
 }
 
@@ -98,11 +97,11 @@ impl BinarySerializer<Event> for Event {
         Ok(())
     }
 
-    fn set_body<R: Read>(&mut self, mut reader: R) -> SerializationResult {
+    fn end_with_data<R: Read>(mut self, mut reader: R) -> Result<Event, Error> {
         let mut v = Vec::new();
         let _ = reader.read_to_end(&mut v)?;
         self.data = Some(Data::from_binary(self.get_datacontenttype(), v)?);
-        Ok(())
+        Ok(self)
     }
 
     fn end(self) -> Result<Event, Error> {

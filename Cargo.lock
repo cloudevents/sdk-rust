@@ -471,7 +471,9 @@ dependencies = [
  "cloudevents-sdk",
  "futures",
  "lazy_static",
+ "serde_json",
  "snafu",
+ "url",
 ]
 
 [[package]]

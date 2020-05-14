@@ -13,6 +13,12 @@ pub enum ExtensionValue {
     Integer(i64),
 }
 
+impl From<&str> for ExtensionValue {
+    fn from(s: &str) -> Self {
+        ExtensionValue::String(String::from(s))
+    }
+}
+
 impl From<String> for ExtensionValue {
     fn from(s: String) -> Self {
         ExtensionValue::String(s)

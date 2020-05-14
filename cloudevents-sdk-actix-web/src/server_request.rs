@@ -54,6 +54,12 @@ impl<'a> BinaryDeserializer for HttpRequestMessage<'a> {
             }
         }
 
+        if let Some(hv) = self.req.headers().get("content-type") {
+            visitor.set_attribute("datacontenttype", MessageAttributeValue::String(String::from(
+                header_value_to_str!(hv)?
+            )))?
+        }
+
         if self.body_reader.len() != 0 {
             visitor.end_with_data(self.body_reader.reader())
         } else {
@@ -102,4 +108,63 @@ pub async fn request_to_event(req: &HttpRequest, mut payload: web::Payload) -> R
     }
     MessageDeserializer::into_event(HttpRequestMessage::new(req, bytes.freeze()))
         .map_err(actix_web::error::ErrorBadRequest)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use actix_web::test;
+    use url::Url;
+
+    use serde_json::json;
+    use cloudevents::EventBuilder;
+    use std::str::FromStr;
+
+    #[actix_rt::test]
+    async fn test_request() {
+        let expected = EventBuilder::new()
+            .id("0001")
+            .ty("example.test")
+            .source(Url::from_str("http://localhost").unwrap())
+            .extension("someint", "10")
+            .build();
+
+        let (req, payload) = test::TestRequest::post()
+            .header("ce-specversion", "1.0")
+            .header("ce-id", "0001")
+            .header("ce-type", "example.test")
+            .header("ce-source", "http://localhost")
+            .header("ce-someint", "10")
+            .to_http_parts();
+
+        let resp = request_to_event(&req, web::Payload(payload)).await.unwrap();
+        assert_eq!(expected, resp);
+    }
+
+    #[actix_rt::test]
+    async fn test_request_with_full_data() {
+        let j = json!({"hello": "world"});
+
+        let expected = EventBuilder::new()
+            .id("0001")
+            .ty("example.test")
+            .source(Url::from_str("http://localhost").unwrap())
+            .data("application/json", j.clone())
+            .extension("someint", "10")
+            .build();
+
+        let (req, payload) = test::TestRequest::post()
+            .header("ce-specversion", "1.0")
+            .header("ce-id", "0001")
+            .header("ce-type", "example.test")
+            .header("ce-source", "http://localhost")
+            .header("ce-someint", "10")
+            .header("content-type", "application/json")
+            .set_json(&j)
+            .to_http_parts();
+
+        let resp = request_to_event(&req, web::Payload(payload)).await.unwrap();
+        assert_eq!(expected, resp);
+    }
+
 }

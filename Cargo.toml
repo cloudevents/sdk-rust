@@ -36,3 +36,6 @@ members = [
   "cloudevents-sdk-actix-web",
   "cloudevents-sdk-reqwest"
 ]
+exclude = [
+  "example-projects/actix-web-example"
+]

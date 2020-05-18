@@ -20,6 +20,7 @@ Work in progress SDK for [CloudEvents](https://github.com/cloudevents/spec)
 
 * `cloudevents-sdk`: Provides Event data structure, JSON Event format implementation
 * `cloudevents-sdk-actix-web`: Integration with [Actix Web](https://github.com/actix/actix-web)
+* `cloudevents-sdk-reqwest`: Integration with [reqwest](https://github.com/seanmonstar/reqwest)
 
 ## Development & Contributing
 

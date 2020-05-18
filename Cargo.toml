@@ -33,5 +33,6 @@ name = "cloudevents"
 [workspace]
 members = [
   ".",
-  "cloudevents-sdk-actix-web"
+  "cloudevents-sdk-actix-web",
+  "cloudevents-sdk-reqwest"
 ]

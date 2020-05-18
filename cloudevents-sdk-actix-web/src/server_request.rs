@@ -4,8 +4,8 @@ use actix_web::web::{Bytes, BytesMut};
 use actix_web::{web, HttpMessage, HttpRequest};
 use cloudevents::event::SpecVersion;
 use cloudevents::message::{
-    BinaryDeserializer, BinarySerializer, Encoding, Error, MessageAttributeValue,
-    MessageDeserializer, StructuredDeserializer, StructuredSerializer,
+    BinaryDeserializer, BinarySerializer, Encoding, MessageAttributeValue, MessageDeserializer,
+    Result, StructuredDeserializer, StructuredSerializer,
 };
 use cloudevents::{message, Event};
 use futures::StreamExt;
@@ -24,10 +24,7 @@ impl HttpRequestDeserializer<'_> {
 }
 
 impl<'a> BinaryDeserializer for HttpRequestDeserializer<'a> {
-    fn deserialize_binary<R: Sized, V: BinarySerializer<R>>(
-        self,
-        mut visitor: V,
-    ) -> Result<R, Error> {
+    fn deserialize_binary<R: Sized, V: BinarySerializer<R>>(self, mut visitor: V) -> Result<R> {
         if self.encoding() != Encoding::BINARY {
             return Err(message::Error::WrongEncoding {});
         }
@@ -36,7 +33,7 @@ impl<'a> BinaryDeserializer for HttpRequestDeserializer<'a> {
             unwrap_optional_header!(self.req.headers(), headers::SPEC_VERSION_HEADER).unwrap()?,
         )?;
 
-        visitor.set_spec_version(spec_version.clone())?;
+        visitor = visitor.set_spec_version(spec_version.clone())?;
 
         let attributes = cloudevents::event::spec_version::ATTRIBUTE_NAMES
             .get(&spec_version)
@@ -50,12 +47,12 @@ impl<'a> BinaryDeserializer for HttpRequestDeserializer<'a> {
             let name = &hn.as_str()["ce-".len()..];
 
             if attributes.contains(&name) {
-                visitor.set_attribute(
+                visitor = visitor.set_attribute(
                     name,
                     MessageAttributeValue::String(String::from(header_value_to_str!(hv)?)),
                 )?
             } else {
-                visitor.set_extension(
+                visitor = visitor.set_extension(
                     name,
                     MessageAttributeValue::String(String::from(header_value_to_str!(hv)?)),
                 )?
@@ -63,7 +60,7 @@ impl<'a> BinaryDeserializer for HttpRequestDeserializer<'a> {
         }
 
         if let Some(hv) = self.req.headers().get("content-type") {
-            visitor.set_attribute(
+            visitor = visitor.set_attribute(
                 "datacontenttype",
                 MessageAttributeValue::String(String::from(header_value_to_str!(hv)?)),
             )?
@@ -78,10 +75,7 @@ impl<'a> BinaryDeserializer for HttpRequestDeserializer<'a> {
 }
 
 impl<'a> StructuredDeserializer for HttpRequestDeserializer<'a> {
-    fn deserialize_structured<R: Sized, V: StructuredSerializer<R>>(
-        self,
-        visitor: V,
-    ) -> Result<R, Error> {
+    fn deserialize_structured<R: Sized, V: StructuredSerializer<R>>(self, visitor: V) -> Result<R> {
         if self.encoding() != Encoding::STRUCTURED {
             return Err(message::Error::WrongEncoding {});
         }
@@ -110,7 +104,7 @@ impl<'a> MessageDeserializer for HttpRequestDeserializer<'a> {
 pub async fn request_to_event(
     req: &HttpRequest,
     mut payload: web::Payload,
-) -> Result<Event, actix_web::error::Error> {
+) -> std::result::Result<Event, actix_web::error::Error> {
     let mut bytes = BytesMut::new();
     while let Some(item) = payload.next().await {
         bytes.extend_from_slice(&item?);

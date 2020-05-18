@@ -8,11 +8,15 @@ edition = "2018"
 
 [dependencies]
 cloudevents-sdk = { path = ".." }
-reqwest = { version = "0.10", features = ["rustls-tls"] }
 lazy_static = "1.4.0"
 bytes = "^0.5"
 serde_json = "^1.0"
 url = { version = "^2.1", features = ["serde"] }
+
+[dependencies.reqwest]
+version = "0.10.4"
+default-features = false
+features = ["rustls-tls"]
 
 [dev-dependencies]
 mockito = "0.25.1"

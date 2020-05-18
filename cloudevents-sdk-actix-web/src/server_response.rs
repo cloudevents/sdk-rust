@@ -2,10 +2,8 @@ use actix_web::http::{HeaderName, HeaderValue};
 use actix_web::HttpResponse;
 use cloudevents::message::{BinaryDeserializer, BinarySerializer, StructuredSerializer, MessageAttributeValue, SerializationResult, Error};
 use cloudevents::Event;
-use actix_web::web::BytesMut;
 use cloudevents::event::SpecVersion;
 use super::headers;
-use std::io::Read;
 use std::str::FromStr;
 use actix_web::dev::HttpResponseBuilder;
 
@@ -44,13 +42,11 @@ impl BinarySerializer<HttpResponse> for HttpResponseSerializer {
         SerializationResult::Ok(())
     }
 
-    fn end_with_data<R: Read>(mut self, mut reader: R) -> Result<HttpResponse, Error> {
-        let mut b = BytesMut::new();
-        reader.read(&mut b)?;
+    fn end_with_data(mut self, bytes: Vec<u8>) -> Result<HttpResponse, Error> {
         Ok(
             self
                 .builder
-                .body(b.freeze())
+                .body(bytes)
         )
     }
 
@@ -60,13 +56,11 @@ impl BinarySerializer<HttpResponse> for HttpResponseSerializer {
 }
 
 impl StructuredSerializer<HttpResponse> for HttpResponseSerializer {
-    fn set_structured_event<R: Read>(mut self, mut reader: R) -> Result<HttpResponse, Error> {
-        let mut b = BytesMut::new();
-        reader.read(&mut b)?;
+    fn set_structured_event(mut self, bytes: Vec<u8>) -> Result<HttpResponse, Error> {
         Ok(
             self.builder
                 .set_header(actix_web::http::header::CONTENT_TYPE, headers::CLOUDEVENTS_JSON_HEADER.clone())
-                .body(actix_web::body::Body::Bytes(b.freeze()))
+                .body(bytes)
         )
     }
 }
@@ -74,4 +68,65 @@ impl StructuredSerializer<HttpResponse> for HttpResponseSerializer {
 pub async fn event_to_response(event: Event, response: HttpResponseBuilder) -> Result<HttpResponse, actix_web::error::Error> {
     BinaryDeserializer::deserialize_binary(event, HttpResponseSerializer { builder: response })
         .map_err(actix_web::error::ErrorBadRequest)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use url::Url;
+
+    use serde_json::json;
+    use cloudevents::EventBuilder;
+    use std::str::FromStr;
+    use actix_web::test;
+    use actix_web::http::StatusCode;
+    use futures::TryStreamExt;
+
+    #[actix_rt::test]
+    async fn test_response() {
+        let input = EventBuilder::new()
+            .id("0001")
+            .ty("example.test")
+            .source(Url::from_str("http://localhost/").unwrap())
+            .extension("someint", "10")
+            .build();
+
+        let resp = event_to_response(input, HttpResponseBuilder::new(StatusCode::OK))
+            .await
+            .unwrap();
+
+        assert_eq!(resp.headers().get("ce-specversion").unwrap().to_str().unwrap(), "1.0");
+        assert_eq!(resp.headers().get("ce-id").unwrap().to_str().unwrap(), "0001");
+        assert_eq!(resp.headers().get("ce-type").unwrap().to_str().unwrap(), "example.test");
+        assert_eq!(resp.headers().get("ce-source").unwrap().to_str().unwrap(), "http://localhost/");
+        assert_eq!(resp.headers().get("ce-someint").unwrap().to_str().unwrap(), "10");
+    }
+
+    #[actix_rt::test]
+    async fn test_response_with_full_data() {
+        let j = json!({"hello": "world"});
+
+        let input = EventBuilder::new()
+            .id("0001")
+            .ty("example.test")
+            .source(Url::from_str("http://localhost").unwrap())
+            .data("application/json", j.clone())
+            .extension("someint", "10")
+            .build();
+
+        let mut resp = event_to_response(input, HttpResponseBuilder::new(StatusCode::OK))
+            .await
+            .unwrap();
+
+        assert_eq!(resp.headers().get("ce-specversion").unwrap().to_str().unwrap(), "1.0");
+        assert_eq!(resp.headers().get("ce-id").unwrap().to_str().unwrap(), "0001");
+        assert_eq!(resp.headers().get("ce-type").unwrap().to_str().unwrap(), "example.test");
+        assert_eq!(resp.headers().get("ce-source").unwrap().to_str().unwrap(), "http://localhost/");
+        assert_eq!(resp.headers().get("content-type").unwrap().to_str().unwrap(), "application/json");
+        assert_eq!(resp.headers().get("ce-someint").unwrap().to_str().unwrap(), "10");
+
+        let bytes = test::load_stream(resp.take_body().into_stream()).await.unwrap();
+        assert_eq!(j.to_string().as_bytes(), bytes.as_ref())
+    }
+
 }

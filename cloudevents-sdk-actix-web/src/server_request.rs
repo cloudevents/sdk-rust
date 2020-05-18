@@ -4,7 +4,6 @@ use cloudevents::message::{BinaryDeserializer, BinarySerializer, Encoding, Messa
 use cloudevents::{Event, message};
 use actix_web::web::{BytesMut, Bytes};
 use futures::StreamExt;
-use bytes::buf::BufExt;
 use cloudevents::event::SpecVersion;
 use std::convert::TryFrom;
 use super::headers;
@@ -12,13 +11,13 @@ use super::headers;
 /// Wrapper for [`HttpRequest`] that implements [`MessageDeserializer`] trait
 pub struct HttpRequestMessage<'a> {
     req: &'a HttpRequest,
-    body_reader: Bytes
+    body: Bytes
 }
 
 impl HttpRequestMessage<'_> {
-    fn new(req: &HttpRequest, body_reader: Bytes) -> HttpRequestMessage {
+    fn new(req: &HttpRequest, body: Bytes) -> HttpRequestMessage {
         HttpRequestMessage {
-            req, body_reader
+            req, body
         }
     }
 }
@@ -60,8 +59,8 @@ impl<'a> BinaryDeserializer for HttpRequestMessage<'a> {
             )))?
         }
 
-        if self.body_reader.len() != 0 {
-            visitor.end_with_data(self.body_reader.reader())
+        if self.body.len() != 0 {
+            visitor.end_with_data(self.body.to_vec())
         } else {
             visitor.end()
         }
@@ -76,7 +75,7 @@ impl<'a> StructuredDeserializer for HttpRequestMessage<'a> {
         if self.encoding() != Encoding::STRUCTURED {
             return Err(message::Error::WrongEncoding {})
         }
-        visitor.set_structured_event(self.body_reader.reader())
+        visitor.set_structured_event(self.body.to_vec())
     }
 }
 

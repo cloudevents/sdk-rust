@@ -3,8 +3,6 @@ use super::Event;
 use super::{Attributes, AttributesReader};
 use crate::event::SpecVersion;
 use crate::message::{BinaryDeserializer, BinarySerializer, DeserializationResult, MessageAttributeValue, SerializationResult, StructuredDeserializer, StructuredSerializer, Error};
-use std::borrow::Borrow;
-use std::io::Read;
 
 impl StructuredDeserializer for Event {
     fn deserialize_structured<R, V: StructuredSerializer<R>>(
@@ -12,7 +10,7 @@ impl StructuredDeserializer for Event {
         visitor: V,
     ) -> Result<R, Error> {
         let vec: Vec<u8> = serde_json::to_vec(&self)?;
-        visitor.set_structured_event::<&[u8]>(vec.borrow())
+        visitor.set_structured_event(vec)
     }
 }
 
@@ -23,12 +21,12 @@ impl BinaryDeserializer for Event {
         for (k, v) in self.extensions.into_iter() {
             visitor.set_extension(&k, v.into())?;
         }
-        match self.data.as_ref() {
-            Some(Data::String(s)) => visitor.end_with_data(s.as_bytes()),
-            Some(Data::Binary(v)) => visitor.end_with_data::<&[u8]>(v),
+        match self.data {
+            Some(Data::String(s)) => visitor.end_with_data(s.into_bytes()),
+            Some(Data::Binary(v)) => visitor.end_with_data(v),
             Some(Data::Json(j)) => {
-                let vec: Vec<u8> = serde_json::to_vec(j)?;
-                visitor.end_with_data::<&[u8]>(vec.borrow())
+                let vec: Vec<u8> = serde_json::to_vec(&j)?;
+                visitor.end_with_data(vec)
             }
             None => visitor.end(),
         }
@@ -70,8 +68,8 @@ impl AttributesSerializer for Attributes {
 }
 
 impl StructuredSerializer<Event> for Event {
-    fn set_structured_event<R: Read>(mut self, reader: R) -> Result<Event, Error> {
-        let new_event: Event = serde_json::from_reader(reader)?;
+    fn set_structured_event(mut self, bytes: Vec<u8>) -> Result<Event, Error> {
+        let new_event: Event = serde_json::from_slice(&bytes)?;
         self.attributes = new_event.attributes;
         self.data = new_event.data;
         self.extensions = new_event.extensions;
@@ -97,10 +95,8 @@ impl BinarySerializer<Event> for Event {
         Ok(())
     }
 
-    fn end_with_data<R: Read>(mut self, mut reader: R) -> Result<Event, Error> {
-        let mut v = Vec::new();
-        let _ = reader.read_to_end(&mut v)?;
-        self.data = Some(Data::from_binary(self.get_datacontenttype(), v)?);
+    fn end_with_data(mut self, bytes: Vec<u8>) -> Result<Event, Error> {
+        self.data = Some(Data::from_binary(self.get_datacontenttype(), bytes)?);
         Ok(self)
     }
 

@@ -1,8 +1,7 @@
 use super::headers;
 use cloudevents::event::SpecVersion;
 use cloudevents::message::{
-    BinaryDeserializer, BinarySerializer, MessageAttributeValue,
-    Result, StructuredSerializer,
+    BinaryDeserializer, BinarySerializer, MessageAttributeValue, Result, StructuredSerializer,
 };
 use cloudevents::Event;
 use reqwest::RequestBuilder;
@@ -64,10 +63,7 @@ impl StructuredSerializer<RequestBuilder> for RequestSerializer {
 }
 
 /// Method to transform an incoming [`HttpRequest`] to [`Event`]
-pub fn event_to_request(
-    event: Event,
-    request_builder: RequestBuilder,
-) -> Result<RequestBuilder> {
+pub fn event_to_request(event: Event, request_builder: RequestBuilder) -> Result<RequestBuilder> {
     BinaryDeserializer::deserialize_binary(event, RequestSerializer::new(request_builder))
 }
 
@@ -76,10 +72,10 @@ mod tests {
     use super::*;
     use mockito::{mock, Matcher};
 
+    use cloudevents::message::StructuredDeserializer;
     use cloudevents::EventBuilder;
     use serde_json::json;
     use url::Url;
-    use cloudevents::message::StructuredDeserializer;
 
     #[tokio::test]
     async fn test_request() {
@@ -164,11 +160,12 @@ mod tests {
         let client = reqwest::Client::new();
         StructuredDeserializer::deserialize_structured(
             input,
-            RequestSerializer::new(client.post(&url))
-        ).unwrap()
-            .send()
-            .await
-            .unwrap();
+            RequestSerializer::new(client.post(&url)),
+        )
+        .unwrap()
+        .send()
+        .await
+        .unwrap();
 
         m.assert();
     }

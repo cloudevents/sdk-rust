@@ -4,8 +4,7 @@ use actix_web::http::{HeaderName, HeaderValue};
 use actix_web::HttpResponse;
 use cloudevents::event::SpecVersion;
 use cloudevents::message::{
-    BinaryDeserializer, BinarySerializer, MessageAttributeValue, Result,
-    StructuredSerializer,
+    BinaryDeserializer, BinarySerializer, MessageAttributeValue, Result, StructuredSerializer,
 };
 use cloudevents::Event;
 use std::str::FromStr;

@@ -1,11 +1,14 @@
 use super::headers;
-use reqwest::Response;
-use cloudevents::event::SpecVersion;
-use cloudevents::message::{BinaryDeserializer, BinarySerializer, Encoding, MessageAttributeValue, MessageDeserializer, StructuredDeserializer, StructuredSerializer, Result, Error};
-use cloudevents::{message, Event};
-use std::convert::TryFrom;
 use bytes::Bytes;
+use cloudevents::event::SpecVersion;
+use cloudevents::message::{
+    BinaryDeserializer, BinarySerializer, Encoding, Error, MessageAttributeValue,
+    MessageDeserializer, Result, StructuredDeserializer, StructuredSerializer,
+};
+use cloudevents::{message, Event};
 use reqwest::header::{HeaderMap, HeaderName};
+use reqwest::Response;
+use std::convert::TryFrom;
 
 /// Wrapper for [`Response`] that implements [`MessageDeserializer`] trait
 pub struct ResponseDeserializer {
@@ -20,10 +23,7 @@ impl ResponseDeserializer {
 }
 
 impl BinaryDeserializer for ResponseDeserializer {
-    fn deserialize_binary<R: Sized, V: BinarySerializer<R>>(
-        self,
-        mut visitor: V,
-    ) -> Result<R> {
+    fn deserialize_binary<R: Sized, V: BinarySerializer<R>>(self, mut visitor: V) -> Result<R> {
         if self.encoding() != Encoding::BINARY {
             return Err(message::Error::WrongEncoding {});
         }
@@ -38,10 +38,10 @@ impl BinaryDeserializer for ResponseDeserializer {
             .get(&spec_version)
             .unwrap();
 
-        for (hn, hv) in
-            self.headers.iter().filter(|(hn, _)| {
-                headers::SPEC_VERSION_HEADER.ne(hn) && hn.as_str().starts_with("ce-")
-            })
+        for (hn, hv) in self
+            .headers
+            .iter()
+            .filter(|(hn, _)| headers::SPEC_VERSION_HEADER.ne(hn) && hn.as_str().starts_with("ce-"))
         {
             let name = &hn.as_str()["ce-".len()..];
 
@@ -74,10 +74,7 @@ impl BinaryDeserializer for ResponseDeserializer {
 }
 
 impl StructuredDeserializer for ResponseDeserializer {
-    fn deserialize_structured<R: Sized, V: StructuredSerializer<R>>(
-        self,
-        visitor: V,
-    ) -> Result<R> {
+    fn deserialize_structured<R: Sized, V: StructuredSerializer<R>>(self, visitor: V) -> Result<R> {
         if self.encoding() != Encoding::STRUCTURED {
             return Err(message::Error::WrongEncoding {});
         }
@@ -92,21 +89,22 @@ impl MessageDeserializer for ResponseDeserializer {
                 .map(|r| r.ok())
                 .flatten()
                 .map(|e| e.starts_with("application/cloudevents+json")),
-            self.headers.get::<&'static HeaderName>(&headers::SPEC_VERSION_HEADER)
+            self.headers
+                .get::<&'static HeaderName>(&headers::SPEC_VERSION_HEADER),
         ) {
             (Some(true), _) => Encoding::STRUCTURED,
             (_, Some(_)) => Encoding::BINARY,
-            _ => Encoding::UNKNOWN
+            _ => Encoding::UNKNOWN,
         }
     }
 }
 
 /// Method to transform an incoming [`Response`] to [`Event`]
-pub async fn response_to_event(
-    res: Response,
-) -> Result<Event> {
+pub async fn response_to_event(res: Response) -> Result<Event> {
     let h = res.headers().to_owned();
-    let b = res.bytes().await.map_err(|e| Error::Other {source: Box::new(e)})?;
+    let b = res.bytes().await.map_err(|e| Error::Other {
+        source: Box::new(e),
+    })?;
 
     MessageDeserializer::into_event(ResponseDeserializer::new(h, b))
 }
@@ -118,8 +116,8 @@ mod tests {
 
     use cloudevents::EventBuilder;
     use serde_json::json;
-    use url::Url;
     use std::str::FromStr;
+    use url::Url;
 
     #[tokio::test]
     async fn test_response() {
@@ -141,10 +139,7 @@ mod tests {
             .build();
 
         let client = reqwest::Client::new();
-        let res = client.get(&url)
-            .send()
-            .await
-            .unwrap();
+        let res = client.get(&url).send().await.unwrap();
 
         let resp = response_to_event(res).await.unwrap();
         assert_eq!(expected, resp);
@@ -174,12 +169,8 @@ mod tests {
             .extension("someint", "10")
             .build();
 
-
         let client = reqwest::Client::new();
-        let res = client.get(&url)
-            .send()
-            .await
-            .unwrap();
+        let res = client.get(&url).send().await.unwrap();
 
         let resp = response_to_event(res).await.unwrap();
         assert_eq!(expected, resp);
@@ -199,15 +190,15 @@ mod tests {
         let url = mockito::server_url();
         let _m = mock("GET", "/")
             .with_status(200)
-            .with_header("content-type", "application/cloudevents+json; charset=utf-8")
+            .with_header(
+                "content-type",
+                "application/cloudevents+json; charset=utf-8",
+            )
             .with_body(serde_json::to_string(&expected).unwrap())
             .create();
 
         let client = reqwest::Client::new();
-        let res = client.get(&url)
-            .send()
-            .await
-            .unwrap();
+        let res = client.get(&url).send().await.unwrap();
 
         let resp = response_to_event(res).await.unwrap();
         assert_eq!(expected, resp);

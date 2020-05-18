@@ -3,8 +3,8 @@ use super::Event;
 use super::{Attributes, AttributesReader};
 use crate::event::SpecVersion;
 use crate::message::{
-    BinaryDeserializer, BinarySerializer, Result, MessageAttributeValue,
-    StructuredDeserializer, StructuredSerializer,
+    BinaryDeserializer, BinarySerializer, MessageAttributeValue, Result, StructuredDeserializer,
+    StructuredSerializer,
 };
 
 impl StructuredDeserializer for Event {
@@ -15,10 +15,7 @@ impl StructuredDeserializer for Event {
 }
 
 impl BinaryDeserializer for Event {
-    fn deserialize_binary<R: Sized, V: BinarySerializer<R>>(
-        self,
-        mut visitor: V,
-    ) -> Result<R> {
+    fn deserialize_binary<R: Sized, V: BinarySerializer<R>>(self, mut visitor: V) -> Result<R> {
         visitor = visitor.set_spec_version(self.get_specversion())?;
         visitor = self.attributes.deserialize_attributes(visitor)?;
         for (k, v) in self.extensions.into_iter() {
@@ -37,25 +34,15 @@ impl BinaryDeserializer for Event {
 }
 
 pub(crate) trait AttributesDeserializer {
-    fn deserialize_attributes<R: Sized, V: BinarySerializer<R>>(
-        self,
-        visitor: V,
-    ) -> Result<V>;
+    fn deserialize_attributes<R: Sized, V: BinarySerializer<R>>(self, visitor: V) -> Result<V>;
 }
 
 pub(crate) trait AttributesSerializer {
-    fn serialize_attribute(
-        &mut self,
-        name: &str,
-        value: MessageAttributeValue,
-    ) -> Result<()>;
+    fn serialize_attribute(&mut self, name: &str, value: MessageAttributeValue) -> Result<()>;
 }
 
 impl AttributesDeserializer for Attributes {
-    fn deserialize_attributes<R: Sized, V: BinarySerializer<R>>(
-        self,
-        visitor: V,
-    ) -> Result<V> {
+    fn deserialize_attributes<R: Sized, V: BinarySerializer<R>>(self, visitor: V) -> Result<V> {
         match self {
             Attributes::V03(v03) => v03.deserialize_attributes(visitor),
             Attributes::V10(v10) => v10.deserialize_attributes(visitor),
@@ -64,11 +51,7 @@ impl AttributesDeserializer for Attributes {
 }
 
 impl AttributesSerializer for Attributes {
-    fn serialize_attribute(
-        &mut self,
-        name: &str,
-        value: MessageAttributeValue,
-    ) -> Result<()> {
+    fn serialize_attribute(&mut self, name: &str, value: MessageAttributeValue) -> Result<()> {
         match self {
             Attributes::V03(v03) => v03.serialize_attribute(name, value),
             Attributes::V10(v10) => v10.serialize_attribute(name, value),

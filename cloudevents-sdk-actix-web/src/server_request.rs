@@ -4,8 +4,8 @@ use actix_web::web::{Bytes, BytesMut};
 use actix_web::{web, HttpMessage, HttpRequest};
 use cloudevents::event::SpecVersion;
 use cloudevents::message::{
-    BinaryDeserializer, BinarySerializer, Encoding, MessageAttributeValue,
-    MessageDeserializer, StructuredDeserializer, StructuredSerializer, Result
+    BinaryDeserializer, BinarySerializer, Encoding, MessageAttributeValue, MessageDeserializer,
+    Result, StructuredDeserializer, StructuredSerializer,
 };
 use cloudevents::{message, Event};
 use futures::StreamExt;
@@ -24,10 +24,7 @@ impl HttpRequestDeserializer<'_> {
 }
 
 impl<'a> BinaryDeserializer for HttpRequestDeserializer<'a> {
-    fn deserialize_binary<R: Sized, V: BinarySerializer<R>>(
-        self,
-        mut visitor: V,
-    ) -> Result<R> {
+    fn deserialize_binary<R: Sized, V: BinarySerializer<R>>(self, mut visitor: V) -> Result<R> {
         if self.encoding() != Encoding::BINARY {
             return Err(message::Error::WrongEncoding {});
         }
@@ -78,10 +75,7 @@ impl<'a> BinaryDeserializer for HttpRequestDeserializer<'a> {
 }
 
 impl<'a> StructuredDeserializer for HttpRequestDeserializer<'a> {
-    fn deserialize_structured<R: Sized, V: StructuredSerializer<R>>(
-        self,
-        visitor: V,
-    ) -> Result<R> {
+    fn deserialize_structured<R: Sized, V: StructuredSerializer<R>>(self, visitor: V) -> Result<R> {
         if self.encoding() != Encoding::STRUCTURED {
             return Err(message::Error::WrongEncoding {});
         }

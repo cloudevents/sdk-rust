@@ -8,26 +8,34 @@ use std::str::FromStr;
 macro_rules! unwrap_optional_header {
     ($headers:expr, $name:expr) => {
         $headers
-          .get::<&'static HeaderName>(&$name)
-          .map(|a| header_value_to_str!(a))
+            .get::<&'static HeaderName>(&$name)
+            .map(|a| header_value_to_str!(a))
     };
 }
 
 macro_rules! header_value_to_str {
     ($header_value:expr) => {
-        $header_value.to_str().map_err(|e| cloudevents::message::Error::Other{ source: Box::new(e) })
+        $header_value
+            .to_str()
+            .map_err(|e| cloudevents::message::Error::Other {
+                source: Box::new(e),
+            })
     };
 }
 
 macro_rules! str_to_header_value {
     ($header_value:expr) => {
-        HeaderValue::from_str($header_value).map_err(|e| cloudevents::message::Error::Other{ source: Box::new(e) })
+        HeaderValue::from_str($header_value).map_err(|e| cloudevents::message::Error::Other {
+            source: Box::new(e),
+        })
     };
 }
 
 macro_rules! str_name_to_header {
     ($attribute:expr) => {
-        HeaderName::from_str($attribute).map_err(|e| cloudevents::message::Error::Other{ source: Box::new(e) })
+        HeaderName::from_str($attribute).map_err(|e| cloudevents::message::Error::Other {
+            source: Box::new(e),
+        })
     };
 }
 

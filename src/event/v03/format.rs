@@ -55,7 +55,9 @@ impl crate::event::format::EventFormatDeserializer for EventFormatDeserializer {
 
 pub(crate) struct EventFormatSerializer {}
 
-impl<S: serde::Serializer> crate::event::format::EventFormatSerializer<S, Attributes> for EventFormatSerializer {
+impl<S: serde::Serializer> crate::event::format::EventFormatSerializer<S, Attributes>
+    for EventFormatSerializer
+{
     fn serialize(
         attributes: &Attributes,
         data: &Option<Data>,

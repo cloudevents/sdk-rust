@@ -1,9 +1,9 @@
+use super::{v03, v10};
+use lazy_static::lazy_static;
+use serde::export::Formatter;
+use std::collections::HashMap;
 use std::convert::TryFrom;
 use std::fmt;
-use std::collections::HashMap;
-use lazy_static::lazy_static;
-use super::{v10, v03};
-use serde::export::Formatter;
 
 lazy_static! {
     pub static ref ATTRIBUTE_NAMES: HashMap<SpecVersion, &'static [&'static str]> = {
@@ -39,7 +39,7 @@ impl fmt::Display for SpecVersion {
 
 #[derive(Debug)]
 pub struct InvalidSpecVersion {
-    spec_version_value: String
+    spec_version_value: String,
 }
 
 impl fmt::Display for InvalidSpecVersion {
@@ -57,7 +57,9 @@ impl TryFrom<&str> for SpecVersion {
         match value {
             "0.3" => Ok(SpecVersion::V03),
             "1.0" => Ok(SpecVersion::V10),
-            _ => Err(InvalidSpecVersion{spec_version_value: value.to_string()}),
+            _ => Err(InvalidSpecVersion {
+                spec_version_value: value.to_string(),
+            }),
         }
     }
 }

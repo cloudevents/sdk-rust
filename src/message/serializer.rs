@@ -1,4 +1,4 @@
-use super::{SerializationResult, MessageAttributeValue, Error};
+use super::{Error, MessageAttributeValue, SerializationResult};
 use crate::event::SpecVersion;
 
 pub trait StructuredSerializer<RETURN: Sized> {

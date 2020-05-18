@@ -1,53 +1,46 @@
+use super::headers;
+use actix_web::dev::HttpResponseBuilder;
 use actix_web::http::{HeaderName, HeaderValue};
 use actix_web::HttpResponse;
-use cloudevents::message::{BinaryDeserializer, BinarySerializer, StructuredSerializer, MessageAttributeValue, SerializationResult, Error};
-use cloudevents::Event;
 use cloudevents::event::SpecVersion;
-use super::headers;
+use cloudevents::message::{
+    BinaryDeserializer, BinarySerializer, Error, MessageAttributeValue, SerializationResult,
+    StructuredSerializer,
+};
+use cloudevents::Event;
 use std::str::FromStr;
-use actix_web::dev::HttpResponseBuilder;
 
 struct HttpResponseSerializer {
-    builder: HttpResponseBuilder
+    builder: HttpResponseBuilder,
 }
 
 impl BinarySerializer<HttpResponse> for HttpResponseSerializer {
     fn set_spec_version(&mut self, spec_version: SpecVersion) -> SerializationResult {
-        self
-            .builder
-            .set_header(
-                headers::SPEC_VERSION_HEADER.clone(),
-                str_to_header_value!(spec_version.as_str())?
-            );
+        self.builder.set_header(
+            headers::SPEC_VERSION_HEADER.clone(),
+            str_to_header_value!(spec_version.as_str())?,
+        );
         SerializationResult::Ok(())
     }
 
     fn set_attribute(&mut self, name: &str, value: MessageAttributeValue) -> SerializationResult {
-        self
-            .builder
-            .set_header(
-                headers::ATTRIBUTES_TO_HEADERS.get(name).unwrap().clone(),
-                str_to_header_value!(value.to_string().as_str())?
-            );
+        self.builder.set_header(
+            headers::ATTRIBUTES_TO_HEADERS.get(name).unwrap().clone(),
+            str_to_header_value!(value.to_string().as_str())?,
+        );
         SerializationResult::Ok(())
     }
 
     fn set_extension(&mut self, name: &str, value: MessageAttributeValue) -> SerializationResult {
-        self
-            .builder
-            .set_header(
-                attribute_name_to_header!(name)?,
-                str_to_header_value!(value.to_string().as_str())?
-            );
+        self.builder.set_header(
+            attribute_name_to_header!(name)?,
+            str_to_header_value!(value.to_string().as_str())?,
+        );
         SerializationResult::Ok(())
     }
 
     fn end_with_data(mut self, bytes: Vec<u8>) -> Result<HttpResponse, Error> {
-        Ok(
-            self
-                .builder
-                .body(bytes)
-        )
+        Ok(self.builder.body(bytes))
     }
 
     fn end(mut self) -> Result<HttpResponse, Error> {
@@ -57,15 +50,20 @@ impl BinarySerializer<HttpResponse> for HttpResponseSerializer {
 
 impl StructuredSerializer<HttpResponse> for HttpResponseSerializer {
     fn set_structured_event(mut self, bytes: Vec<u8>) -> Result<HttpResponse, Error> {
-        Ok(
-            self.builder
-                .set_header(actix_web::http::header::CONTENT_TYPE, headers::CLOUDEVENTS_JSON_HEADER.clone())
-                .body(bytes)
-        )
+        Ok(self
+            .builder
+            .set_header(
+                actix_web::http::header::CONTENT_TYPE,
+                headers::CLOUDEVENTS_JSON_HEADER.clone(),
+            )
+            .body(bytes))
     }
 }
 
-pub async fn event_to_response(event: Event, response: HttpResponseBuilder) -> Result<HttpResponse, actix_web::error::Error> {
+pub async fn event_to_response(
+    event: Event,
+    response: HttpResponseBuilder,
+) -> Result<HttpResponse, actix_web::error::Error> {
     BinaryDeserializer::deserialize_binary(event, HttpResponseSerializer { builder: response })
         .map_err(actix_web::error::ErrorBadRequest)
 }
@@ -75,12 +73,12 @@ mod tests {
     use super::*;
     use url::Url;
 
-    use serde_json::json;
-    use cloudevents::EventBuilder;
-    use std::str::FromStr;
-    use actix_web::test;
     use actix_web::http::StatusCode;
+    use actix_web::test;
+    use cloudevents::EventBuilder;
     use futures::TryStreamExt;
+    use serde_json::json;
+    use std::str::FromStr;
 
     #[actix_rt::test]
     async fn test_response() {
@@ -95,11 +93,30 @@ mod tests {
             .await
             .unwrap();
 
-        assert_eq!(resp.headers().get("ce-specversion").unwrap().to_str().unwrap(), "1.0");
-        assert_eq!(resp.headers().get("ce-id").unwrap().to_str().unwrap(), "0001");
-        assert_eq!(resp.headers().get("ce-type").unwrap().to_str().unwrap(), "example.test");
-        assert_eq!(resp.headers().get("ce-source").unwrap().to_str().unwrap(), "http://localhost/");
-        assert_eq!(resp.headers().get("ce-someint").unwrap().to_str().unwrap(), "10");
+        assert_eq!(
+            resp.headers()
+                .get("ce-specversion")
+                .unwrap()
+                .to_str()
+                .unwrap(),
+            "1.0"
+        );
+        assert_eq!(
+            resp.headers().get("ce-id").unwrap().to_str().unwrap(),
+            "0001"
+        );
+        assert_eq!(
+            resp.headers().get("ce-type").unwrap().to_str().unwrap(),
+            "example.test"
+        );
+        assert_eq!(
+            resp.headers().get("ce-source").unwrap().to_str().unwrap(),
+            "http://localhost/"
+        );
+        assert_eq!(
+            resp.headers().get("ce-someint").unwrap().to_str().unwrap(),
+            "10"
+        );
     }
 
     #[actix_rt::test]
@@ -118,15 +135,42 @@ mod tests {
             .await
             .unwrap();
 
-        assert_eq!(resp.headers().get("ce-specversion").unwrap().to_str().unwrap(), "1.0");
-        assert_eq!(resp.headers().get("ce-id").unwrap().to_str().unwrap(), "0001");
-        assert_eq!(resp.headers().get("ce-type").unwrap().to_str().unwrap(), "example.test");
-        assert_eq!(resp.headers().get("ce-source").unwrap().to_str().unwrap(), "http://localhost/");
-        assert_eq!(resp.headers().get("content-type").unwrap().to_str().unwrap(), "application/json");
-        assert_eq!(resp.headers().get("ce-someint").unwrap().to_str().unwrap(), "10");
+        assert_eq!(
+            resp.headers()
+                .get("ce-specversion")
+                .unwrap()
+                .to_str()
+                .unwrap(),
+            "1.0"
+        );
+        assert_eq!(
+            resp.headers().get("ce-id").unwrap().to_str().unwrap(),
+            "0001"
+        );
+        assert_eq!(
+            resp.headers().get("ce-type").unwrap().to_str().unwrap(),
+            "example.test"
+        );
+        assert_eq!(
+            resp.headers().get("ce-source").unwrap().to_str().unwrap(),
+            "http://localhost/"
+        );
+        assert_eq!(
+            resp.headers()
+                .get("content-type")
+                .unwrap()
+                .to_str()
+                .unwrap(),
+            "application/json"
+        );
+        assert_eq!(
+            resp.headers().get("ce-someint").unwrap().to_str().unwrap(),
+            "10"
+        );
 
-        let bytes = test::load_stream(resp.take_body().into_stream()).await.unwrap();
+        let bytes = test::load_stream(resp.take_body().into_stream())
+            .await
+            .unwrap();
         assert_eq!(j.to_string().as_bytes(), bytes.as_ref())
     }
-
 }

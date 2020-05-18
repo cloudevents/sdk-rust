@@ -1,6 +1,6 @@
 use super::{
-    Attributes, Data, Event, EventFormatDeserializerV03, EventFormatDeserializerV10, EventFormatSerializerV03,
-    EventFormatSerializerV10,
+    Attributes, Data, Event, EventFormatDeserializerV03, EventFormatDeserializerV10,
+    EventFormatSerializerV03, EventFormatSerializerV10,
 };
 use crate::event::{AttributesReader, ExtensionValue};
 use serde::de::{Error, IntoDeserializer, Unexpected};

@@ -1,62 +1,72 @@
-use actix_web::http::HeaderName;
-use actix_web::{HttpMessage, HttpRequest, web};
-use cloudevents::message::{BinaryDeserializer, BinarySerializer, Encoding, MessageDeserializer, StructuredDeserializer, StructuredSerializer, MessageAttributeValue, Error};
-use cloudevents::{Event, message};
-use actix_web::web::{BytesMut, Bytes};
-use futures::StreamExt;
-use cloudevents::event::SpecVersion;
-use std::convert::TryFrom;
 use super::headers;
+use actix_web::http::HeaderName;
+use actix_web::web::{Bytes, BytesMut};
+use actix_web::{web, HttpMessage, HttpRequest};
+use cloudevents::event::SpecVersion;
+use cloudevents::message::{
+    BinaryDeserializer, BinarySerializer, Encoding, Error, MessageAttributeValue,
+    MessageDeserializer, StructuredDeserializer, StructuredSerializer,
+};
+use cloudevents::{message, Event};
+use futures::StreamExt;
+use std::convert::TryFrom;
 
 /// Wrapper for [`HttpRequest`] that implements [`MessageDeserializer`] trait
 pub struct HttpRequestMessage<'a> {
     req: &'a HttpRequest,
-    body: Bytes
+    body: Bytes,
 }
 
 impl HttpRequestMessage<'_> {
     fn new(req: &HttpRequest, body: Bytes) -> HttpRequestMessage {
-        HttpRequestMessage {
-            req, body
-        }
+        HttpRequestMessage { req, body }
     }
 }
 
 impl<'a> BinaryDeserializer for HttpRequestMessage<'a> {
-    fn deserialize_binary<R: Sized, V: BinarySerializer<R>>(self, mut visitor: V) -> Result<R, Error> {
+    fn deserialize_binary<R: Sized, V: BinarySerializer<R>>(
+        self,
+        mut visitor: V,
+    ) -> Result<R, Error> {
         if self.encoding() != Encoding::BINARY {
-            return Err(message::Error::WrongEncoding {})
+            return Err(message::Error::WrongEncoding {});
         }
 
         let spec_version = SpecVersion::try_from(
-            unwrap_optional_header!(self.req.headers(), headers::SPEC_VERSION_HEADER).unwrap()?
+            unwrap_optional_header!(self.req.headers(), headers::SPEC_VERSION_HEADER).unwrap()?,
         )?;
 
         visitor.set_spec_version(spec_version.clone())?;
 
-        let attributes = cloudevents::event::spec_version::ATTRIBUTE_NAMES.get(&spec_version).unwrap();
+        let attributes = cloudevents::event::spec_version::ATTRIBUTE_NAMES
+            .get(&spec_version)
+            .unwrap();
 
-        for (hn, hv) in self.req
-            .headers()
-            .iter()
-            .filter(|(hn, _)| headers::SPEC_VERSION_HEADER.ne(hn) && hn.as_str().starts_with("ce-")) {
+        for (hn, hv) in
+            self.req.headers().iter().filter(|(hn, _)| {
+                headers::SPEC_VERSION_HEADER.ne(hn) && hn.as_str().starts_with("ce-")
+            })
+        {
             let name = hn.as_str().strip_prefix("ce-").unwrap();
 
             if attributes.contains(&name) {
-                visitor.set_attribute(name, MessageAttributeValue::String(String::from(
-                    header_value_to_str!(hv)?
-                )))?
+                visitor.set_attribute(
+                    name,
+                    MessageAttributeValue::String(String::from(header_value_to_str!(hv)?)),
+                )?
             } else {
-                visitor.set_extension(name, MessageAttributeValue::String(String::from(
-                    header_value_to_str!(hv)?
-                )))?
+                visitor.set_extension(
+                    name,
+                    MessageAttributeValue::String(String::from(header_value_to_str!(hv)?)),
+                )?
             }
         }
 
         if let Some(hv) = self.req.headers().get("content-type") {
-            visitor.set_attribute("datacontenttype", MessageAttributeValue::String(String::from(
-                header_value_to_str!(hv)?
-            )))?
+            visitor.set_attribute(
+                "datacontenttype",
+                MessageAttributeValue::String(String::from(header_value_to_str!(hv)?)),
+            )?
         }
 
         if self.body.len() != 0 {
@@ -73,7 +83,7 @@ impl<'a> StructuredDeserializer for HttpRequestMessage<'a> {
         visitor: V,
     ) -> Result<R, Error> {
         if self.encoding() != Encoding::STRUCTURED {
-            return Err(message::Error::WrongEncoding {})
+            return Err(message::Error::WrongEncoding {});
         }
         visitor.set_structured_event(self.body.to_vec())
     }
@@ -97,13 +107,13 @@ impl<'a> MessageDeserializer for HttpRequestMessage<'a> {
 }
 
 /// Method to transform an incoming [`HttpRequest`] to [`Event`]
-pub async fn request_to_event(req: &HttpRequest, mut payload: web::Payload) -> Result<Event, actix_web::error::Error> {
+pub async fn request_to_event(
+    req: &HttpRequest,
+    mut payload: web::Payload,
+) -> Result<Event, actix_web::error::Error> {
     let mut bytes = BytesMut::new();
     while let Some(item) = payload.next().await {
-        bytes
-            .extend_from_slice(
-                &item?
-            );
+        bytes.extend_from_slice(&item?);
     }
     MessageDeserializer::into_event(HttpRequestMessage::new(req, bytes.freeze()))
         .map_err(actix_web::error::ErrorBadRequest)
@@ -115,8 +125,8 @@ mod tests {
     use actix_web::test;
     use url::Url;
 
-    use serde_json::json;
     use cloudevents::EventBuilder;
+    use serde_json::json;
     use std::str::FromStr;
 
     #[actix_rt::test]
@@ -165,5 +175,4 @@ mod tests {
         let resp = request_to_event(&req, web::Payload(payload)).await.unwrap();
         assert_eq!(expected, resp);
     }
-
 }

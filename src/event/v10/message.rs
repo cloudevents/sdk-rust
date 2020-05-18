@@ -4,7 +4,10 @@ use crate::message::{
 use std::convert::TryInto;
 
 impl crate::event::message::AttributesDeserializer for super::Attributes {
-    fn deserialize_attributes<R: Sized, V: BinarySerializer<R>>(self, visitor: &mut V) -> DeserializationResult {
+    fn deserialize_attributes<R: Sized, V: BinarySerializer<R>>(
+        self,
+        visitor: &mut V,
+    ) -> DeserializationResult {
         visitor.set_attribute("id", MessageAttributeValue::String(self.id))?;
         visitor.set_attribute("type", MessageAttributeValue::String(self.ty))?;
         visitor.set_attribute("source", MessageAttributeValue::UriRef(self.source))?;

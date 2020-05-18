@@ -4,5 +4,5 @@ use std::fmt::Debug;
 pub enum Encoding {
     STRUCTURED,
     BINARY,
-    UNKNOWN
+    UNKNOWN,
 }

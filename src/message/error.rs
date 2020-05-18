@@ -3,10 +3,12 @@ use snafu::Snafu;
 #[derive(Debug, Snafu)]
 pub enum Error {
     #[snafu(display("Wrong encoding"))]
-    WrongEncoding { },
+    WrongEncoding {},
     #[snafu(display("{}", source))]
     #[snafu(context(false))]
-    InvalidSpecVersion { source: crate::event::spec_version::InvalidSpecVersion },
+    InvalidSpecVersion {
+        source: crate::event::spec_version::InvalidSpecVersion,
+    },
     #[snafu(display("Unrecognized attribute name: {}", name))]
     UnrecognizedAttributeName { name: String },
     #[snafu(display("Error while parsing a time string: {}", source))]

@@ -1,11 +1,11 @@
 mod deserializer;
-mod serializer;
 mod encoding;
-mod types;
 mod error;
+mod serializer;
+mod types;
 
 pub use deserializer::*;
-pub use serializer::*;
 pub use encoding::*;
-pub use types::MessageAttributeValue;
 pub use error::*;
+pub use serializer::*;
+pub use types::MessageAttributeValue;

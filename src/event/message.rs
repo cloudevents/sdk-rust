@@ -2,20 +2,23 @@ use super::Data;
 use super::Event;
 use super::{Attributes, AttributesReader};
 use crate::event::SpecVersion;
-use crate::message::{BinaryDeserializer, BinarySerializer, DeserializationResult, MessageAttributeValue, SerializationResult, StructuredDeserializer, StructuredSerializer, Error};
+use crate::message::{
+    BinaryDeserializer, BinarySerializer, DeserializationResult, Error, MessageAttributeValue,
+    SerializationResult, StructuredDeserializer, StructuredSerializer,
+};
 
 impl StructuredDeserializer for Event {
-    fn deserialize_structured<R, V: StructuredSerializer<R>>(
-        self,
-        visitor: V,
-    ) -> Result<R, Error> {
+    fn deserialize_structured<R, V: StructuredSerializer<R>>(self, visitor: V) -> Result<R, Error> {
         let vec: Vec<u8> = serde_json::to_vec(&self)?;
         visitor.set_structured_event(vec)
     }
 }
 
 impl BinaryDeserializer for Event {
-    fn deserialize_binary<R: Sized, V: BinarySerializer<R>>(self, mut visitor: V) -> Result<R, Error> {
+    fn deserialize_binary<R: Sized, V: BinarySerializer<R>>(
+        self,
+        mut visitor: V,
+    ) -> Result<R, Error> {
         visitor.set_spec_version(self.get_specversion())?;
         self.attributes.deserialize_attributes(&mut visitor)?;
         for (k, v) in self.extensions.into_iter() {
@@ -34,7 +37,10 @@ impl BinaryDeserializer for Event {
 }
 
 pub(crate) trait AttributesDeserializer {
-    fn deserialize_attributes<R: Sized, V: BinarySerializer<R>>(self, visitor: &mut V) -> DeserializationResult;
+    fn deserialize_attributes<R: Sized, V: BinarySerializer<R>>(
+        self,
+        visitor: &mut V,
+    ) -> DeserializationResult;
 }
 
 pub(crate) trait AttributesSerializer {
@@ -46,7 +52,10 @@ pub(crate) trait AttributesSerializer {
 }
 
 impl AttributesDeserializer for Attributes {
-    fn deserialize_attributes<R: Sized, V: BinarySerializer<R>>(self, visitor: &mut V) -> DeserializationResult {
+    fn deserialize_attributes<R: Sized, V: BinarySerializer<R>>(
+        self,
+        visitor: &mut V,
+    ) -> DeserializationResult {
         match self {
             Attributes::V03(v03) => v03.deserialize_attributes(visitor),
             Attributes::V10(v10) => v10.deserialize_attributes(visitor),

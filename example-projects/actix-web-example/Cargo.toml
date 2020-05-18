@@ -1,0 +1,19 @@
+[package]
+name = "actix-web-example"
+version = "0.1.0"
+authors = ["Francesco Guardiani <francescoguard@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+cloudevents-sdk = { path = "../.." }
+cloudevents-sdk-actix-web = { path = "../../cloudevents-sdk-actix-web" }
+actix-web = "2"
+actix-rt = "1"
+lazy_static = "1.4.0"
+bytes = "^0.5"
+futures = "^0.3"
+serde_json = "^1.0"
+url = { version = "^2.1" }
+env_logger = "0.7.1"
+
+[workspace]

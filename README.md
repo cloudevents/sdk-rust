@@ -6,15 +6,20 @@ Work in progress SDK for [CloudEvents](https://github.com/cloudevents/spec)
 
 |                               |  [v0.3](https://github.com/cloudevents/spec/tree/v0.3) | [v1.0](https://github.com/cloudevents/spec/tree/v1.0) |
 | :---------------------------: | :----------------------------------------------------------------------------: | :---------------------------------------------------------------------------------: |
-| CloudEvents Core              | :x: | :heavy_check_mark: |
+| CloudEvents Core              | :heavy_check_mark: | :heavy_check_mark: |
 | AMQP Protocol Binding         | :x: | :x:  |
 | AVRO Event Format             | :x: | :x: |
-| HTTP Protocol Binding         | :x: | :x: |
-| JSON Event Format             | :x: | :heavy_check_mark: |
+| HTTP Protocol Binding         | :heavy_check_mark: | :heavy_check_mark: |
+| JSON Event Format             | :heavy_check_mark: | :heavy_check_mark: |
 | Kafka Protocol Binding        | :x: | :x: |
 | MQTT Protocol Binding         | :x: | :x: |
 | NATS Protocol Binding         | :x: | :x: |
 | Web hook                      | :x: | :x: |
+
+## Modules
+
+* `cloudevents-sdk`: Provides Event data structure, JSON Event format implementation
+* `cloudevents-sdk-actix-web`: Integration with [Actix Web](https://github.com/actix/actix-web)
 
 ## Development & Contributing
 

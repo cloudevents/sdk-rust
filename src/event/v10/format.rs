@@ -9,18 +9,18 @@ use serde_value::Value;
 use std::collections::{BTreeMap, HashMap};
 use url::Url;
 
-pub(crate) struct EventDeserializer {}
+pub(crate) struct EventFormatDeserializer {}
 
-impl crate::event::serde::EventDeserializer for EventDeserializer {
+impl crate::event::format::EventFormatDeserializer for EventFormatDeserializer {
     fn deserialize_attributes<E: serde::de::Error>(
         map: &mut BTreeMap<String, Value>,
     ) -> Result<crate::event::Attributes, E> {
-        Ok(crate::event::Attributes::V03(Attributes {
+        Ok(crate::event::Attributes::V10(Attributes {
             id: parse_field!(map, "id", String, E)?,
             ty: parse_field!(map, "type", String, E)?,
             source: parse_field!(map, "source", String, E, Url::parse)?,
             datacontenttype: parse_optional_field!(map, "datacontenttype", String, E)?,
-            schemaurl: parse_optional_field!(map, "schemaurl", String, E, Url::parse)?,
+            dataschema: parse_optional_field!(map, "dataschema", String, E, Url::parse)?,
             subject: parse_optional_field!(map, "subject", String, E)?,
             time: parse_optional_field!(map, "time", String, E, |s| DateTime::parse_from_rfc3339(
                 s
@@ -34,28 +34,26 @@ impl crate::event::serde::EventDeserializer for EventDeserializer {
         map: &mut BTreeMap<String, Value>,
     ) -> Result<Option<Data>, E> {
         let data = map.remove("data");
-        let is_base64 = map
-            .remove("datacontentencoding")
-            .map(String::deserialize)
-            .transpose()
-            .map_err(|e| E::custom(e))?
-            .map(|dce| dce.to_lowercase() == "base64")
-            .unwrap_or(false);
+        let data_base64 = map.remove("data_base64");
+
         let is_json = is_json_content_type(content_type);
 
-        Ok(match (data, is_base64, is_json) {
-            (Some(d), false, true) => Some(Data::Json(parse_data_json!(d, E)?)),
-            (Some(d), false, false) => Some(Data::String(parse_data_string!(d, E)?)),
-            (Some(d), true, true) => Some(Data::Json(parse_json_data_base64!(d, E)?)),
-            (Some(d), true, false) => Some(Data::Binary(parse_data_base64!(d, E)?)),
-            (None, _, _) => None,
+        Ok(match (data, data_base64, is_json) {
+            (Some(d), None, true) => Some(Data::Json(parse_data_json!(d, E)?)),
+            (Some(d), None, false) => Some(Data::String(parse_data_string!(d, E)?)),
+            (None, Some(d), true) => Some(Data::Json(parse_json_data_base64!(d, E)?)),
+            (None, Some(d), false) => Some(Data::Binary(parse_data_base64!(d, E)?)),
+            (Some(_), Some(_), _) => Err(E::custom("Cannot have both data and data_base64 field"))?,
+            (None, None, _) => None,
         })
     }
 }
 
-pub(crate) struct EventSerializer {}
+pub(crate) struct EventFormatSerializer {}
 
-impl<S: serde::Serializer> crate::event::serde::EventSerializer<S, Attributes> for EventSerializer {
+impl<S: serde::Serializer> crate::event::format::EventFormatSerializer<S, Attributes>
+    for EventFormatSerializer
+{
     fn serialize(
         attributes: &Attributes,
         data: &Option<Data>,
@@ -67,21 +65,24 @@ impl<S: serde::Serializer> crate::event::serde::EventSerializer<S, Attributes> f
                 1
             } else {
                 0
-            } + if attributes.schemaurl.is_some() { 1 } else { 0 }
-                + if attributes.subject.is_some() { 1 } else { 0 }
+            } + if attributes.dataschema.is_some() {
+                1
+            } else {
+                0
+            } + if attributes.subject.is_some() { 1 } else { 0 }
                 + if attributes.time.is_some() { 1 } else { 0 }
                 + if data.is_some() { 1 } else { 0 }
                 + extensions.len();
         let mut state = serializer.serialize_map(Some(num))?;
-        state.serialize_entry("specversion", "0.3")?;
+        state.serialize_entry("specversion", "1.0")?;
         state.serialize_entry("id", &attributes.id)?;
         state.serialize_entry("type", &attributes.ty)?;
         state.serialize_entry("source", &attributes.source)?;
         if let Some(datacontenttype) = &attributes.datacontenttype {
             state.serialize_entry("datacontenttype", datacontenttype)?;
         }
-        if let Some(schemaurl) = &attributes.schemaurl {
-            state.serialize_entry("schemaurl", schemaurl)?;
+        if let Some(dataschema) = &attributes.dataschema {
+            state.serialize_entry("dataschema", dataschema)?;
         }
         if let Some(subject) = &attributes.subject {
             state.serialize_entry("subject", subject)?;
@@ -92,10 +93,7 @@ impl<S: serde::Serializer> crate::event::serde::EventSerializer<S, Attributes> f
         match data {
             Some(Data::Json(j)) => state.serialize_entry("data", j)?,
             Some(Data::String(s)) => state.serialize_entry("data", s)?,
-            Some(Data::Binary(v)) => {
-                state.serialize_entry("data", &base64::encode(v))?;
-                state.serialize_entry("datacontentencoding", "base64")?;
-            }
+            Some(Data::Binary(v)) => state.serialize_entry("data_base64", &base64::encode(v))?,
             _ => (),
         };
         for (k, v) in extensions {

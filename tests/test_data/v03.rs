@@ -1,7 +1,7 @@
 use super::*;
 use cloudevents::{Event, EventBuilder};
 use serde_json::{json, Value};
-use std::convert::TryInto;
+
 use url::Url;
 
 pub fn minimal() -> Event {

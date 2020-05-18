@@ -12,18 +12,18 @@ use futures::StreamExt;
 use std::convert::TryFrom;
 
 /// Wrapper for [`HttpRequest`] that implements [`MessageDeserializer`] trait
-pub struct HttpRequestMessage<'a> {
+pub struct HttpRequestDeserializer<'a> {
     req: &'a HttpRequest,
     body: Bytes,
 }
 
-impl HttpRequestMessage<'_> {
-    fn new(req: &HttpRequest, body: Bytes) -> HttpRequestMessage {
-        HttpRequestMessage { req, body }
+impl HttpRequestDeserializer<'_> {
+    pub fn new(req: &HttpRequest, body: Bytes) -> HttpRequestDeserializer {
+        HttpRequestDeserializer { req, body }
     }
 }
 
-impl<'a> BinaryDeserializer for HttpRequestMessage<'a> {
+impl<'a> BinaryDeserializer for HttpRequestDeserializer<'a> {
     fn deserialize_binary<R: Sized, V: BinarySerializer<R>>(
         self,
         mut visitor: V,
@@ -77,7 +77,7 @@ impl<'a> BinaryDeserializer for HttpRequestMessage<'a> {
     }
 }
 
-impl<'a> StructuredDeserializer for HttpRequestMessage<'a> {
+impl<'a> StructuredDeserializer for HttpRequestDeserializer<'a> {
     fn deserialize_structured<R: Sized, V: StructuredSerializer<R>>(
         self,
         visitor: V,
@@ -89,7 +89,7 @@ impl<'a> StructuredDeserializer for HttpRequestMessage<'a> {
     }
 }
 
-impl<'a> MessageDeserializer for HttpRequestMessage<'a> {
+impl<'a> MessageDeserializer for HttpRequestDeserializer<'a> {
     fn encoding(&self) -> Encoding {
         if self.req.content_type() == "application/cloudevents+json" {
             Encoding::STRUCTURED
@@ -115,7 +115,7 @@ pub async fn request_to_event(
     while let Some(item) = payload.next().await {
         bytes.extend_from_slice(&item?);
     }
-    MessageDeserializer::into_event(HttpRequestMessage::new(req, bytes.freeze()))
+    MessageDeserializer::into_event(HttpRequestDeserializer::new(req, bytes.freeze()))
         .map_err(actix_web::error::ErrorBadRequest)
 }
 

@@ -10,8 +10,14 @@ use cloudevents::message::{
 use cloudevents::Event;
 use std::str::FromStr;
 
-struct HttpResponseSerializer {
+pub struct HttpResponseSerializer {
     builder: HttpResponseBuilder,
+}
+
+impl HttpResponseSerializer {
+    pub fn new(builder: HttpResponseBuilder) -> HttpResponseSerializer {
+        HttpResponseSerializer { builder }
+    }
 }
 
 impl BinarySerializer<HttpResponse> for HttpResponseSerializer {
@@ -60,11 +66,12 @@ impl StructuredSerializer<HttpResponse> for HttpResponseSerializer {
     }
 }
 
+/// Method to fill an [`HttpResponseBuilder`] with an [`Event`]
 pub async fn event_to_response(
     event: Event,
     response: HttpResponseBuilder,
 ) -> Result<HttpResponse, actix_web::error::Error> {
-    BinaryDeserializer::deserialize_binary(event, HttpResponseSerializer { builder: response })
+    BinaryDeserializer::deserialize_binary(event, HttpResponseSerializer::new(response))
         .map_err(actix_web::error::ErrorBadRequest)
 }
 

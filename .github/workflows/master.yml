@@ -21,7 +21,7 @@ jobs:
     - uses: actions/checkout@v2
     - run: sudo apt-get update
       if: matrix.target == 'x86_64-unknown-linux-musl'
-    - run: sudo apt-get install -y musl
+    - run: sudo apt-get install -y musl musl-dev musl-tools
       if: matrix.target == 'x86_64-unknown-linux-musl'
     - name: Cache cargo registry
       uses: actions/cache@v1

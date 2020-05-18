@@ -1,4 +1,4 @@
-use super::{BinarySerializer, Encoding, Error, StructuredSerializer, Result};
+use super::{BinarySerializer, Encoding, StructuredSerializer, Result};
 use crate::Event;
 
 pub trait StructuredDeserializer

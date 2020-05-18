@@ -4,7 +4,7 @@ use actix_web::http::{HeaderName, HeaderValue};
 use actix_web::HttpResponse;
 use cloudevents::event::SpecVersion;
 use cloudevents::message::{
-    BinaryDeserializer, BinarySerializer, Error, MessageAttributeValue, SerializationResult,
+    BinaryDeserializer, BinarySerializer, MessageAttributeValue, Result,
     StructuredSerializer,
 };
 use cloudevents::Event;
@@ -21,41 +21,41 @@ impl HttpResponseSerializer {
 }
 
 impl BinarySerializer<HttpResponse> for HttpResponseSerializer {
-    fn set_spec_version(&mut self, spec_version: SpecVersion) -> SerializationResult {
+    fn set_spec_version(mut self, spec_version: SpecVersion) -> Result<Self> {
         self.builder.set_header(
             headers::SPEC_VERSION_HEADER.clone(),
             str_to_header_value!(spec_version.as_str())?,
         );
-        SerializationResult::Ok(())
+        Ok(self)
     }
 
-    fn set_attribute(&mut self, name: &str, value: MessageAttributeValue) -> SerializationResult {
+    fn set_attribute(mut self, name: &str, value: MessageAttributeValue) -> Result<Self> {
         self.builder.set_header(
             headers::ATTRIBUTES_TO_HEADERS.get(name).unwrap().clone(),
             str_to_header_value!(value.to_string().as_str())?,
         );
-        SerializationResult::Ok(())
+        Ok(self)
     }
 
-    fn set_extension(&mut self, name: &str, value: MessageAttributeValue) -> SerializationResult {
+    fn set_extension(mut self, name: &str, value: MessageAttributeValue) -> Result<Self> {
         self.builder.set_header(
             attribute_name_to_header!(name)?,
             str_to_header_value!(value.to_string().as_str())?,
         );
-        SerializationResult::Ok(())
+        Ok(self)
     }
 
-    fn end_with_data(mut self, bytes: Vec<u8>) -> Result<HttpResponse, Error> {
+    fn end_with_data(mut self, bytes: Vec<u8>) -> Result<HttpResponse> {
         Ok(self.builder.body(bytes))
     }
 
-    fn end(mut self) -> Result<HttpResponse, Error> {
+    fn end(mut self) -> Result<HttpResponse> {
         Ok(self.builder.finish())
     }
 }
 
 impl StructuredSerializer<HttpResponse> for HttpResponseSerializer {
-    fn set_structured_event(mut self, bytes: Vec<u8>) -> Result<HttpResponse, Error> {
+    fn set_structured_event(mut self, bytes: Vec<u8>) -> Result<HttpResponse> {
         Ok(self
             .builder
             .set_header(
@@ -70,7 +70,7 @@ impl StructuredSerializer<HttpResponse> for HttpResponseSerializer {
 pub async fn event_to_response(
     event: Event,
     response: HttpResponseBuilder,
-) -> Result<HttpResponse, actix_web::error::Error> {
+) -> std::result::Result<HttpResponse, actix_web::error::Error> {
     BinaryDeserializer::deserialize_binary(event, HttpResponseSerializer::new(response))
         .map_err(actix_web::error::ErrorBadRequest)
 }

@@ -47,7 +47,7 @@ impl<'a> BinaryDeserializer for HttpRequestMessage<'a> {
                 headers::SPEC_VERSION_HEADER.ne(hn) && hn.as_str().starts_with("ce-")
             })
         {
-            let name = hn.as_str().strip_prefix("ce-").unwrap();
+            let name = &hn.as_str()["ce-".len()..];
 
             if attributes.contains(&name) {
                 visitor.set_attribute(

@@ -1,5 +1,3 @@
-#![feature(str_strip)]
-
 #[macro_use]
 mod headers;
 mod server_request;

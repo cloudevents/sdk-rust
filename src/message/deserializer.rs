@@ -1,4 +1,4 @@
-use super::{BinarySerializer, Encoding, Error, StructuredSerializer};
+use super::{BinarySerializer, Encoding, Error, StructuredSerializer, Result};
 use crate::Event;
 
 pub trait StructuredDeserializer
@@ -8,9 +8,9 @@ where
     fn deserialize_structured<R: Sized, V: StructuredSerializer<R>>(
         self,
         serializer: V,
-    ) -> Result<R, Error>;
+    ) -> Result<R>;
 
-    fn into_event(self) -> Result<Event, Error> {
+    fn into_event(self) -> Result<Event> {
         self.deserialize_structured(Event::default())
     }
 }
@@ -22,9 +22,9 @@ where
     fn deserialize_binary<R: Sized, V: BinarySerializer<R>>(
         self,
         serializer: V,
-    ) -> Result<R, Error>;
+    ) -> Result<R>;
 
-    fn into_event(self) -> Result<Event, Error> {
+    fn into_event(self) -> Result<Event> {
         self.deserialize_binary(Event::default())
     }
 }
@@ -35,14 +35,14 @@ where
 {
     fn encoding(&self) -> Encoding;
 
-    fn into_event(self) -> Result<Event, Error> {
+    fn into_event(self) -> Result<Event> {
         self.deserialize_to(Event::default())
     }
 
     fn deserialize_to_binary<R: Sized, T: BinarySerializer<R>>(
         self,
         serializer: T,
-    ) -> Result<R, Error> {
+    ) -> Result<R> {
         if self.encoding() == Encoding::BINARY {
             return self.deserialize_binary(serializer);
         }
@@ -53,7 +53,7 @@ where
     fn deserialize_to_structured<R: Sized, T: StructuredSerializer<R>>(
         self,
         serializer: T,
-    ) -> Result<R, Error> {
+    ) -> Result<R> {
         if self.encoding() == Encoding::STRUCTURED {
             return self.deserialize_structured(serializer);
         }
@@ -64,7 +64,7 @@ where
     fn deserialize_to<R: Sized, T: BinarySerializer<R> + StructuredSerializer<R>>(
         self,
         serializer: T,
-    ) -> Result<R, Error> {
+    ) -> Result<R> {
         if self.encoding() == Encoding::STRUCTURED {
             self.deserialize_structured(serializer)
         } else {

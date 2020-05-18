@@ -30,5 +30,4 @@ pub enum Error {
     Other { source: Box<dyn std::error::Error> },
 }
 
-pub type SerializationResult = Result<(), Error>;
-pub type DeserializationResult = Result<(), Error>;
+pub type Result<T> = std::result::Result<T, Error>;

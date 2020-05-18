@@ -1,13 +1,13 @@
 mod test_data;
 use cloudevents::message::{
-    BinaryDeserializer, BinarySerializer, DeserializationResult, Error, MessageAttributeValue,
-    StructuredDeserializer,
+    BinaryDeserializer, BinarySerializer, Error, MessageAttributeValue,
+    StructuredDeserializer, Result,
 };
 
 use test_data::*;
 
 #[test]
-fn message_v03_roundtrip_structured() -> DeserializationResult {
+fn message_v03_roundtrip_structured() -> Result<()> {
     assert_eq!(
         v03::full_json_data(),
         StructuredDeserializer::into_event(v03::full_json_data())?
@@ -16,7 +16,7 @@ fn message_v03_roundtrip_structured() -> DeserializationResult {
 }
 
 #[test]
-fn message_v03_roundtrip_binary() -> DeserializationResult {
+fn message_v03_roundtrip_binary() -> Result<()> {
     assert_eq!(
         v03::full_json_data(),
         BinaryDeserializer::into_event(v03::full_json_data())?
@@ -25,7 +25,7 @@ fn message_v03_roundtrip_binary() -> DeserializationResult {
 }
 
 #[test]
-fn message_v10_roundtrip_structured() -> DeserializationResult {
+fn message_v10_roundtrip_structured() -> Result<()> {
     assert_eq!(
         v10::full_json_data(),
         StructuredDeserializer::into_event(v10::full_json_data())?
@@ -34,7 +34,7 @@ fn message_v10_roundtrip_structured() -> DeserializationResult {
 }
 
 #[test]
-fn message_v10_roundtrip_binary() -> DeserializationResult {
+fn message_v10_roundtrip_binary() -> Result<()> {
     assert_eq!(
         v10::full_json_data(),
         BinaryDeserializer::into_event(v10::full_json_data())?

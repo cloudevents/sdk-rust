@@ -199,7 +199,11 @@ pub(crate) fn default_hostname() -> Url {
     Url::parse(
         format!(
             "http://{}",
-            hostname::get_hostname().unwrap_or("localhost".to_string())
+            hostname::get()
+                .ok()
+                .map(|s| s.into_string().ok())
+                .flatten()
+                .unwrap_or(String::from("localhost".to_string()))
         )
         .as_ref(),
     )

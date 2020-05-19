@@ -44,11 +44,17 @@ pub trait AttributesReader {
     fn get_time(&self) -> Option<&DateTime<Utc>>;
 }
 
+/// Trait to set [CloudEvents Context attributes](https://github.com/cloudevents/spec/blob/master/spec.md#context-attributes).
 pub trait AttributesWriter {
+    /// Set the [id](https://github.com/cloudevents/spec/blob/master/spec.md#id).
     fn set_id(&mut self, id: impl Into<String>);
+    /// Set the [source](https://github.com/cloudevents/spec/blob/master/spec.md#source-1).
     fn set_source(&mut self, source: impl Into<Url>);
+    /// Set the [type](https://github.com/cloudevents/spec/blob/master/spec.md#type).
     fn set_type(&mut self, ty: impl Into<String>);
+    /// Set the [subject](https://github.com/cloudevents/spec/blob/master/spec.md#subject).
     fn set_subject(&mut self, subject: Option<impl Into<String>>);
+    /// Set the [time](https://github.com/cloudevents/spec/blob/master/spec.md#time).
     fn set_time(&mut self, time: Option<impl Into<DateTime<Utc>>>);
 }
 
@@ -62,6 +68,7 @@ pub(crate) trait DataAttributesWriter {
     fn set_dataschema(&mut self, dataschema: Option<impl Into<Url>>);
 }
 
+/// Union type representing one of the possible context attributes structs
 #[derive(PartialEq, Debug, Clone)]
 pub enum Attributes {
     V03(AttributesV03),

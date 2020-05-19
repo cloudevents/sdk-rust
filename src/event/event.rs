@@ -14,7 +14,7 @@ use url::Url;
 /// and write them through [`AttributesWriter`].
 /// It also provides methods to read and write the [event data](https://github.com/cloudevents/spec/blob/master/spec.md#event-data).
 ///
-/// You can build events using [`EventBuilder`]
+/// You can build events using [`super::EventBuilder`]
 /// ```
 /// use cloudevents::Event;
 /// use cloudevents::event::AttributesReader;
@@ -35,9 +35,9 @@ use url::Url;
 /// ```
 #[derive(PartialEq, Debug, Clone)]
 pub struct Event {
-    pub attributes: Attributes,
-    pub data: Option<Data>,
-    pub extensions: HashMap<String, ExtensionValue>,
+    pub(crate) attributes: Attributes,
+    pub(crate) data: Option<Data>,
+    pub(crate) extensions: HashMap<String, ExtensionValue>,
 }
 
 impl AttributesReader for Event {
@@ -78,13 +78,14 @@ impl Default for Event {
 }
 
 impl Event {
+    /// Remove `data`, `dataschema` and `datacontenttype` from this `Event`
     pub fn remove_data(&mut self) {
         self.data = None;
         self.attributes.set_dataschema(None as Option<Url>);
         self.attributes.set_datacontenttype(None as Option<String>);
     }
 
-    /// Write data into the `Event` with the specified `datacontenttype`.
+    /// Write `data` into this `Event` with the specified `datacontenttype`.
     ///
     /// ```
     /// use cloudevents::Event;
@@ -100,7 +101,7 @@ impl Event {
         self.data = Some(data.into());
     }
 
-    /// Write data into the `Event` with the specified `datacontenttype` and `dataschema`.
+    /// Write `data` into this `Event` with the specified `datacontenttype` and `dataschema`.
     ///
     /// ```
     /// use cloudevents::Event;
@@ -126,6 +127,7 @@ impl Event {
         self.data = Some(data.into());
     }
 
+    /// Get `data` from this `Event`
     pub fn get_data<T: Sized + From<Data>>(&self) -> Option<T> {
         match self.data.as_ref() {
             Some(d) => Some(T::from(d.clone())),
@@ -133,6 +135,7 @@ impl Event {
         }
     }
 
+    /// Try to get `data` from this `Event`
     pub fn try_get_data<T: Sized + TryFrom<Data>>(&self) -> Result<Option<T>, T::Error> {
         match self.data.as_ref() {
             Some(d) => Some(T::try_from(d.clone())),
@@ -141,6 +144,7 @@ impl Event {
         .transpose()
     }
 
+    /// Transform this `Event` into the content of `data`
     pub fn into_data<T: Sized + TryFrom<Data>>(self) -> Result<Option<T>, T::Error> {
         match self.data {
             Some(d) => Some(T::try_from(d)),
@@ -162,6 +166,7 @@ impl Event {
             .collect()
     }
 
+    /// Set the [extension](https://github.com/cloudevents/spec/blob/master/spec.md#extension-context-attributes) named `extension_name` with `extension_value`
     pub fn set_extension<'name, 'event: 'name>(
         &'event mut self,
         extension_name: &'name str,
@@ -171,6 +176,7 @@ impl Event {
             .insert(extension_name.to_owned(), extension_value.into());
     }
 
+    /// Remove the [extension](https://github.com/cloudevents/spec/blob/master/spec.md#extension-context-attributes) named `extension_name`
     pub fn remove_extension<'name, 'event: 'name>(
         &'event mut self,
         extension_name: &'name str,

@@ -1,5 +1,6 @@
 use snafu::Snafu;
 
+/// Represents an error during serialization/deserialization process
 #[derive(Debug, Snafu)]
 pub enum Error {
     #[snafu(display("Wrong encoding"))]
@@ -30,4 +31,5 @@ pub enum Error {
     Other { source: Box<dyn std::error::Error> },
 }
 
+/// Result type alias for return values during serialization/deserialization process
 pub type Result<T> = std::result::Result<T, Error>;

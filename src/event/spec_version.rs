@@ -6,6 +6,7 @@ use std::convert::TryFrom;
 use std::fmt;
 
 lazy_static! {
+    /// Lazily initialized map that contains all the context attribute names per [`SpecVersion`]
     pub static ref ATTRIBUTE_NAMES: HashMap<SpecVersion, &'static [&'static str]> = {
         let mut m = HashMap::new();
         m.insert(SpecVersion::V03, &v03::ATTRIBUTE_NAMES[..]);
@@ -16,6 +17,7 @@ lazy_static! {
 
 pub(crate) const SPEC_VERSIONS: [&'static str; 2] = ["0.3", "1.0"];
 
+/// CloudEvent specification version
 #[derive(PartialEq, Eq, Hash, Debug, Clone)]
 pub enum SpecVersion {
     V03,
@@ -37,6 +39,7 @@ impl fmt::Display for SpecVersion {
     }
 }
 
+/// Error representing an invalid [`SpecVersion`] string identifier
 #[derive(Debug)]
 pub struct InvalidSpecVersion {
     spec_version_value: String,

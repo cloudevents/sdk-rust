@@ -27,13 +27,13 @@ you need to install the Rust tooling using [rustup](https://rustup.rs/).
 To build the project:
 
 ```sh
-cargo build --all-features
+cargo build --all-features --all
 ```
 
 To run all tests:
 
 ```sh
-cargo test --all-features
+cargo test --all-features --all
 ```
 
 To build and open the documentation:

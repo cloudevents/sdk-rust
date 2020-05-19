@@ -4,6 +4,7 @@ use chrono::{DateTime, Utc};
 use std::collections::HashMap;
 use url::Url;
 
+/// Builder to create a CloudEvent V0.3
 pub struct EventBuilder {
     event: Event,
 }

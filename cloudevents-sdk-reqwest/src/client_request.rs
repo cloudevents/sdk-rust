@@ -62,7 +62,7 @@ impl StructuredSerializer<RequestBuilder> for RequestSerializer {
     }
 }
 
-/// Method to transform an incoming [`HttpRequest`] to [`Event`]
+/// Method to fill a [`RequestBuilder`] with an [`Event`]
 pub fn event_to_request(event: Event, request_builder: RequestBuilder) -> Result<RequestBuilder> {
     BinaryDeserializer::deserialize_binary(event, RequestSerializer::new(request_builder))
 }

@@ -9,6 +9,7 @@ use cloudevents::message::{
 use cloudevents::Event;
 use std::str::FromStr;
 
+/// Wrapper for [`HttpResponseBuilder`] that implements [`StructuredSerializer`] and [`BinarySerializer`]
 pub struct HttpResponseSerializer {
     builder: HttpResponseBuilder,
 }

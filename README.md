@@ -20,9 +20,9 @@ Note: All APIs are considered unstable.
 
 ## Modules
 
-* `cloudevents-sdk`: Provides Event data structure, JSON Event format implementation
-* `cloudevents-sdk-actix-web`: Integration with [Actix Web](https://github.com/actix/actix-web)
-* `cloudevents-sdk-reqwest`: Integration with [reqwest](https://github.com/seanmonstar/reqwest)
+* `cloudevents-sdk`: Provides Event data structure, JSON Event format implementation. This module is tested to work with GNU libc, WASM and musl toolchains.
+* `cloudevents-sdk-actix-web`: Integration with [Actix Web](https://github.com/actix/actix-web).
+* `cloudevents-sdk-reqwest`: Integration with [reqwest](https://github.com/seanmonstar/reqwest).
 
 ## Get Started
 

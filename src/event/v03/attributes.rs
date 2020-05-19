@@ -1,8 +1,7 @@
-use crate::event::attributes::{AttributeValue, AttributesConverter, DataAttributesWriter};
+use crate::event::attributes::{AttributeValue, AttributesConverter, DataAttributesWriter, default_hostname};
 use crate::event::AttributesV10;
 use crate::event::{AttributesReader, AttributesWriter, SpecVersion};
 use chrono::{DateTime, Utc};
-use hostname::get_hostname;
 use url::Url;
 use uuid::Uuid;
 
@@ -153,14 +152,7 @@ impl Default for Attributes {
         Attributes {
             id: Uuid::new_v4().to_string(),
             ty: "type".to_string(),
-            source: Url::parse(
-                format!(
-                    "http://{}",
-                    get_hostname().unwrap_or("localhost".to_string())
-                )
-                .as_ref(),
-            )
-            .unwrap(),
+            source: default_hostname(),
             datacontenttype: None,
             schemaurl: None,
             subject: None,

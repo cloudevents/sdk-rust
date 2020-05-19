@@ -17,6 +17,7 @@ jobs:
         target:
           - x86_64-unknown-linux-gnu
           - x86_64-unknown-linux-musl
+          - wasm32-unknown-unknown
     steps:
     - uses: actions/checkout@v2
     - run: sudo apt-get update
@@ -44,12 +45,22 @@ jobs:
         target: ${{ matrix.target }}
         override: true
     - uses: actions-rs/cargo@v1
+      if: matrix.target != 'wasm32-unknown-unknown'
       with:
         command: build
         toolchain: ${{ matrix.toolchain }}
         args: --target ${{ matrix.target }} --all
     - uses: actions-rs/cargo@v1
+      if: matrix.target != 'wasm32-unknown-unknown'
       with:
         command: test
         toolchain: ${{ matrix.toolchain }}
         args: --target ${{ matrix.target }} --all
+
+    # If wasm, then we don't need to compile --all
+    - uses: actions-rs/cargo@v1
+      if: matrix.target == 'wasm32-unknown-unknown'
+      with:
+        command: build
+        toolchain: ${{ matrix.toolchain }}
+        args: --target wasm32-unknown-unknown

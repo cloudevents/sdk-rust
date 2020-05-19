@@ -201,14 +201,21 @@ pub(crate) fn default_hostname() -> Url {
             "http://{}",
             hostname::get_hostname().unwrap_or("localhost".to_string())
         )
-            .as_ref(),
+        .as_ref(),
     )
-        .unwrap()
+    .unwrap()
 }
 
 #[cfg(target_arch = "wasm32")]
 pub(crate) fn default_hostname() -> Url {
     use std::str::FromStr;
 
-    Url::from_str(web_sys::window().map(|w| w.location().host().ok()).flatten().unwrap_or(String::from("http://localhost")).as_str()).unwrap()
+    Url::from_str(
+        web_sys::window()
+            .map(|w| w.location().host().ok())
+            .flatten()
+            .unwrap_or(String::from("http://localhost"))
+            .as_str(),
+    )
+    .unwrap()
 }

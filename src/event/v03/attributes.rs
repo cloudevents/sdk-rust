@@ -1,4 +1,6 @@
-use crate::event::attributes::{AttributeValue, AttributesConverter, DataAttributesWriter, default_hostname};
+use crate::event::attributes::{
+    default_hostname, AttributeValue, AttributesConverter, DataAttributesWriter,
+};
 use crate::event::AttributesV10;
 use crate::event::{AttributesReader, AttributesWriter, SpecVersion};
 use chrono::{DateTime, Utc};

@@ -55,7 +55,7 @@ fn attributes_to_headers(
 
 lazy_static! {
     pub(crate) static ref ATTRIBUTES_TO_HEADERS: HashMap<&'static str, HeaderName> =
-        attributes_to_headers(&cloudevents::event::spec_version::ATTRIBUTE_NAMES);
+        attributes_to_headers(&cloudevents::event::SPEC_VERSION_ATTRIBUTES);
     pub(crate) static ref SPEC_VERSION_HEADER: HeaderName =
         HeaderName::from_static("ce-specversion");
     pub(crate) static ref CLOUDEVENTS_JSON_HEADER: HeaderValue =

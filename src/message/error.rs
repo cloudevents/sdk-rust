@@ -7,7 +7,7 @@ pub enum Error {
     #[snafu(display("{}", source))]
     #[snafu(context(false))]
     InvalidSpecVersion {
-        source: crate::event::spec_version::InvalidSpecVersion,
+        source: crate::event::InvalidSpecVersion,
     },
     #[snafu(display("Unrecognized attribute name: {}", name))]
     UnrecognizedAttributeName { name: String },

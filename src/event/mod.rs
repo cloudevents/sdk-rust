@@ -6,7 +6,7 @@ mod extensions;
 #[macro_use]
 mod format;
 mod message;
-pub mod spec_version;
+mod spec_version;
 
 pub use attributes::Attributes;
 pub use attributes::{AttributesReader, AttributesWriter};
@@ -15,6 +15,8 @@ pub use data::Data;
 pub use event::Event;
 pub use extensions::ExtensionValue;
 pub use spec_version::SpecVersion;
+pub use spec_version::InvalidSpecVersion;
+pub use spec_version::ATTRIBUTE_NAMES as SPEC_VERSION_ATTRIBUTES;
 
 mod v03;
 

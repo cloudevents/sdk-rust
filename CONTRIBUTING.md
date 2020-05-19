@@ -42,11 +42,13 @@ To build and open the documentation:
 cargo doc --lib --open
 ```
 
-To run the code formatter:
+Before performing the PR, once you have committed all changes, run:
 
 ```sh
-cargo fmt
+cargo fix --all && cargo fmt --all
 ```
+
+And commit the changed files. These commands will reorganize imports and format the code.
 
 ## Suggesting a change
 

@@ -32,5 +32,5 @@ pub mod event;
 pub mod message;
 
 pub use event::Event;
-pub use event::{AttributesReader, AttributesWriter};
 pub use event::EventBuilder;
+pub use event::{AttributesReader, AttributesWriter};

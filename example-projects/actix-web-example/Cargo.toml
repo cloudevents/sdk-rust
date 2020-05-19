@@ -9,6 +9,7 @@ cloudevents-sdk = { path = "../.." }
 cloudevents-sdk-actix-web = { path = "../../cloudevents-sdk-actix-web" }
 actix-web = "2"
 actix-rt = "1"
+actix-cors = "^0.2.0"
 lazy_static = "1.4.0"
 bytes = "^0.5"
 futures = "^0.3"

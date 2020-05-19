@@ -185,7 +185,7 @@ mod tests {
     use chrono::NaiveDateTime;
 
     #[test]
-    fn iterator_test_V03() {
+    fn iterator_test_v03() {
         let a = Attributes {
             id: String::from("1"),
             ty: String::from("someType"),

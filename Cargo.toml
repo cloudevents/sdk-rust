@@ -8,6 +8,9 @@ description = "CloudEvents official Rust SDK"
 documentation = "https://docs.rs/cloudevents-sdk"
 readme = "README.md"
 repository = "https://github.com/cloudevents/sdk-rust"
+exclude = [
+    ".github/*"
+]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 

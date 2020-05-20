@@ -35,10 +35,11 @@ async fn main() -> std::io::Result<()> {
     HttpServer::new(|| {
         App::new()
             .wrap(actix_web::middleware::Logger::default())
+            .wrap(actix_cors::Cors::new().finish())
             .service(post_event)
             .service(get_event)
     })
-        .bind("127.0.0.1:8080")?
+        .bind("127.0.0.1:9000")?
         .workers(1)
         .run()
         .await

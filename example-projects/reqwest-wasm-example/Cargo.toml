@@ -1,0 +1,21 @@
+[package]
+name = "reqwest-wasm-example"
+version = "0.1.0"
+authors = ["Francesco Guardiani <francescoguard@gmail.com>"]
+edition = "2018"
+
+# Config mostly pulled from: https://github.com/rustwasm/wasm-bindgen/blob/master/examples/fetch/Cargo.toml
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+reqwest = "0.10.4"
+cloudevents-sdk = { path = "../.." }
+cloudevents-sdk-reqwest = { path = "../../cloudevents-sdk-reqwest" }
+url = { version = "^2.1" }
+web-sys = { version = "0.3.39", features = ["Window", "Location"] }
+wasm-bindgen-futures = "0.4.12"
+wasm-bindgen = { version = "0.2.62", features = ["serde-serialize"]  }
+
+[workspace]

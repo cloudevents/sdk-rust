@@ -193,3 +193,33 @@ impl Attributes {
         }
     }
 }
+
+#[cfg(not(target_arch = "wasm32"))]
+pub(crate) fn default_hostname() -> Url {
+    Url::parse(
+        format!(
+            "http://{}",
+            hostname::get()
+                .ok()
+                .map(|s| s.into_string().ok())
+                .flatten()
+                .unwrap_or(String::from("localhost".to_string()))
+        )
+        .as_ref(),
+    )
+    .unwrap()
+}
+
+#[cfg(target_arch = "wasm32")]
+pub(crate) fn default_hostname() -> Url {
+    use std::str::FromStr;
+
+    Url::from_str(
+        web_sys::window()
+            .map(|w| w.location().host().ok())
+            .flatten()
+            .unwrap_or(String::from("http://localhost"))
+            .as_str(),
+    )
+    .unwrap()
+}

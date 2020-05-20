@@ -1,8 +1,9 @@
-use crate::event::attributes::{AttributeValue, AttributesConverter, DataAttributesWriter};
+use crate::event::attributes::{
+    default_hostname, AttributeValue, AttributesConverter, DataAttributesWriter,
+};
 use crate::event::AttributesV10;
 use crate::event::{AttributesReader, AttributesWriter, SpecVersion};
 use chrono::{DateTime, Utc};
-use hostname::get_hostname;
 use url::Url;
 use uuid::Uuid;
 
@@ -153,14 +154,7 @@ impl Default for Attributes {
         Attributes {
             id: Uuid::new_v4().to_string(),
             ty: "type".to_string(),
-            source: Url::parse(
-                format!(
-                    "http://{}",
-                    get_hostname().unwrap_or("localhost".to_string())
-                )
-                .as_ref(),
-            )
-            .unwrap(),
+            source: default_hostname(),
             datacontenttype: None,
             schemaurl: None,
             subject: None,
@@ -193,7 +187,7 @@ mod tests {
     use chrono::NaiveDateTime;
 
     #[test]
-    fn iterator_test_V03() {
+    fn iterator_test_v03() {
         let a = Attributes {
             id: String::from("1"),
             ty: String::from("someType"),

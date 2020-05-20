@@ -27,13 +27,13 @@ you need to install the Rust tooling using [rustup](https://rustup.rs/).
 To build the project:
 
 ```sh
-cargo build --all-features
+cargo build --all-features --all
 ```
 
 To run all tests:
 
 ```sh
-cargo test --all-features
+cargo test --all-features --all
 ```
 
 To build and open the documentation:
@@ -42,11 +42,13 @@ To build and open the documentation:
 cargo doc --lib --open
 ```
 
-To run the code formatter:
+Before performing the PR, once you have committed all changes, run:
 
 ```sh
-cargo fmt
+cargo fix --all && cargo fmt --all
 ```
+
+And commit the changed files. These commands will reorganize imports and format the code.
 
 ## Suggesting a change
 

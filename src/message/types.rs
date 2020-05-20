@@ -3,6 +3,7 @@ use chrono::{DateTime, Utc};
 use std::convert::TryInto;
 use url::Url;
 
+/// Union type representing a [CloudEvent context attribute type](https://github.com/cloudevents/spec/blob/v1.0/spec.md#type-system)
 pub enum MessageAttributeValue {
     Boolean(bool),
     Integer(i64),

@@ -1,5 +1,6 @@
 use snafu::Snafu;
 
+/// Represents an error during serialization/deserialization process
 #[derive(Debug, Snafu)]
 pub enum Error {
     #[snafu(display("Wrong encoding"))]
@@ -7,7 +8,7 @@ pub enum Error {
     #[snafu(display("{}", source))]
     #[snafu(context(false))]
     InvalidSpecVersion {
-        source: crate::event::spec_version::InvalidSpecVersion,
+        source: crate::event::InvalidSpecVersion,
     },
     #[snafu(display("Unrecognized attribute name: {}", name))]
     UnrecognizedAttributeName { name: String },
@@ -30,4 +31,5 @@ pub enum Error {
     Other { source: Box<dyn std::error::Error> },
 }
 
+/// Result type alias for return values during serialization/deserialization process
 pub type Result<T> = std::result::Result<T, Error>;

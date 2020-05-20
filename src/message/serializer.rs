@@ -1,10 +1,12 @@
 use super::{MessageAttributeValue, Result};
 use crate::event::SpecVersion;
 
+/// Serializer for structured mode messages
 pub trait StructuredSerializer<RETURN: Sized> {
     fn set_structured_event(self, bytes: Vec<u8>) -> Result<RETURN>;
 }
 
+/// Serializer for binary mode messages
 pub trait BinarySerializer<RETURN: Sized>
 where
     Self: Sized,

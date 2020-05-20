@@ -1,6 +1,6 @@
 use super::{EventBuilderV03, EventBuilderV10};
 
-/// Builder to create [`Event`]:
+/// Builder to create [`super::Event`]:
 /// ```
 /// use cloudevents::EventBuilder;
 /// use chrono::Utc;

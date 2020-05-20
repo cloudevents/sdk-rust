@@ -18,6 +18,7 @@ pub(crate) const ATTRIBUTE_NAMES: [&'static str; 8] = [
     "time",
 ];
 
+/// Data structure representing [CloudEvents V0.3 context attributes](https://github.com/cloudevents/spec/blob/v0.3/spec.md#context-attributes)
 #[derive(PartialEq, Debug, Clone)]
 pub struct Attributes {
     pub(crate) id: String,

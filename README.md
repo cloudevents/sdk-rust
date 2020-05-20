@@ -1,8 +1,8 @@
 # CloudEvents SDK Rust [![Crates badge]][crates.io] [![Docs badge]][docs.rs] 
 
-Work in progress SDK for [CloudEvents](https://github.com/cloudevents/spec).
+This project implements the [CloudEvents](https://cloudevents.io/) Spec for Rust.
 
-Note: All APIs are considered unstable.
+Note: This projecets is WIP under active development, hence all APIs are considered unstable.
 
 ## Spec support
 
@@ -18,7 +18,7 @@ Note: All APIs are considered unstable.
 | NATS Protocol Binding         | :x: | :x: |
 | Web hook                      | :x: | :x: |
 
-## Modules
+## Crates
 
 * `cloudevents-sdk`: Provides Event data structure, JSON Event format implementation. This module is tested to work with GNU libc, WASM and musl toolchains.
 * `cloudevents-sdk-actix-web`: Integration with [Actix Web](https://github.com/actix/actix-web).

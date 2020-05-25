@@ -2,21 +2,21 @@
 
 This project implements the [CloudEvents](https://cloudevents.io/) Spec for Rust.
 
-Note: This projecets is WIP under active development, hence all APIs are considered unstable.
+Note: This project is WIP under active development, hence all APIs are considered unstable.
 
 ## Spec support
 
 |                               |  [v0.3](https://github.com/cloudevents/spec/tree/v0.3) | [v1.0](https://github.com/cloudevents/spec/tree/v1.0) |
 | :---------------------------: | :----------------------------------------------------------------------------: | :---------------------------------------------------------------------------------: |
-| CloudEvents Core              | :heavy_check_mark: | :heavy_check_mark: |
-| AMQP Protocol Binding         | :x: | :x:  |
-| AVRO Event Format             | :x: | :x: |
-| HTTP Protocol Binding         | :heavy_check_mark: | :heavy_check_mark: |
-| JSON Event Format             | :heavy_check_mark: | :heavy_check_mark: |
-| Kafka Protocol Binding        | :x: | :x: |
-| MQTT Protocol Binding         | :x: | :x: |
-| NATS Protocol Binding         | :x: | :x: |
-| Web hook                      | :x: | :x: |
+| CloudEvents Core              | ✓ | ✓ |
+| AMQP Protocol Binding         | ✕ | ✕ |
+| AVRO Event Format             | ✕ | ✕ |
+| HTTP Protocol Binding         | ✓ | ✓ |
+| JSON Event Format             | ✓ | ✓ |
+| Kafka Protocol Binding        | ✕ | ✕ |
+| MQTT Protocol Binding         | ✕ | ✕ |
+| NATS Protocol Binding         | ✕ | ✕ |
+| Web hook                      | ✕ | ✕ |
 
 ## Crates
 

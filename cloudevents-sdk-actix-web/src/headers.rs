@@ -46,17 +46,16 @@ macro_rules! attribute_name_to_header {
 }
 
 fn attributes_to_headers(
-    it: impl Iterator<Item=&'static str>,
+    it: impl Iterator<Item = &'static str>,
 ) -> HashMap<&'static str, HeaderName> {
-    it
-        .map(|s| {
-            if s == "datacontenttype" {
-                (s, header::CONTENT_TYPE)
-            } else {
-                (s, attribute_name_to_header!(s).unwrap())
-            }
-        })
-        .collect()
+    it.map(|s| {
+        if s == "datacontenttype" {
+            (s, header::CONTENT_TYPE)
+        } else {
+            (s, attribute_name_to_header!(s).unwrap())
+        }
+    })
+    .collect()
 }
 
 lazy_static! {

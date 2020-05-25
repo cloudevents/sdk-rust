@@ -25,12 +25,12 @@ impl SpecVersion {
     pub fn attribute_names(&self) -> &'static [&'static str] {
         match self {
             SpecVersion::V03 => &v03::ATTRIBUTE_NAMES,
-            SpecVersion::V10 => &v10::ATTRIBUTE_NAMES
+            SpecVersion::V10 => &v10::ATTRIBUTE_NAMES,
         }
     }
     /// Get all attribute names for all Spec versions.
     /// Note that the result iterator could contain duplicate entries.
-    pub fn all_attribute_names() -> impl Iterator<Item=&'static str> {
+    pub fn all_attribute_names() -> impl Iterator<Item = &'static str> {
         vec![SpecVersion::V03, SpecVersion::V10]
             .into_iter()
             .flat_map(|s| s.attribute_names().to_owned().into_iter())

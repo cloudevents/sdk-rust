@@ -39,15 +39,14 @@ macro_rules! attribute_name_to_header {
 }
 
 fn attributes_to_headers(
-    map: &HashMap<SpecVersion, &'static [&'static str]>,
+    it: impl Iterator<Item=&'static str>,
 ) -> HashMap<&'static str, HeaderName> {
-    map.values()
-        .flat_map(|s| s.iter())
+    it
         .map(|s| {
-            if *s == "datacontenttype" {
-                (*s, reqwest::header::CONTENT_TYPE)
+            if s == "datacontenttype" {
+                (s, reqwest::header::CONTENT_TYPE)
             } else {
-                (*s, attribute_name_to_header!(s).unwrap())
+                (s, attribute_name_to_header!(s).unwrap())
             }
         })
         .collect()
@@ -55,7 +54,7 @@ fn attributes_to_headers(
 
 lazy_static! {
     pub(crate) static ref ATTRIBUTES_TO_HEADERS: HashMap<&'static str, HeaderName> =
-        attributes_to_headers(&cloudevents::event::SPEC_VERSION_ATTRIBUTES);
+        attributes_to_headers(SpecVersion::all_attribute_names());
     pub(crate) static ref SPEC_VERSION_HEADER: HeaderName =
         HeaderName::from_static("ce-specversion");
     pub(crate) static ref CLOUDEVENTS_JSON_HEADER: HeaderValue =

@@ -1,19 +1,7 @@
 use super::{v03, v10};
-use lazy_static::lazy_static;
 use serde::export::Formatter;
-use std::collections::HashMap;
 use std::convert::TryFrom;
 use std::fmt;
-
-lazy_static! {
-    /// Lazily initialized map that contains all the context attribute names per [`SpecVersion`]
-    pub static ref ATTRIBUTE_NAMES: HashMap<SpecVersion, &'static [&'static str]> = {
-        let mut m = HashMap::new();
-        m.insert(SpecVersion::V03, &v03::ATTRIBUTE_NAMES[..]);
-        m.insert(SpecVersion::V10, &v10::ATTRIBUTE_NAMES[..]);
-        m
-    };
-}
 
 pub(crate) const SPEC_VERSIONS: [&'static str; 2] = ["0.3", "1.0"];
 
@@ -30,6 +18,22 @@ impl SpecVersion {
             SpecVersion::V03 => "0.3",
             SpecVersion::V10 => "1.0",
         }
+    }
+
+    /// Get all attribute names for this [`SpecVersion`].
+    #[inline]
+    pub fn attribute_names(&self) -> &'static [&'static str] {
+        match self {
+            SpecVersion::V03 => &v03::ATTRIBUTE_NAMES,
+            SpecVersion::V10 => &v10::ATTRIBUTE_NAMES,
+        }
+    }
+    /// Get all attribute names for all Spec versions.
+    /// Note that the result iterator could contain duplicate entries.
+    pub fn all_attribute_names() -> impl Iterator<Item = &'static str> {
+        vec![SpecVersion::V03, SpecVersion::V10]
+            .into_iter()
+            .flat_map(|s| s.attribute_names().to_owned().into_iter())
     }
 }
 

@@ -16,7 +16,6 @@ pub use event::Event;
 pub use extensions::ExtensionValue;
 pub use spec_version::InvalidSpecVersion;
 pub use spec_version::SpecVersion;
-pub use spec_version::ATTRIBUTE_NAMES as SPEC_VERSION_ATTRIBUTES;
 
 mod v03;
 

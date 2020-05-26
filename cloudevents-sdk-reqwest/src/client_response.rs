@@ -34,9 +34,7 @@ impl BinaryDeserializer for ResponseDeserializer {
 
         visitor = visitor.set_spec_version(spec_version.clone())?;
 
-        let attributes = cloudevents::event::SPEC_VERSION_ATTRIBUTES
-            .get(&spec_version)
-            .unwrap();
+        let attributes = spec_version.attribute_names();
 
         for (hn, hv) in self
             .headers

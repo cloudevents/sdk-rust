@@ -12,7 +12,8 @@ exclude = [
     ".github/*"
 ]
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[lib]
+name = "cloudevents"
 
 [dependencies]
 serde = { version = "^1.0", features = ["derive"] }
@@ -23,7 +24,6 @@ delegate = "^0.4"
 base64 = "^0.12"
 url = { version = "^2.1", features = ["serde"] }
 snafu = "^0.6"
-lazy_static = "1.4.0"
 
 [target."cfg(not(target_arch = \"wasm32\"))".dependencies]
 hostname = "^0.3"
@@ -36,9 +36,6 @@ uuid = { version = "^0.8", features = ["v4", "wasm-bindgen"] }
 [dev-dependencies]
 rstest = "0.6"
 claim = "0.3.1"
-
-[lib]
-name = "cloudevents"
 
 [workspace]
 members = [

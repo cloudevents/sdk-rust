@@ -18,7 +18,7 @@ pub use event::Event;
 pub use extensions::ExtensionValue;
 pub use spec_version::InvalidSpecVersion;
 pub use spec_version::SpecVersion;
-pub use types::{TryIntoUrl, TryIntoTime};
+pub use types::{TryIntoTime, TryIntoUrl};
 
 mod v03;
 

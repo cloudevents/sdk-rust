@@ -1,32 +1,42 @@
-use super::{EventBuilderV03, EventBuilderV10};
+use super::Event;
+use snafu::Snafu;
 
 /// Builder to create [`super::Event`]:
 /// ```
-/// use cloudevents::EventBuilder;
+/// use cloudevents::event::{EventBuilderV10, EventBuilder};
 /// use chrono::Utc;
 /// use url::Url;
 ///
-/// let event = EventBuilder::v10()
+/// let event = EventBuilderV10::new()
 ///     .id("my_event.my_application")
-///     .source(Url::parse("http://localhost:8080").unwrap())
+///     .source("http://localhost:8080")
 ///     .time(Utc::now())
-///     .build();
+///     .build()?;
 /// ```
-pub struct EventBuilder {}
+pub trait EventBuilder where Self: Clone + Sized {
+    /// Create a new builder copying the contents of the provided [`Event`].
+    fn from(event: Event) -> Self;
 
-impl EventBuilder {
-    /// Creates a new builder for latest CloudEvents version
-    pub fn new() -> EventBuilderV10 {
-        return Self::v10();
-    }
+    /// Create a new empty builder
+    fn new() -> Self;
 
-    /// Creates a new builder for CloudEvents V1.0
-    pub fn v10() -> EventBuilderV10 {
-        return EventBuilderV10::new();
-    }
+    /// Build [`super::Event`]
+    fn build(self) -> Result<super::Event, Error>;
+}
 
-    /// Creates a new builder for CloudEvents V0.3
-    pub fn v03() -> EventBuilderV03 {
-        return EventBuilderV03::new();
+/// Represents an error during build process
+#[derive(Debug, Snafu, Clone)]
+pub enum Error {
+    #[snafu(display("Missing required attribute {}", attribute_name))]
+    MissingRequiredAttribute{ attribute_name: &'static str },
+    #[snafu(display("Error while setting attribute '{}' with timestamp type: {}", attribute_name, source))]
+    ParseTimeError { attribute_name: &'static str, source: chrono::ParseError },
+    #[snafu(display("Error while setting attribute '{}' with uri/uriref type: {}", attribute_name, source))]
+    ParseUrlError { attribute_name: &'static str, source: url::ParseError },
+}
+
+impl <T: EventBuilder> Default for T {
+    fn default() -> T {
+        T::from(Event::default())
     }
 }

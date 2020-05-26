@@ -1,8 +1,8 @@
 use actix_web::{get, post, web, App, HttpRequest, HttpResponse, HttpServer};
 use cloudevents::{EventBuilder, EventBuilderV10};
-use url::Url;
-use std::str::FromStr;
 use serde_json::json;
+use std::str::FromStr;
+use url::Url;
 
 #[post("/")]
 async fn post_event(req: HttpRequest, payload: web::Payload) -> Result<String, actix_web::Error> {
@@ -24,8 +24,9 @@ async fn get_event() -> Result<HttpResponse, actix_web::Error> {
             .extension("someint", "10")
             .build()
             .unwrap(),
-        HttpResponse::Ok()
-    ).await?)
+        HttpResponse::Ok(),
+    )
+    .await?)
 }
 
 #[actix_rt::main]
@@ -40,8 +41,8 @@ async fn main() -> std::io::Result<()> {
             .service(post_event)
             .service(get_event)
     })
-        .bind("127.0.0.1:9000")?
-        .workers(1)
-        .run()
-        .await
+    .bind("127.0.0.1:9000")?
+    .workers(1)
+    .run()
+    .await
 }

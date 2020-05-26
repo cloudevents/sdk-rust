@@ -112,6 +112,7 @@ mod tests {
     use super::*;
     use mockito::mock;
 
+    use chrono::Utc;
     use cloudevents::{EventBuilder, EventBuilderV10};
     use serde_json::json;
     use std::str::FromStr;
@@ -119,6 +120,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_response() {
+        let time = Utc::now();
         let url = mockito::server_url();
         let _m = mock("GET", "/")
             .with_status(200)
@@ -127,11 +129,15 @@ mod tests {
             .with_header("ce-type", "example.test")
             .with_header("ce-source", "http://localhost")
             .with_header("ce-someint", "10")
+            .with_header("ce-time", &time.to_rfc3339())
             .create();
 
         let expected = EventBuilderV10::new()
             .id("0001")
             .ty("example.test")
+            //TODO this is required now because the message deserializer implictly set default values
+            // As soon as this defaulting doesn't happen anymore, we can remove it (Issues #40/#41)
+            .time(time)
             .source(Url::from_str("http://localhost").unwrap())
             .extension("someint", "10")
             .build()
@@ -146,6 +152,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_response_with_full_data() {
+        let time = Utc::now();
         let j = json!({"hello": "world"});
 
         let url = mockito::server_url();
@@ -157,12 +164,16 @@ mod tests {
             .with_header("ce-source", "http://localhost/")
             .with_header("content-type", "application/json")
             .with_header("ce-someint", "10")
+            .with_header("ce-time", &time.to_rfc3339())
             .with_body(j.to_string())
             .create();
 
         let expected = EventBuilderV10::new()
             .id("0001")
             .ty("example.test")
+            //TODO this is required now because the message deserializer implictly set default values
+            // As soon as this defaulting doesn't happen anymore, we can remove it (Issues #40/#41)
+            .time(time)
             .source(Url::from_str("http://localhost").unwrap())
             .data("application/json", j.clone())
             .extension("someint", "10")
@@ -178,10 +189,15 @@ mod tests {
 
     #[tokio::test]
     async fn test_structured_response_with_full_data() {
+        let time = Utc::now();
+
         let j = json!({"hello": "world"});
         let expected = EventBuilderV10::new()
             .id("0001")
             .ty("example.test")
+            //TODO this is required now because the message deserializer implictly set default values
+            // As soon as this defaulting doesn't happen anymore, we can remove it (Issues #40/#41)
+            .time(time)
             .source(Url::from_str("http://localhost").unwrap())
             .data("application/json", j.clone())
             .extension("someint", "10")

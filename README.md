@@ -35,14 +35,15 @@ cloudevents-sdk = "0.1.0"
 Now you can start creating events:
 
 ```rust
-use cloudevents::EventBuilder;
+use cloudevents::{EventBuilder, EventBuilderV10};
 use url::Url;
 
-let event = EventBuilder::v03()
+let event = EventBuilderV10::new()
     .id("aaa")
     .source(Url::parse("http://localhost").unwrap())
     .ty("example.demo")
-    .build();
+    .build()
+    .unwrap();
 ```
 
 Checkout the examples using our integrations with `actix-web` and `reqwest` to learn how to send and receive events:

@@ -1,5 +1,5 @@
 use actix_web::{get, post, web, App, HttpRequest, HttpResponse, HttpServer};
-use cloudevents::EventBuilder;
+use cloudevents::{EventBuilder, EventBuilderV10};
 use url::Url;
 use std::str::FromStr;
 use serde_json::json;
@@ -16,13 +16,14 @@ async fn get_event() -> Result<HttpResponse, actix_web::Error> {
     let payload = json!({"hello": "world"});
 
     Ok(cloudevents_sdk_actix_web::event_to_response(
-        EventBuilder::new()
+        EventBuilderV10::new()
             .id("0001")
             .ty("example.test")
             .source(Url::from_str("http://localhost/").unwrap())
             .data("application/json", payload)
             .extension("someint", "10")
-            .build(),
+            .build()
+            .unwrap(),
         HttpResponse::Ok()
     ).await?)
 }

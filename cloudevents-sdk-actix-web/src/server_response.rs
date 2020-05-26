@@ -82,19 +82,20 @@ mod tests {
 
     use actix_web::http::StatusCode;
     use actix_web::test;
-    use cloudevents::EventBuilder;
+    use cloudevents::{EventBuilder, EventBuilderV10};
     use futures::TryStreamExt;
     use serde_json::json;
     use std::str::FromStr;
 
     #[actix_rt::test]
     async fn test_response() {
-        let input = EventBuilder::new()
+        let input = EventBuilderV10::new()
             .id("0001")
             .ty("example.test")
             .source(Url::from_str("http://localhost/").unwrap())
             .extension("someint", "10")
-            .build();
+            .build()
+            .unwrap();
 
         let resp = event_to_response(input, HttpResponseBuilder::new(StatusCode::OK))
             .await
@@ -130,13 +131,14 @@ mod tests {
     async fn test_response_with_full_data() {
         let j = json!({"hello": "world"});
 
-        let input = EventBuilder::new()
+        let input = EventBuilderV10::new()
             .id("0001")
             .ty("example.test")
             .source(Url::from_str("http://localhost").unwrap())
             .data("application/json", j.clone())
             .extension("someint", "10")
-            .build();
+            .build()
+            .unwrap();
 
         let mut resp = event_to_response(input, HttpResponseBuilder::new(StatusCode::OK))
             .await

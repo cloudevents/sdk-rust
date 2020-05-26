@@ -73,7 +73,7 @@ mod tests {
     use mockito::{mock, Matcher};
 
     use cloudevents::message::StructuredDeserializer;
-    use cloudevents::EventBuilder;
+    use cloudevents::{EventBuilder, EventBuilderV10};
     use serde_json::json;
     use url::Url;
 
@@ -89,12 +89,13 @@ mod tests {
             .match_body(Matcher::Missing)
             .create();
 
-        let input = EventBuilder::new()
+        let input = EventBuilderV10::new()
             .id("0001")
             .ty("example.test")
             .source(Url::from_str("http://localhost/").unwrap())
             .extension("someint", "10")
-            .build();
+            .build()
+            .unwrap();
 
         let client = reqwest::Client::new();
         event_to_request(input, client.post(&url))
@@ -121,13 +122,14 @@ mod tests {
             .match_body(Matcher::Exact(j.to_string()))
             .create();
 
-        let input = EventBuilder::new()
+        let input = EventBuilderV10::new()
             .id("0001")
             .ty("example.test")
             .source(Url::from_str("http://localhost").unwrap())
             .data("application/json", j.clone())
             .extension("someint", "10")
-            .build();
+            .build()
+            .unwrap();
 
         let client = reqwest::Client::new();
         event_to_request(input, client.post(&url))
@@ -143,13 +145,14 @@ mod tests {
     async fn test_structured_request_with_full_data() {
         let j = json!({"hello": "world"});
 
-        let input = EventBuilder::new()
+        let input = EventBuilderV10::new()
             .id("0001")
             .ty("example.test")
             .source(Url::from_str("http://localhost").unwrap())
             .data("application/json", j.clone())
             .extension("someint", "10")
-            .build();
+            .build()
+            .unwrap();
 
         let url = mockito::server_url();
         let m = mock("POST", "/")

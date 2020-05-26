@@ -112,7 +112,7 @@ mod tests {
     use super::*;
     use mockito::mock;
 
-    use cloudevents::EventBuilder;
+    use cloudevents::{EventBuilder, EventBuilderV10};
     use serde_json::json;
     use std::str::FromStr;
     use url::Url;
@@ -129,12 +129,13 @@ mod tests {
             .with_header("ce-someint", "10")
             .create();
 
-        let expected = EventBuilder::new()
+        let expected = EventBuilderV10::new()
             .id("0001")
             .ty("example.test")
             .source(Url::from_str("http://localhost").unwrap())
             .extension("someint", "10")
-            .build();
+            .build()
+            .unwrap();
 
         let client = reqwest::Client::new();
         let res = client.get(&url).send().await.unwrap();
@@ -159,13 +160,14 @@ mod tests {
             .with_body(j.to_string())
             .create();
 
-        let expected = EventBuilder::new()
+        let expected = EventBuilderV10::new()
             .id("0001")
             .ty("example.test")
             .source(Url::from_str("http://localhost").unwrap())
             .data("application/json", j.clone())
             .extension("someint", "10")
-            .build();
+            .build()
+            .unwrap();
 
         let client = reqwest::Client::new();
         let res = client.get(&url).send().await.unwrap();
@@ -177,13 +179,14 @@ mod tests {
     #[tokio::test]
     async fn test_structured_response_with_full_data() {
         let j = json!({"hello": "world"});
-        let expected = EventBuilder::new()
+        let expected = EventBuilderV10::new()
             .id("0001")
             .ty("example.test")
             .source(Url::from_str("http://localhost").unwrap())
             .data("application/json", j.clone())
             .extension("someint", "10")
-            .build();
+            .build()
+            .unwrap();
 
         let url = mockito::server_url();
         let _m = mock("GET", "/")

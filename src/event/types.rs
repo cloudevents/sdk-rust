@@ -1,5 +1,5 @@
-use url::Url;
 use chrono::{DateTime, Utc};
+use url::Url;
 
 /// Trait to define conversion to [`Url`]
 pub trait TryIntoUrl {
@@ -37,9 +37,7 @@ impl TryIntoTime for DateTime<Utc> {
 /// Trait to define conversion to [`DateTime`]
 impl TryIntoTime for &str {
     fn into_time(self) -> Result<DateTime<Utc>, chrono::ParseError> {
-        Ok(DateTime::<Utc>::from(DateTime::parse_from_rfc3339(
-            self,
-        )?))
+        Ok(DateTime::<Utc>::from(DateTime::parse_from_rfc3339(self)?))
     }
 }
 

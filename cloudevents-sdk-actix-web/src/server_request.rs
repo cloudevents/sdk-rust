@@ -117,10 +117,10 @@ mod tests {
     use actix_web::test;
     use url::Url;
 
+    use chrono::Utc;
     use cloudevents::{EventBuilder, EventBuilderV10};
     use serde_json::json;
     use std::str::FromStr;
-    use chrono::Utc;
 
     #[actix_rt::test]
     async fn test_request() {

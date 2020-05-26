@@ -1,10 +1,12 @@
 #[macro_use]
 mod util;
 
-use url::Url;
-use cloudevents::event::{AttributesReader, SpecVersion, EventBuilder, ExtensionValue, EventBuilderError};
 use chrono::{DateTime, Utc};
+use cloudevents::event::{
+    AttributesReader, EventBuilder, EventBuilderError, ExtensionValue, SpecVersion,
+};
 use cloudevents::EventBuilderV03;
+use url::Url;
 
 #[test]
 fn build_event() {
@@ -18,8 +20,8 @@ fn build_event() {
     let content_type = "application/json";
     let schema = Url::parse("http://localhost:8080/schema").unwrap();
     let data = serde_json::json!({
-            "hello": "world"
-        });
+        "hello": "world"
+    });
 
     let event = EventBuilderV03::new()
         .id(id)
@@ -54,15 +56,24 @@ fn build_missing_id() {
     let res = EventBuilderV03::new()
         .source("http://localhost:8080")
         .build();
-    assert_match_pattern!(res, Err(EventBuilderError::MissingRequiredAttribute {attribute_name: "id"}));
+    assert_match_pattern!(
+        res,
+        Err(EventBuilderError::MissingRequiredAttribute {
+            attribute_name: "id"
+        })
+    );
 }
 
 #[test]
 fn source_invalid_url() {
-    let res = EventBuilderV03::new()
-        .source("")
-        .build();
-    assert_match_pattern!(res, Err(EventBuilderError::ParseUrlError {attribute_name: "source", ..}));
+    let res = EventBuilderV03::new().source("").build();
+    assert_match_pattern!(
+        res,
+        Err(EventBuilderError::ParseUrlError {
+            attribute_name: "source",
+            ..
+        })
+    );
 }
 
 #[test]

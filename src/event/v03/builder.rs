@@ -1,5 +1,7 @@
 use super::Attributes as AttributesV03;
-use crate::event::{Attributes, Data, Event, ExtensionValue, EventBuilderError, TryIntoUrl, TryIntoTime};
+use crate::event::{
+    Attributes, Data, Event, EventBuilderError, ExtensionValue, TryIntoTime, TryIntoUrl,
+};
 use chrono::{DateTime, Utc};
 use std::collections::HashMap;
 use url::Url;
@@ -16,7 +18,7 @@ pub struct EventBuilder {
     time: Option<DateTime<Utc>>,
     data: Option<Data>,
     extensions: HashMap<String, ExtensionValue>,
-    error: Option<EventBuilderError>
+    error: Option<EventBuilderError>,
 }
 
 impl EventBuilder {
@@ -28,9 +30,12 @@ impl EventBuilder {
     pub fn source(mut self, source: impl TryIntoUrl) -> Self {
         match source.into_url() {
             Ok(u) => self.source = Some(u),
-            Err(e) => self.error = Some(
-                EventBuilderError::ParseUrlError {attribute_name: "source", source: e}
-            )
+            Err(e) => {
+                self.error = Some(EventBuilderError::ParseUrlError {
+                    attribute_name: "source",
+                    source: e,
+                })
+            }
         };
         self
     }
@@ -48,9 +53,12 @@ impl EventBuilder {
     pub fn time(mut self, time: impl TryIntoTime) -> Self {
         match time.into_time() {
             Ok(u) => self.time = Some(u),
-            Err(e) => self.error = Some(
-                EventBuilderError::ParseTimeError {attribute_name: "time", source: e}
-            )
+            Err(e) => {
+                self.error = Some(EventBuilderError::ParseTimeError {
+                    attribute_name: "time",
+                    source: e,
+                })
+            }
         };
         self
     }
@@ -60,7 +68,8 @@ impl EventBuilder {
         extension_name: &str,
         extension_value: impl Into<ExtensionValue>,
     ) -> Self {
-        self.extensions.insert(extension_name.to_owned(), extension_value.into());
+        self.extensions
+            .insert(extension_name.to_owned(), extension_value.into());
         self
     }
 
@@ -79,9 +88,12 @@ impl EventBuilder {
         self.datacontenttype = Some(datacontenttype.into());
         match schemaurl.into_url() {
             Ok(u) => self.schemaurl = Some(u),
-            Err(e) => self.error = Some(
-                EventBuilderError::ParseUrlError {attribute_name: "schemaurl", source: e}
-            )
+            Err(e) => {
+                self.error = Some(EventBuilderError::ParseUrlError {
+                    attribute_name: "schemaurl",
+                    source: e,
+                })
+            }
         };
         self.data = Some(data.into());
         self
@@ -94,7 +106,7 @@ impl From<Event> for EventBuilder {
             Attributes::V03(attr) => attr,
             // This branch is unreachable because into_v03() returns
             // always a Attributes::V03
-            _ => unreachable!()
+            _ => unreachable!(),
         };
 
         EventBuilder {
@@ -107,7 +119,7 @@ impl From<Event> for EventBuilder {
             time: attributes.time,
             data: event.data,
             extensions: event.extensions,
-            error: None
+            error: None,
         }
     }
 }
@@ -130,28 +142,34 @@ impl crate::event::builder::EventBuilder for EventBuilder {
             time: None,
             data: None,
             extensions: Default::default(),
-            error: None
+            error: None,
         }
     }
 
     fn build(self) -> Result<Event, EventBuilderError> {
         match self.error {
             Some(e) => Err(e),
-            None => {
-                Ok(Event{
-                    attributes: Attributes::V03(AttributesV03 {
-                        id: self.id.ok_or(EventBuilderError::MissingRequiredAttribute {attribute_name: "id"})?,
-                        ty: self.ty.ok_or(EventBuilderError::MissingRequiredAttribute {attribute_name: "type"})?,
-                        source: self.source.ok_or(EventBuilderError::MissingRequiredAttribute {attribute_name: "source"})?,
-                        datacontenttype: self.datacontenttype,
-                        schemaurl: self.schemaurl,
-                        subject: self.subject,
-                        time: self.time
-                    }),
-                    data: self.data,
-                    extensions: self.extensions
-                })
-            }
+            None => Ok(Event {
+                attributes: Attributes::V03(AttributesV03 {
+                    id: self.id.ok_or(EventBuilderError::MissingRequiredAttribute {
+                        attribute_name: "id",
+                    })?,
+                    ty: self.ty.ok_or(EventBuilderError::MissingRequiredAttribute {
+                        attribute_name: "type",
+                    })?,
+                    source: self
+                        .source
+                        .ok_or(EventBuilderError::MissingRequiredAttribute {
+                            attribute_name: "source",
+                        })?,
+                    datacontenttype: self.datacontenttype,
+                    schemaurl: self.schemaurl,
+                    subject: self.subject,
+                    time: self.time,
+                }),
+                data: self.data,
+                extensions: self.extensions,
+            }),
         }
     }
 }

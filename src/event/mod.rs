@@ -11,8 +11,8 @@ mod types;
 
 pub use attributes::Attributes;
 pub use attributes::{AttributesReader, AttributesWriter};
-pub use builder::EventBuilder;
 pub use builder::Error as EventBuilderError;
+pub use builder::EventBuilder;
 pub use data::Data;
 pub use event::Event;
 pub use extensions::ExtensionValue;

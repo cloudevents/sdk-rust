@@ -1,7 +1,7 @@
 use super::Event;
 use snafu::Snafu;
 
-/// Builder to create [`super::Event`]:
+/// Trait to implement a builder for [`Event`]:
 /// ```
 /// use cloudevents::event::{EventBuilderV10, EventBuilder};
 /// use chrono::Utc;
@@ -10,13 +10,15 @@ use snafu::Snafu;
 /// let event = EventBuilderV10::new()
 ///     .id("my_event.my_application")
 ///     .source("http://localhost:8080")
+///     .ty("example.demo")
 ///     .time(Utc::now())
-///     .build()?;
+///     .build()
+///     .unwrap();
 /// ```
-pub trait EventBuilder where Self: Clone + Sized {
-    /// Create a new builder copying the contents of the provided [`Event`].
-    fn from(event: Event) -> Self;
-
+///
+/// You can create an [`EventBuilder`] starting from an existing [`Event`] using the [`From`] trait.
+/// You can create a default [`EventBuilder`] setting default values for some attributes.
+pub trait EventBuilder where Self: Clone + Sized + From<Event> + Default {
     /// Create a new empty builder
     fn new() -> Self;
 
@@ -33,10 +35,4 @@ pub enum Error {
     ParseTimeError { attribute_name: &'static str, source: chrono::ParseError },
     #[snafu(display("Error while setting attribute '{}' with uri/uriref type: {}", attribute_name, source))]
     ParseUrlError { attribute_name: &'static str, source: url::ParseError },
-}
-
-impl <T: EventBuilder> Default for T {
-    fn default() -> T {
-        T::from(Event::default())
-    }
 }

@@ -7,9 +7,11 @@
 //!
 //! let event = EventBuilderV10::new()
 //!     .id("my_event.my_application")
-//!     .source(Url::parse("http://localhost:8080").unwrap())
+//!     .source("http://localhost:8080")
+//!     .ty("example.demo")
 //!     .time(Utc::now())
-//!     .build();
+//!     .build()
+//!     .unwrap();
 //!
 //! println!("CloudEvent Id: {}", event.get_id());
 //! println!("CloudEvent Time: {}", event.get_time().unwrap());

@@ -1,5 +1,5 @@
 use super::Attributes as AttributesV10;
-use crate::event::{Attributes, AttributesWriter, Data, Event, ExtensionValue, EventBuilderError, TryIntoUrl, TryIntoTime};
+use crate::event::{Attributes, Data, Event, ExtensionValue, EventBuilderError, TryIntoUrl, TryIntoTime};
 use chrono::{DateTime, Utc};
 use std::collections::HashMap;
 use url::Url;
@@ -78,7 +78,7 @@ impl EventBuilder {
     ) -> Self {
         self.datacontenttype = Some(datacontenttype.into());
         match schemaurl.into_url() {
-            Ok(u) => self.schemaurl = Some(u),
+            Ok(u) => self.dataschema = Some(u),
             Err(e) => self.error = Some(
                 EventBuilderError::ParseUrlError {attribute_name: "dataschema", source: e}
             )
@@ -88,7 +88,7 @@ impl EventBuilder {
     }
 }
 
-impl crate::event::builder::EventBuilder for EventBuilder {
+impl From<Event> for EventBuilder {
     fn from(event: Event) -> Self {
         let attributes = match event.attributes.into_v10() {
             Attributes::V10(attr) => attr,
@@ -102,7 +102,7 @@ impl crate::event::builder::EventBuilder for EventBuilder {
             ty: Some(attributes.ty),
             source: Some(attributes.source),
             datacontenttype: attributes.datacontenttype,
-            dataschema: attributes.schemaurl,
+            dataschema: attributes.dataschema,
             subject: attributes.subject,
             time: attributes.time,
             data: event.data,
@@ -110,7 +110,15 @@ impl crate::event::builder::EventBuilder for EventBuilder {
             error: None
         }
     }
+}
 
+impl Default for EventBuilder {
+    fn default() -> Self {
+        Self::from(Event::default())
+    }
+}
+
+impl crate::event::builder::EventBuilder for EventBuilder {
     fn new() -> Self {
         EventBuilder {
             id: None,
@@ -136,7 +144,7 @@ impl crate::event::builder::EventBuilder for EventBuilder {
                         ty: self.ty.ok_or(EventBuilderError::MissingRequiredAttribute {attribute_name: "type"})?,
                         source: self.source.ok_or(EventBuilderError::MissingRequiredAttribute {attribute_name: "source"})?,
                         datacontenttype: self.datacontenttype,
-                        dataschema: self.schemaurl,
+                        dataschema: self.dataschema,
                         subject: self.subject,
                         time: self.time
                     }),
@@ -145,55 +153,5 @@ impl crate::event::builder::EventBuilder for EventBuilder {
                 })
             }
         }
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use crate::event::{AttributesReader, SpecVersion, EventBuilder, ExtensionValue};
-    use url::Url;
-    use chrono::{DateTime, Utc};
-
-    #[test]
-    fn build_event() {
-        let id = "aaa";
-        let source = Url::parse("http://localhost:8080").unwrap();
-        let ty = "bbb";
-        let subject = "francesco";
-        let time: DateTime<Utc> = Utc::now();
-        let extension_name = "ext";
-        let extension_value = 10i64;
-        let content_type = "application/json";
-        let schema = Url::parse("http://localhost:8080/schema").unwrap();
-        let data = serde_json::json!({
-            "hello": "world"
-        });
-
-        let event = super::EventBuilder::new()
-            .id(id)
-            .source(source.clone())
-            .ty(ty)
-            .subject(subject)
-            .time(time)
-            .extension(extension_name, extension_value)
-            .data_with_schema(content_type, schema.clone(), data.clone())
-            .build()
-            .unwrap();
-
-        assert_eq!(SpecVersion::V10, event.get_specversion());
-        assert_eq!(id, event.get_id());
-        assert_eq!(source, event.get_source().clone());
-        assert_eq!(ty, event.get_type());
-        assert_eq!(subject, event.get_subject().unwrap());
-        assert_eq!(time, event.get_time().unwrap().clone());
-        assert_eq!(
-            ExtensionValue::from(extension_value),
-            event.get_extension(extension_name).unwrap().clone()
-        );
-        assert_eq!(content_type, event.get_datacontenttype().unwrap());
-        assert_eq!(schema, event.get_dataschema().unwrap().clone());
-
-        let event_data: serde_json::Value = event.try_get_data().unwrap().unwrap();
-        assert_eq!(data, event_data);
     }
 }

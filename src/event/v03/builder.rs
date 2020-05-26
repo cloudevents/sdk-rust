@@ -88,7 +88,7 @@ impl EventBuilder {
     }
 }
 
-impl crate::event::builder::EventBuilder for EventBuilder {
+impl From<Event> for EventBuilder {
     fn from(event: Event) -> Self {
         let attributes = match event.attributes.into_v03() {
             Attributes::V03(attr) => attr,
@@ -110,7 +110,15 @@ impl crate::event::builder::EventBuilder for EventBuilder {
             error: None
         }
     }
+}
 
+impl Default for EventBuilder {
+    fn default() -> Self {
+        Self::from(Event::default())
+    }
+}
+
+impl crate::event::builder::EventBuilder for EventBuilder {
     fn new() -> Self {
         EventBuilder {
             id: None,
@@ -145,55 +153,5 @@ impl crate::event::builder::EventBuilder for EventBuilder {
                 })
             }
         }
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use crate::event::{AttributesReader, SpecVersion, EventBuilder, ExtensionValue};
-    use url::Url;
-    use chrono::{DateTime, Utc};
-
-    #[test]
-    fn build_event() {
-        let id = "aaa";
-        let source = Url::parse("http://localhost:8080").unwrap();
-        let ty = "bbb";
-        let subject = "francesco";
-        let time: DateTime<Utc> = Utc::now();
-        let extension_name = "ext";
-        let extension_value = 10i64;
-        let content_type = "application/json";
-        let schema = Url::parse("http://localhost:8080/schema").unwrap();
-        let data = serde_json::json!({
-            "hello": "world"
-        });
-
-        let event = super::EventBuilder::new()
-            .id(id)
-            .source("http://example.com")
-            .ty(ty)
-            .subject(subject)
-            .time(time)
-            .extension(extension_name, extension_value)
-            .data_with_schema(content_type, schema.clone(), data.clone())
-            .build()
-            .unwrap();
-
-        assert_eq!(SpecVersion::V03, event.get_specversion());
-        assert_eq!(id, event.get_id());
-        assert_eq!(source, event.get_source().clone());
-        assert_eq!(ty, event.get_type());
-        assert_eq!(subject, event.get_subject().unwrap());
-        assert_eq!(time, event.get_time().unwrap().clone());
-        assert_eq!(
-            ExtensionValue::from(extension_value),
-            event.get_extension(extension_name).unwrap().clone()
-        );
-        assert_eq!(content_type, event.get_datacontenttype().unwrap());
-        assert_eq!(schema, event.get_dataschema().unwrap().clone());
-
-        let event_data: serde_json::Value = event.try_get_data().unwrap().unwrap();
-        assert_eq!(data, event_data);
     }
 }

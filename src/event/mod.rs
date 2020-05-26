@@ -7,15 +7,18 @@ mod extensions;
 mod format;
 mod message;
 mod spec_version;
+mod types;
 
 pub use attributes::Attributes;
 pub use attributes::{AttributesReader, AttributesWriter};
+pub use builder::Error as EventBuilderError;
 pub use builder::EventBuilder;
 pub use data::Data;
 pub use event::Event;
 pub use extensions::ExtensionValue;
 pub use spec_version::InvalidSpecVersion;
 pub use spec_version::SpecVersion;
+pub use types::{TryIntoTime, TryIntoUrl};
 
 mod v03;
 

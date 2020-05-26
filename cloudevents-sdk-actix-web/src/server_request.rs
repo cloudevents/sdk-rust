@@ -117,25 +117,32 @@ mod tests {
     use actix_web::test;
     use url::Url;
 
-    use cloudevents::EventBuilder;
+    use chrono::Utc;
+    use cloudevents::{EventBuilder, EventBuilderV10};
     use serde_json::json;
     use std::str::FromStr;
 
     #[actix_rt::test]
     async fn test_request() {
-        let expected = EventBuilder::new()
+        let time = Utc::now();
+        let expected = EventBuilderV10::new()
             .id("0001")
             .ty("example.test")
-            .source(Url::from_str("http://localhost").unwrap())
+            .source("http://localhost/")
+            //TODO this is required now because the message deserializer implictly set default values
+            // As soon as this defaulting doesn't happen anymore, we can remove it (Issues #40/#41)
+            .time(time)
             .extension("someint", "10")
-            .build();
+            .build()
+            .unwrap();
 
         let (req, payload) = test::TestRequest::post()
             .header("ce-specversion", "1.0")
             .header("ce-id", "0001")
             .header("ce-type", "example.test")
-            .header("ce-source", "http://localhost")
+            .header("ce-source", "http://localhost/")
             .header("ce-someint", "10")
+            .header("ce-time", time.to_rfc3339())
             .to_http_parts();
 
         let resp = request_to_event(&req, web::Payload(payload)).await.unwrap();
@@ -144,15 +151,20 @@ mod tests {
 
     #[actix_rt::test]
     async fn test_request_with_full_data() {
+        let time = Utc::now();
         let j = json!({"hello": "world"});
 
-        let expected = EventBuilder::new()
+        let expected = EventBuilderV10::new()
             .id("0001")
             .ty("example.test")
             .source(Url::from_str("http://localhost").unwrap())
+            //TODO this is required now because the message deserializer implictly set default values
+            // As soon as this defaulting doesn't happen anymore, we can remove it (Issues #40/#41)
+            .time(time)
             .data("application/json", j.clone())
             .extension("someint", "10")
-            .build();
+            .build()
+            .unwrap();
 
         let (req, payload) = test::TestRequest::post()
             .header("ce-specversion", "1.0")
@@ -160,6 +172,7 @@ mod tests {
             .header("ce-type", "example.test")
             .header("ce-source", "http://localhost")
             .header("ce-someint", "10")
+            .header("ce-time", time.to_rfc3339())
             .header("content-type", "application/json")
             .set_json(&j)
             .to_http_parts();

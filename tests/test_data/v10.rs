@@ -1,14 +1,15 @@
 use super::*;
-use cloudevents::{Event, EventBuilder};
+use cloudevents::{Event, EventBuilder, EventBuilderV10};
 use serde_json::{json, Value};
 use url::Url;
 
 pub fn minimal() -> Event {
-    EventBuilder::v10()
+    EventBuilderV10::new()
         .id(id())
         .source(Url::parse(source().as_ref()).unwrap())
         .ty(ty())
         .build()
+        .unwrap()
 }
 
 pub fn minimal_json() -> Value {
@@ -25,7 +26,7 @@ pub fn full_no_data() -> Event {
     let (bool_ext_name, bool_ext_value) = bool_extension();
     let (int_ext_name, int_ext_value) = int_extension();
 
-    EventBuilder::v10()
+    EventBuilderV10::new()
         .id(id())
         .source(Url::parse(source().as_ref()).unwrap())
         .ty(ty())
@@ -35,6 +36,7 @@ pub fn full_no_data() -> Event {
         .extension(&bool_ext_name, bool_ext_value)
         .extension(&int_ext_name, int_ext_value)
         .build()
+        .unwrap()
 }
 
 pub fn full_no_data_json() -> Value {
@@ -60,7 +62,7 @@ pub fn full_json_data() -> Event {
     let (bool_ext_name, bool_ext_value) = bool_extension();
     let (int_ext_name, int_ext_value) = int_extension();
 
-    EventBuilder::v10()
+    EventBuilderV10::new()
         .id(id())
         .source(Url::parse(source().as_ref()).unwrap())
         .ty(ty())
@@ -75,6 +77,7 @@ pub fn full_json_data() -> Event {
             json_data(),
         )
         .build()
+        .unwrap()
 }
 
 pub fn full_json_data_json() -> Value {
@@ -124,7 +127,7 @@ pub fn full_xml_string_data() -> Event {
     let (bool_ext_name, bool_ext_value) = bool_extension();
     let (int_ext_name, int_ext_value) = int_extension();
 
-    EventBuilder::v10()
+    EventBuilderV10::new()
         .id(id())
         .source(Url::parse(source().as_ref()).unwrap())
         .ty(ty())
@@ -135,6 +138,7 @@ pub fn full_xml_string_data() -> Event {
         .extension(&int_ext_name, int_ext_value)
         .data(xml_datacontenttype(), xml_data())
         .build()
+        .unwrap()
 }
 
 pub fn full_xml_binary_data() -> Event {
@@ -142,7 +146,7 @@ pub fn full_xml_binary_data() -> Event {
     let (bool_ext_name, bool_ext_value) = bool_extension();
     let (int_ext_name, int_ext_value) = int_extension();
 
-    EventBuilder::v10()
+    EventBuilderV10::new()
         .id(id())
         .source(Url::parse(source().as_ref()).unwrap())
         .ty(ty())
@@ -153,6 +157,7 @@ pub fn full_xml_binary_data() -> Event {
         .extension(&int_ext_name, int_ext_value)
         .data(xml_datacontenttype(), Vec::from(xml_data()))
         .build()
+        .unwrap()
 }
 
 pub fn full_xml_string_data_json() -> Value {

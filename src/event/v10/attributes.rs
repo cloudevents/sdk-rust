@@ -158,7 +158,7 @@ impl Default for Attributes {
             datacontenttype: None,
             dataschema: None,
             subject: None,
-            time: None,
+            time: Some(Utc::now()),
         }
     }
 }

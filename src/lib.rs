@@ -1,15 +1,17 @@
 //! This crate implements the [CloudEvents](https://cloudevents.io/) Spec for Rust.
 //!
 //! ```
-//! use cloudevents::{EventBuilder, AttributesReader};
+//! use cloudevents::{EventBuilder, AttributesReader, EventBuilderV10};
 //! use chrono::Utc;
 //! use url::Url;
 //!
-//! let event = EventBuilder::v10()
+//! let event = EventBuilderV10::new()
 //!     .id("my_event.my_application")
-//!     .source(Url::parse("http://localhost:8080").unwrap())
+//!     .source("http://localhost:8080")
+//!     .ty("example.demo")
 //!     .time(Utc::now())
-//!     .build();
+//!     .build()
+//!     .unwrap();
 //!
 //! println!("CloudEvent Id: {}", event.get_id());
 //! println!("CloudEvent Time: {}", event.get_time().unwrap());
@@ -32,5 +34,5 @@ pub mod event;
 pub mod message;
 
 pub use event::Event;
-pub use event::EventBuilder;
 pub use event::{AttributesReader, AttributesWriter};
+pub use event::{EventBuilder, EventBuilderV03, EventBuilderV10};

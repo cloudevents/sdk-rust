@@ -1,11 +1,18 @@
+use cloudevents::{EventBuilder, EventBuilderV10};
 use wasm_bindgen::prelude::*;
 
 #[wasm_bindgen]
-pub async fn run(target: String, ty: String, datacontenttype: String, data: String) -> Result<(), String> {
-    let event = cloudevents::EventBuilder::new()
+pub async fn run(
+    target: String,
+    ty: String,
+    datacontenttype: String,
+    data: String,
+) -> Result<(), String> {
+    let event = EventBuilderV10::new()
         .ty(ty)
         .data(datacontenttype, data)
-        .build();
+        .build()
+        .unwrap();
 
     println!("Going to send event: {:?}", event);
 

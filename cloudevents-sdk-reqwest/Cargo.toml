@@ -7,6 +7,7 @@ edition = "2018"
 description = "CloudEvents official Rust SDK - Reqwest integration"
 documentation = "https://docs.rs/cloudevents-sdk-reqwest"
 repository = "https://github.com/cloudevents/sdk-rust"
+readme = "README.md"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 

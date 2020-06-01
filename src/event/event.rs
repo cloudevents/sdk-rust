@@ -1,6 +1,6 @@
 use super::{
     Attributes, AttributesReader, AttributesV10, AttributesWriter, Data, ExtensionValue,
-    SpecVersion, IterAttribute
+    IterAttribute, SpecVersion,
 };
 use crate::event::attributes::DataAttributesWriter;
 use chrono::{DateTime, Utc};

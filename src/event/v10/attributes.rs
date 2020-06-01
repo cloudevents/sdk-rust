@@ -86,21 +86,6 @@ impl<'a> Iterator for AttributesIntoIterator<'a> {
     }
 }
 
-impl AttributesReader for AttributesIntoIterator<'_> {
-    delegate! {
-        to self.attributes {
-            fn get_id(&self) -> &str;
-            fn get_source(&self) -> &Url;
-            fn get_specversion(&self) -> SpecVersion;
-            fn get_type(&self) -> &str;
-            fn get_datacontenttype(&self) -> Option<&str>;
-            fn get_dataschema(&self) -> Option<&Url>;
-            fn get_subject(&self) -> Option<&str>;
-            fn get_time(&self) -> Option<&DateTime<Utc>>;
-        }
-    }
-}
-
 impl AttributesReader for Attributes {
     fn get_id(&self) -> &str {
         &self.id

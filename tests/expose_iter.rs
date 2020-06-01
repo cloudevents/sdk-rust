@@ -1,18 +1,25 @@
 mod test_data;
+use cloudevents::event::AttributeValue;
 use test_data::*;
-use cloudevents::event::{AttributesReader, AttributeValue, IterAttribute};
 
 #[test]
 fn iter_v10_test() {
     let in_event = v10::full_json_data();
-    let iter = in_event.attributes_iter();
-    
-    assert_eq!(iter.get_id(),"0001");
+    let mut iter_v10 = in_event.attributes_iter();
 
-    if let IterAttribute::IterV10(mut b) = iter {
-            for i in b {
-            println!("{:?}",i);
-        }
-        assert_eq!(("id", AttributeValue::String("0001")), b.next().unwrap());
-    };
+    assert_eq!(
+        ("id", AttributeValue::String("0001")),
+        iter_v10.next().unwrap()
+    );
+}
+
+#[test]
+fn iter_v03_test() {
+    let in_event = v03::full_json_data();
+    let mut iter_v03 = in_event.attributes_iter();
+
+    assert_eq!(
+        ("id", AttributeValue::String("0001")),
+        iter_v03.next().unwrap()
+    );
 }

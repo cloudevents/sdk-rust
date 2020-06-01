@@ -3,6 +3,8 @@ use crate::event::attributes::{
 };
 use crate::event::{AttributesReader, AttributesV03, AttributesWriter, SpecVersion};
 use chrono::{DateTime, Utc};
+use core::fmt::Debug;
+use delegate::delegate;
 use url::Url;
 use uuid::Uuid;
 
@@ -41,9 +43,10 @@ impl<'a> IntoIterator for &'a Attributes {
     }
 }
 
+#[derive(PartialEq, Debug, Clone, Copy)]
 pub struct AttributesIntoIterator<'a> {
-    attributes: &'a Attributes,
-    index: usize,
+    pub attributes: &'a Attributes,
+    pub index: usize,
 }
 
 impl<'a> Iterator for AttributesIntoIterator<'a> {
@@ -80,6 +83,21 @@ impl<'a> Iterator for AttributesIntoIterator<'a> {
             return self.next();
         }
         result
+    }
+}
+
+impl AttributesReader for AttributesIntoIterator<'_> {
+    delegate! {
+        to self.attributes {
+            fn get_id(&self) -> &str;
+            fn get_source(&self) -> &Url;
+            fn get_specversion(&self) -> SpecVersion;
+            fn get_type(&self) -> &str;
+            fn get_datacontenttype(&self) -> Option<&str>;
+            fn get_dataschema(&self) -> Option<&Url>;
+            fn get_subject(&self) -> Option<&str>;
+            fn get_time(&self) -> Option<&DateTime<Utc>>;
+        }
     }
 }
 

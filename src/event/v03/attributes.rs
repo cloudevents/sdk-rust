@@ -42,9 +42,10 @@ impl<'a> IntoIterator for &'a Attributes {
     }
 }
 
+#[derive(PartialEq, Debug, Clone, Copy)]
 pub struct AttributesIntoIterator<'a> {
-    attributes: &'a Attributes,
-    index: usize,
+    pub(crate) attributes: &'a Attributes,
+    pub(crate) index: usize,
 }
 
 impl<'a> Iterator for AttributesIntoIterator<'a> {

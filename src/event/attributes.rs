@@ -1,4 +1,6 @@
-use super::{AttributesV03, AttributesV10, SpecVersion};
+use super::{
+    AttributesIntoIteratorV03, AttributesIntoIteratorV10, AttributesV03, AttributesV10, SpecVersion,
+};
 use chrono::{DateTime, Utc};
 use std::fmt;
 use url::Url;
@@ -66,6 +68,70 @@ pub(crate) trait AttributesConverter {
 pub(crate) trait DataAttributesWriter {
     fn set_datacontenttype(&mut self, datacontenttype: Option<impl Into<String>>);
     fn set_dataschema(&mut self, dataschema: Option<impl Into<Url>>);
+}
+
+#[derive(PartialEq, Debug, Clone)]
+pub enum IterAttribute<'a> {
+    IterV03(AttributesIntoIteratorV03<'a>),
+    IterV10(AttributesIntoIteratorV10<'a>),
+}
+
+impl AttributesReader for IterAttribute<'_> {
+    fn get_id(&self) -> &str {
+        match self {
+            IterAttribute::IterV03(a) => a.attributes.get_id(),
+            IterAttribute::IterV10(a) => a.attributes.get_id(),
+        }
+    }
+
+    fn get_source(&self) -> &Url {
+        match self {
+            IterAttribute::IterV03(a) => a.attributes.get_source(),
+            IterAttribute::IterV10(a) => a.attributes.get_source(),
+        }
+    }
+
+    fn get_specversion(&self) -> SpecVersion {
+        match self {
+            IterAttribute::IterV03(a) => a.attributes.get_specversion(),
+            IterAttribute::IterV10(a) => a.attributes.get_specversion(),
+        }
+    }
+
+    fn get_type(&self) -> &str {
+        match self {
+            IterAttribute::IterV03(a) => a.attributes.get_type(),
+            IterAttribute::IterV10(a) => a.attributes.get_type(),
+        }
+    }
+
+    fn get_datacontenttype(&self) -> Option<&str> {
+        match self {
+            IterAttribute::IterV03(a) => a.attributes.get_datacontenttype(),
+            IterAttribute::IterV10(a) => a.attributes.get_datacontenttype(),
+        }
+    }
+
+    fn get_dataschema(&self) -> Option<&Url> {
+        match self {
+            IterAttribute::IterV03(a) => a.attributes.get_dataschema(),
+            IterAttribute::IterV10(a) => a.attributes.get_dataschema(),
+        }
+    }
+
+    fn get_subject(&self) -> Option<&str> {
+        match self {
+            IterAttribute::IterV03(a) => a.attributes.get_subject(),
+            IterAttribute::IterV10(a) => a.attributes.get_subject(),
+        }
+    }
+
+    fn get_time(&self) -> Option<&DateTime<Utc>> {
+        match self {
+            IterAttribute::IterV03(a) => a.attributes.get_time(),
+            IterAttribute::IterV10(a) => a.attributes.get_time(),
+        }
+    }
 }
 
 /// Union type representing one of the possible context attributes structs

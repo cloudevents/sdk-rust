@@ -1,6 +1,6 @@
 use super::{
     Attributes, AttributesReader, AttributesV10, AttributesWriter, Data, ExtensionValue,
-    IterAttribute, SpecVersion,
+    AttributesIter, SpecVersion,
 };
 use crate::event::attributes::DataAttributesWriter;
 use chrono::{DateTime, Utc};
@@ -79,10 +79,10 @@ impl Default for Event {
 
 impl Event {
     /// Returns an `Iterator` for `Attributes`
-    pub fn attributes_iter(&self) -> IterAttribute {
+    pub fn attributes_iter(&self) -> AttributesIter {
         match &self.attributes {
-            Attributes::V03(a) => IterAttribute::IterV03(a.into_iter()),
-            Attributes::V10(a) => IterAttribute::IterV10(a.into_iter()),
+            Attributes::V03(a) => AttributesIter::IterV03(a.into_iter()),
+            Attributes::V10(a) => AttributesIter::IterV10(a.into_iter()),
         }
     }
     /// Remove `data`, `dataschema` and `datacontenttype` from this `Event`

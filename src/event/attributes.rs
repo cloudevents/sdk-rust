@@ -71,17 +71,17 @@ pub(crate) trait DataAttributesWriter {
 }
 
 #[derive(PartialEq, Debug, Clone, Copy)]
-pub enum IterAttribute<'a> {
+pub enum AttributesIter<'a> {
     IterV03(AttributesIntoIteratorV03<'a>),
     IterV10(AttributesIntoIteratorV10<'a>),
 }
 
-impl<'a> Iterator for IterAttribute<'a> {
+impl<'a> Iterator for AttributesIter<'a> {
     type Item = (&'a str, AttributeValue<'a>);
     fn next(&mut self) -> Option<Self::Item> {
         match self {
-            IterAttribute::IterV03(a) => a.next(),
-            IterAttribute::IterV10(a) => a.next(),
+            AttributesIter::IterV03(a) => a.next(),
+            AttributesIter::IterV10(a) => a.next(),
         }
     }
 }

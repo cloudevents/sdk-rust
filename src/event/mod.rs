@@ -23,7 +23,7 @@ pub use types::{TryIntoTime, TryIntoUrl};
 mod v03;
 
 pub use v03::Attributes as AttributesV03;
-pub use v03::AttributesIntoIterator as AttributesIntoIteratorV03;
+pub(crate) use v03::AttributesIntoIterator as AttributesIntoIteratorV03;
 pub use v03::EventBuilder as EventBuilderV03;
 pub(crate) use v03::EventFormatDeserializer as EventFormatDeserializerV03;
 pub(crate) use v03::EventFormatSerializer as EventFormatSerializerV03;
@@ -31,7 +31,7 @@ pub(crate) use v03::EventFormatSerializer as EventFormatSerializerV03;
 mod v10;
 
 pub use v10::Attributes as AttributesV10;
-pub use v10::AttributesIntoIterator as AttributesIntoIteratorV10;
+pub(crate) use v10::AttributesIntoIterator as AttributesIntoIteratorV10;
 pub use v10::EventBuilder as EventBuilderV10;
 pub(crate) use v10::EventFormatDeserializer as EventFormatDeserializerV10;
 pub(crate) use v10::EventFormatSerializer as EventFormatSerializerV10;

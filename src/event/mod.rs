@@ -10,7 +10,7 @@ mod spec_version;
 mod types;
 
 pub use attributes::Attributes;
-pub use attributes::{AttributeValue, AttributesReader, AttributesWriter, AttributesIter};
+pub use attributes::{AttributeValue, AttributesIter, AttributesReader, AttributesWriter};
 pub use builder::Error as EventBuilderError;
 pub use builder::EventBuilder;
 pub use data::Data;

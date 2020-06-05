@@ -1,4 +1,6 @@
-use super::{AttributesV03, AttributesV10, SpecVersion};
+use super::{
+    AttributesIntoIteratorV03, AttributesIntoIteratorV10, AttributesV03, AttributesV10, SpecVersion,
+};
 use chrono::{DateTime, Utc};
 use std::fmt;
 use url::Url;
@@ -66,6 +68,22 @@ pub(crate) trait AttributesConverter {
 pub(crate) trait DataAttributesWriter {
     fn set_datacontenttype(&mut self, datacontenttype: Option<impl Into<String>>);
     fn set_dataschema(&mut self, dataschema: Option<impl Into<Url>>);
+}
+
+#[derive(PartialEq, Debug, Clone, Copy)]
+pub(crate) enum AttributesIter<'a> {
+    IterV03(AttributesIntoIteratorV03<'a>),
+    IterV10(AttributesIntoIteratorV10<'a>),
+}
+
+impl<'a> Iterator for AttributesIter<'a> {
+    type Item = (&'a str, AttributeValue<'a>);
+    fn next(&mut self) -> Option<Self::Item> {
+        match self {
+            AttributesIter::IterV03(a) => a.next(),
+            AttributesIter::IterV10(a) => a.next(),
+        }
+    }
 }
 
 /// Union type representing one of the possible context attributes structs

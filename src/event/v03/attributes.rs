@@ -42,34 +42,36 @@ impl<'a> IntoIterator for &'a Attributes {
     }
 }
 
+#[derive(PartialEq, Debug, Clone, Copy)]
 pub struct AttributesIntoIterator<'a> {
-    attributes: &'a Attributes,
-    index: usize,
+    pub(crate) attributes: &'a Attributes,
+    pub(crate) index: usize,
 }
 
 impl<'a> Iterator for AttributesIntoIterator<'a> {
     type Item = (&'a str, AttributeValue<'a>);
     fn next(&mut self) -> Option<Self::Item> {
         let result = match self.index {
-            0 => Some(("id", AttributeValue::String(&self.attributes.id))),
-            1 => Some(("type", AttributeValue::String(&self.attributes.ty))),
-            2 => Some(("source", AttributeValue::URIRef(&self.attributes.source))),
-            3 => self
+            0 => Some(("specversion", AttributeValue::SpecVersion(SpecVersion::V03))),
+            1 => Some(("id", AttributeValue::String(&self.attributes.id))),
+            2 => Some(("type", AttributeValue::String(&self.attributes.ty))),
+            3 => Some(("source", AttributeValue::URIRef(&self.attributes.source))),
+            4 => self
                 .attributes
                 .datacontenttype
                 .as_ref()
                 .map(|v| ("datacontenttype", AttributeValue::String(v))),
-            4 => self
+            5 => self
                 .attributes
                 .schemaurl
                 .as_ref()
                 .map(|v| ("schemaurl", AttributeValue::URIRef(v))),
-            5 => self
+            6 => self
                 .attributes
                 .subject
                 .as_ref()
                 .map(|v| ("subject", AttributeValue::String(v))),
-            6 => self
+            7 => self
                 .attributes
                 .time
                 .as_ref()
@@ -204,6 +206,10 @@ mod tests {
         let b = &mut a.into_iter();
         let time = DateTime::<Utc>::from_utc(NaiveDateTime::from_timestamp(61, 0), Utc);
 
+        assert_eq!(
+            ("specversion", AttributeValue::SpecVersion(SpecVersion::V03)),
+            b.next().unwrap()
+        );
         assert_eq!(("id", AttributeValue::String("1")), b.next().unwrap());
         assert_eq!(
             ("type", AttributeValue::String("someType")),

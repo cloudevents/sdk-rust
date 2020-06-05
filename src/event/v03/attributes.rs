@@ -206,6 +206,10 @@ mod tests {
         let b = &mut a.into_iter();
         let time = DateTime::<Utc>::from_utc(NaiveDateTime::from_timestamp(61, 0), Utc);
 
+        assert_eq!(
+            ("specversion", AttributeValue::SpecVersion(SpecVersion::V03)),
+            b.next().unwrap()
+        );
         assert_eq!(("id", AttributeValue::String("1")), b.next().unwrap());
         assert_eq!(
             ("type", AttributeValue::String("someType")),

@@ -1,5 +1,5 @@
 use super::{
-    Attributes, AttributesIter, AttributesReader, AttributesV10, AttributesWriter, Data,
+    Attributes, AttributesIter, AttributesReader, AttributesV10, AttributeValue, AttributesWriter, Data,
     ExtensionValue, SpecVersion,
 };
 use crate::event::attributes::DataAttributesWriter;
@@ -79,7 +79,7 @@ impl Default for Event {
 
 impl Event {
     /// Returns an `Iterator` for `Attributes`
-    pub fn attributes_iter(&self) -> AttributesIter {
+    pub fn attributes_iter(&self) -> impl Iterator<Item = (&str, AttributeValue<'_>)> {
         match &self.attributes {
             Attributes::V03(a) => AttributesIter::IterV03(a.into_iter()),
             Attributes::V10(a) => AttributesIter::IterV10(a.into_iter()),

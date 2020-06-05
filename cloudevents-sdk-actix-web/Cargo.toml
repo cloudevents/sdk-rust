@@ -13,6 +13,7 @@ readme = "README.md"
 
 [dependencies]
 cloudevents-sdk = { version = "0.1.0", path = ".." }
+async-trait = "^0.1.33"
 actix-web = "2"
 actix-rt = "1"
 lazy_static = "1.4.0"

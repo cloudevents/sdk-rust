@@ -52,25 +52,26 @@ impl<'a> Iterator for AttributesIntoIterator<'a> {
     type Item = (&'a str, AttributeValue<'a>);
     fn next(&mut self) -> Option<Self::Item> {
         let result = match self.index {
-            0 => Some(("id", AttributeValue::String(&self.attributes.id))),
-            1 => Some(("type", AttributeValue::String(&self.attributes.ty))),
-            2 => Some(("source", AttributeValue::URIRef(&self.attributes.source))),
-            3 => self
+            0 => Some(("specversion", AttributeValue::SpecVersion(SpecVersion::V10))),
+            1 => Some(("id", AttributeValue::String(&self.attributes.id))),
+            2 => Some(("type", AttributeValue::String(&self.attributes.ty))),
+            3 => Some(("source", AttributeValue::URIRef(&self.attributes.source))),
+            4 => self
                 .attributes
                 .datacontenttype
                 .as_ref()
                 .map(|v| ("datacontenttype", AttributeValue::String(v))),
-            4 => self
+            5 => self
                 .attributes
                 .dataschema
                 .as_ref()
                 .map(|v| ("dataschema", AttributeValue::URI(v))),
-            5 => self
+            6 => self
                 .attributes
                 .subject
                 .as_ref()
                 .map(|v| ("subject", AttributeValue::String(v))),
-            6 => self
+            7 => self
                 .attributes
                 .time
                 .as_ref()

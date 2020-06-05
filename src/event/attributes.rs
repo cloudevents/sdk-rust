@@ -71,7 +71,7 @@ pub(crate) trait DataAttributesWriter {
 }
 
 #[derive(PartialEq, Debug, Clone, Copy)]
-pub enum AttributesIter<'a> {
+pub(crate) enum AttributesIter<'a> {
     IterV03(AttributesIntoIteratorV03<'a>),
     IterV10(AttributesIntoIteratorV10<'a>),
 }

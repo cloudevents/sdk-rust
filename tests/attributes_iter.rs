@@ -7,10 +7,6 @@ fn iter_v10_test() {
     let in_event = v10::full_no_data();
     let mut iter_v10 = in_event.attributes_iter();
 
-    for i in iter_v10 {
-        println!("{:?}",i)
-    }
-
     assert_eq!(
         ("id", AttributeValue::String("0001")),
         iter_v10.next().unwrap()

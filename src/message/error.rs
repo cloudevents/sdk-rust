@@ -12,6 +12,9 @@ pub enum Error {
     },
     #[snafu(display("Unrecognized attribute name: {}", name))]
     UnrecognizedAttributeName { name: String },
+    #[snafu(display("Error while building the final event: {}", source))]
+    #[snafu(context(false))]
+    EventBuilderError { source: crate::event::EventBuilderError },
     #[snafu(display("Error while parsing a time string: {}", source))]
     #[snafu(context(false))]
     ParseTimeError { source: chrono::ParseError },

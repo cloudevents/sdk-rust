@@ -6,6 +6,7 @@ use crate::event::{AttributesReader, AttributesWriter, SpecVersion};
 use chrono::{DateTime, Utc};
 use url::Url;
 use uuid::Uuid;
+use crate::message::{BinarySerializer, MessageAttributeValue};
 
 pub(crate) const ATTRIBUTE_NAMES: [&'static str; 8] = [
     "specversion",
@@ -181,6 +182,37 @@ impl AttributesConverter for Attributes {
             subject: self.subject,
             time: self.time,
         }
+    }
+}
+
+impl crate::event::message::AttributesDeserializer for super::Attributes {
+    fn deserialize_attributes<R: Sized, V: BinarySerializer<R>>(self, mut visitor: V) -> crate::message::Result<V> {
+        visitor = visitor.set_attribute("id", MessageAttributeValue::String(self.id))?;
+        visitor = visitor.set_attribute("type", MessageAttributeValue::String(self.ty))?;
+        visitor = visitor.set_attribute("source", MessageAttributeValue::UriRef(self.source))?;
+        if self.datacontenttype.is_some() {
+            visitor = visitor.set_attribute(
+                "datacontenttype",
+                MessageAttributeValue::String(self.datacontenttype.unwrap()),
+            )?;
+        }
+        if self.schemaurl.is_some() {
+            visitor = visitor.set_attribute(
+                "schemaurl",
+                MessageAttributeValue::Uri(self.schemaurl.unwrap()),
+            )?;
+        }
+        if self.subject.is_some() {
+            visitor = visitor.set_attribute(
+                "subject",
+                MessageAttributeValue::String(self.subject.unwrap()),
+            )?;
+        }
+        if self.time.is_some() {
+            visitor = visitor
+                .set_attribute("time", MessageAttributeValue::DateTime(self.time.unwrap()))?;
+        }
+        Ok(visitor)
     }
 }
 

@@ -46,7 +46,7 @@ impl Data {
 }
 
 pub(crate) fn is_json_content_type(ct: &str) -> bool {
-    ct == "application/json" || ct == "text/json" || ct.ends_with("+json")
+    ct.starts_with("application/json") || ct.starts_with("text/json") || ct.ends_with("+json")
 }
 
 impl Into<Data> for serde_json::Value {

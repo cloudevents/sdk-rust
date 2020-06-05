@@ -5,6 +5,8 @@ use crate::event::{
 use chrono::{DateTime, Utc};
 use std::collections::HashMap;
 use url::Url;
+use crate::message::MessageAttributeValue;
+use std::convert::TryInto;
 
 /// Builder to create a CloudEvent V1.0
 #[derive(Clone)]
@@ -70,6 +72,11 @@ impl EventBuilder {
     ) -> Self {
         self.extensions
             .insert(extension_name.to_owned(), extension_value.into());
+        self
+    }
+
+    pub(crate) fn data_without_content_type(mut self, data: impl Into<Data>) -> Self {
+        self.data = Some(data.into());
         self
     }
 
@@ -171,5 +178,25 @@ impl crate::event::builder::EventBuilder for EventBuilder {
                 extensions: self.extensions,
             }),
         }
+    }
+}
+
+impl crate::event::message::AttributesSerializer for EventBuilder {
+    fn serialize_attribute(&mut self, name: &str, value: MessageAttributeValue) -> crate::message::Result<()> {
+        match name {
+            "id" => self.id = Some(value.to_string()),
+            "type" => self.ty = Some(value.to_string()),
+            "source" => self.source = Some(value.try_into()?),
+            "datacontenttype" => self.datacontenttype = Some(value.to_string()),
+            "dataschema" => self.dataschema = Some(value.try_into()?),
+            "subject" => self.subject = Some(value.to_string()),
+            "time" => self.time = Some(value.try_into()?),
+            _ => {
+                return Err(crate::message::Error::UnrecognizedAttributeName {
+                    name: name.to_string(),
+                })
+            }
+        }
+        Ok(())
     }
 }

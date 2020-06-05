@@ -6,6 +6,7 @@ use crate::message::{
     BinaryDeserializer, BinarySerializer, MessageAttributeValue, Result, StructuredDeserializer,
     StructuredSerializer,
 };
+use crate::{EventBuilderV10, EventBuilderV03, EventBuilder};
 
 impl StructuredDeserializer for Event {
     fn deserialize_structured<R, V: StructuredSerializer<R>>(self, visitor: V) -> Result<R> {
@@ -37,10 +38,6 @@ pub(crate) trait AttributesDeserializer {
     fn deserialize_attributes<R: Sized, V: BinarySerializer<R>>(self, visitor: V) -> Result<V>;
 }
 
-pub(crate) trait AttributesSerializer {
-    fn serialize_attribute(&mut self, name: &str, value: MessageAttributeValue) -> Result<()>;
-}
-
 impl AttributesDeserializer for Attributes {
     fn deserialize_attributes<R: Sized, V: BinarySerializer<R>>(self, visitor: V) -> Result<V> {
         match self {
@@ -50,13 +47,8 @@ impl AttributesDeserializer for Attributes {
     }
 }
 
-impl AttributesSerializer for Attributes {
-    fn serialize_attribute(&mut self, name: &str, value: MessageAttributeValue) -> Result<()> {
-        match self {
-            Attributes::V03(v03) => v03.serialize_attribute(name, value),
-            Attributes::V10(v10) => v10.serialize_attribute(name, value),
-        }
-    }
+pub(crate) trait AttributesSerializer {
+    fn serialize_attribute(&mut self, name: &str, value: MessageAttributeValue) -> Result<()>;
 }
 
 impl StructuredSerializer<Event> for Event {
@@ -69,31 +61,49 @@ impl StructuredSerializer<Event> for Event {
     }
 }
 
-impl BinarySerializer<Event> for Event {
+enum EventBinarySerializer {
+    V10(EventBuilderV10),
+    V03(EventBuilderV03)
+}
+
+impl BinarySerializer<Event> for EventBinarySerializer {
     fn set_spec_version(mut self, spec_version: SpecVersion) -> Result<Self> {
-        match spec_version {
-            SpecVersion::V03 => self.attributes = self.attributes.clone().into_v03(),
-            SpecVersion::V10 => self.attributes = self.attributes.clone().into_v10(),
+        Ok(match spec_version {
+            SpecVersion::V03 => EventBinarySerializer::V03(EventBuilderV03::new()),
+            SpecVersion::V10 => EventBinarySerializer::V10(EventBuilderV10::new())
+        })
+    }
+
+    fn set_attribute(mut self, name: &str, value: MessageAttributeValue) -> Result<Self> {
+        match &mut self {
+            EventBinarySerializer::V03(eb) => eb.serialize_attribute(name, value)?,
+            EventBinarySerializer::V10(eb) => eb.serialize_attribute(name, value)?,
         }
         Ok(self)
     }
 
-    fn set_attribute(mut self, name: &str, value: MessageAttributeValue) -> Result<Self> {
-        self.attributes.serialize_attribute(name, value)?;
-        Ok(self)
-    }
-
     fn set_extension(mut self, name: &str, value: MessageAttributeValue) -> Result<Self> {
-        self.extensions.insert(name.to_string(), value.into());
-        Ok(self)
+        Ok(match self {
+            EventBinarySerializer::V03(eb) => EventBinarySerializer::V03(
+                eb.extension(name, value)
+            ),
+            EventBinarySerializer::V10(eb) => EventBinarySerializer::V10(
+                eb.extension(name, value)
+            )
+        })
     }
 
     fn end_with_data(mut self, bytes: Vec<u8>) -> Result<Event> {
-        self.data = Some(Data::from_binary(self.get_datacontenttype(), bytes)?);
-        Ok(self)
+        Ok(match self {
+            EventBinarySerializer::V03(eb) => eb.data_without_content_type(Data::Binary(bytes)).build(),
+            EventBinarySerializer::V10(eb) => eb.data_without_content_type(Data::Binary(bytes)).build()
+        }?)
     }
 
     fn end(self) -> Result<Event> {
-        Ok(self)
+        Ok(match self {
+            EventBinarySerializer::V03(eb) => eb.build(),
+            EventBinarySerializer::V10(eb) => eb.build()
+        }?)
     }
 }

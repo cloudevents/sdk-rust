@@ -7,6 +7,17 @@ use cloudevents::Event;
 use reqwest::RequestBuilder;
 use std::str::FromStr;
 
+/// Extention Trait for [`RequestBuilderExt`]
+pub trait RequestBuilderExt {
+    fn event(self, event: Event) -> Result<RequestBuilder>;
+}
+
+impl RequestBuilderExt for RequestBuilder {
+    fn event(self, event: Event) -> Result<RequestBuilder> {
+        BinaryDeserializer::deserialize_binary(event, RequestSerializer::new(self))
+    }
+}
+
 /// Wrapper for [`RequestBuilder`] that implements [`StructuredSerializer`] & [`BinarySerializer`] traits
 pub struct RequestSerializer {
     req: RequestBuilder,

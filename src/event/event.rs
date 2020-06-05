@@ -78,13 +78,14 @@ impl Default for Event {
 }
 
 impl Event {
-    /// Returns an `Iterator` for `Attributes`
+    /// Returns an [`Iterator`] for [`Attributes`]
     pub fn attributes_iter<'a>(&'a self) -> impl Iterator<Item = (&'a str, AttributeValue<'a>)> {
         match &self.attributes {
             Attributes::V03(a) => AttributesIter::IterV03(a.into_iter()),
             Attributes::V10(a) => AttributesIter::IterV10(a.into_iter()),
         }
     }
+
     /// Remove `data`, `dataschema` and `datacontenttype` from this `Event`
     pub fn remove_data(&mut self) {
         self.data = None;

@@ -7,17 +7,6 @@ use cloudevents::Event;
 use reqwest::RequestBuilder;
 use std::str::FromStr;
 
-/// Extention Trait for [`RequestBuilderExt`]
-pub trait RequestBuilderExt {
-    fn event(self, event: Event) -> Result<RequestBuilder>;
-}
-
-impl RequestBuilderExt for RequestBuilder {
-    fn event(self, event: Event) -> Result<RequestBuilder> {
-        BinaryDeserializer::deserialize_binary(event, RequestSerializer::new(self))
-    }
-}
-
 /// Wrapper for [`RequestBuilder`] that implements [`StructuredSerializer`] & [`BinarySerializer`] traits
 pub struct RequestSerializer {
     req: RequestBuilder,
@@ -78,6 +67,17 @@ pub fn event_to_request(event: Event, request_builder: RequestBuilder) -> Result
     BinaryDeserializer::deserialize_binary(event, RequestSerializer::new(request_builder))
 }
 
+/// Extention Trait for [`RequestBuilderExt`]
+pub trait RequestBuilderExt {
+    fn event(self, event: Event) -> Result<RequestBuilder>;
+}
+
+impl RequestBuilderExt for RequestBuilder {
+    fn event(self, event: Event) -> Result<RequestBuilder> {
+        BinaryDeserializer::deserialize_binary(event, RequestSerializer::new(self))
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -109,11 +109,7 @@ mod tests {
             .unwrap();
 
         let client = reqwest::Client::new();
-        /*event_to_request(input, client.post(&url))
-        .unwrap()
-        .send()
-        .await
-        .unwrap();*/
+
         client
             .post(&url)
             .event(input)
@@ -150,11 +146,6 @@ mod tests {
             .unwrap();
 
         let client = reqwest::Client::new();
-        /*event_to_request(input, client.post(&url))
-        .unwrap()
-        .send()
-        .await
-        .unwrap();*/
 
         client
             .post(&url)

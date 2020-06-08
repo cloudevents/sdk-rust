@@ -11,24 +11,6 @@ use reqwest::header::{HeaderMap, HeaderName};
 use reqwest::Response;
 use std::convert::TryFrom;
 
-/// Extention Trait for [`Response`]
-#[async_trait]
-pub trait ResponseExt {
-    async fn to_event(self) -> Result<Event>;
-}
-
-#[async_trait]
-impl ResponseExt for Response {
-    async fn to_event(self) -> Result<Event> {
-        let h = self.headers().to_owned();
-        let b = self.bytes().await.map_err(|e| Error::Other {
-            source: Box::new(e),
-        })?;
-
-        MessageDeserializer::into_event(ResponseDeserializer::new(h, b))
-    }
-}
-
 /// Wrapper for [`Response`] that implements [`MessageDeserializer`] trait
 pub struct ResponseDeserializer {
     headers: HeaderMap,

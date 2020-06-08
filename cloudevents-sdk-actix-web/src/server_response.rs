@@ -2,7 +2,6 @@ use super::headers;
 use actix_web::dev::HttpResponseBuilder;
 use actix_web::http::{HeaderName, HeaderValue};
 use actix_web::HttpResponse;
-//use async_trait::async_trait;
 use cloudevents::event::SpecVersion;
 use cloudevents::message::{
     BinaryDeserializer, BinarySerializer, MessageAttributeValue, Result, StructuredSerializer,
@@ -75,26 +74,6 @@ pub async fn event_to_response(
     BinaryDeserializer::deserialize_binary(event, HttpResponseSerializer::new(response))
         .map_err(actix_web::error::ErrorBadRequest)
 }
-
-/// Extention Trait for [`RequestBuilderExt`]
-/*#[async_trait]
-pub trait EventExt {
-    async fn event(
-        self,
-        response: HttpResponseBuilder,
-    ) -> std::result::Result<HttpResponse, actix_web::error::Error>;
-}
-
-#[async_trait]
-impl EventExt for Event {
-    async fn event(
-        self,
-        response: HttpResponseBuilder,
-    ) -> std::result::Result<HttpResponse, actix_web::error::Error> {
-        BinaryDeserializer::deserialize_binary(self, HttpResponseSerializer::new(response))
-            .map_err(actix_web::error::ErrorBadRequest)
-    }
-}*/
 
 #[cfg(test)]
 mod tests {

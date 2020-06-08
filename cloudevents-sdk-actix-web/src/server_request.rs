@@ -2,7 +2,6 @@ use super::headers;
 use actix_web::http::HeaderName;
 use actix_web::web::{Bytes, BytesMut};
 use actix_web::{web, HttpMessage, HttpRequest};
-//use async_trait::async_trait;
 use cloudevents::event::SpecVersion;
 use cloudevents::message::{
     BinaryDeserializer, BinarySerializer, Encoding, MessageAttributeValue, MessageDeserializer,
@@ -11,31 +10,6 @@ use cloudevents::message::{
 use cloudevents::{message, Event};
 use futures::StreamExt;
 use std::convert::TryFrom;
-
-/// Extention Trait for [`RequestBuilderExt`]
-/*
-#[async_trait]
-pub trait HttpRequestExt {
-    async fn request<'a>(
-        &'a self,
-        payload: web::Payload,
-    ) -> std::result::Result<Event, actix_web::error::Error>;
-}
-
-#[async_trait]
-impl HttpRequestExt for HttpRequest {
-    async fn request(
-        &self,
-        mut payload: web::Payload,
-    ) -> std::result::Result<Event, actix_web::error::Error> {
-        let mut bytes = BytesMut::new();
-        while let Some(item) = payload.next().await {
-            bytes.extend_from_slice(&item?);
-        }
-        MessageDeserializer::into_event(HttpRequestDeserializer::new(&self, bytes.freeze()))
-            .map_err(actix_web::error::ErrorBadRequest)
-    }
-}*/
 
 /// Wrapper for [`HttpRequest`] that implements [`MessageDeserializer`] trait
 pub struct HttpRequestDeserializer<'a> {

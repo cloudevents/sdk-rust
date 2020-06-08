@@ -74,7 +74,7 @@ pub trait RequestBuilderExt {
 
 impl RequestBuilderExt for RequestBuilder {
     fn event(self, event: Event) -> Result<RequestBuilder> {
-        BinaryDeserializer::deserialize_binary(event, RequestSerializer::new(self))
+        event_to_request(event, self)
     }
 }
 

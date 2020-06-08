@@ -117,12 +117,7 @@ pub trait ResponseExt {
 #[async_trait]
 impl ResponseExt for Response {
     async fn to_event(self) -> Result<Event> {
-        let h = self.headers().to_owned();
-        let b = self.bytes().await.map_err(|e| Error::Other {
-            source: Box::new(e),
-        })?;
-
-        MessageDeserializer::into_event(ResponseDeserializer::new(h, b))
+        response_to_event(self).await
     }
 }
 

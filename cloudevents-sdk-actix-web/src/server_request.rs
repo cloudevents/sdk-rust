@@ -2,7 +2,7 @@ use super::headers;
 use actix_web::http::HeaderName;
 use actix_web::web::{Bytes, BytesMut};
 use actix_web::{web, HttpMessage, HttpRequest};
-use async_trait::async_trait;
+//use async_trait::async_trait;
 use cloudevents::event::SpecVersion;
 use cloudevents::message::{
     BinaryDeserializer, BinarySerializer, Encoding, MessageAttributeValue, MessageDeserializer,
@@ -13,6 +13,7 @@ use futures::StreamExt;
 use std::convert::TryFrom;
 
 /// Extention Trait for [`RequestBuilderExt`]
+/*
 #[async_trait]
 pub trait HttpRequestExt {
     async fn request<'a>(
@@ -34,7 +35,7 @@ impl HttpRequestExt for HttpRequest {
         MessageDeserializer::into_event(HttpRequestDeserializer::new(&self, bytes.freeze()))
             .map_err(actix_web::error::ErrorBadRequest)
     }
-}
+}*/
 
 /// Wrapper for [`HttpRequest`] that implements [`MessageDeserializer`] trait
 pub struct HttpRequestDeserializer<'a> {

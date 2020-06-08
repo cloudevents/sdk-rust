@@ -120,7 +120,6 @@ mod tests {
             .unwrap();
 
         let client = reqwest::Client::new();
-
         client
             .post(&url)
             .event(input)

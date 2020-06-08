@@ -14,12 +14,12 @@ use std::convert::TryFrom;
 /// Extention Trait for [`Response`]
 #[async_trait]
 pub trait ResponseExt {
-    async fn response(self) -> Result<Event>;
+    async fn to_event(self) -> Result<Event>;
 }
 
 #[async_trait]
 impl ResponseExt for Response {
-    async fn response(self) -> Result<Event> {
+    async fn to_event(self) -> Result<Event> {
         let h = self.headers().to_owned();
         let b = self.bytes().await.map_err(|e| Error::Other {
             source: Box::new(e),

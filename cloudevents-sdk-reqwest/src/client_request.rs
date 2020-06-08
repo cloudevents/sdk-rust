@@ -109,7 +109,14 @@ mod tests {
             .unwrap();
 
         let client = reqwest::Client::new();
-        event_to_request(input, client.post(&url))
+        /*event_to_request(input, client.post(&url))
+        .unwrap()
+        .send()
+        .await
+        .unwrap();*/
+        client
+            .post(&url)
+            .event(input)
             .unwrap()
             .send()
             .await
@@ -143,7 +150,15 @@ mod tests {
             .unwrap();
 
         let client = reqwest::Client::new();
-        event_to_request(input, client.post(&url))
+        /*event_to_request(input, client.post(&url))
+        .unwrap()
+        .send()
+        .await
+        .unwrap();*/
+
+        client
+            .post(&url)
+            .event(input)
             .unwrap()
             .send()
             .await

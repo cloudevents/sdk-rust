@@ -163,10 +163,17 @@ mod tests {
             .unwrap();
 
         let client = reqwest::Client::new();
-        let res = client.get(&url).send().await.unwrap();
+        let res = client
+            .get(&url)
+            .send()
+            .await
+            .unwrap()
+            .response()
+            .await
+            .unwrap();
 
-        let resp = response_to_event(res).await.unwrap();
-        assert_eq!(expected, resp);
+        //let resp = response_to_event(res).await.unwrap();
+        assert_eq!(expected, res);
     }
 
     #[tokio::test]
@@ -200,10 +207,17 @@ mod tests {
             .unwrap();
 
         let client = reqwest::Client::new();
-        let res = client.get(&url).send().await.unwrap();
+        let res = client
+            .get(&url)
+            .send()
+            .await
+            .unwrap()
+            .response()
+            .await
+            .unwrap();
 
-        let resp = response_to_event(res).await.unwrap();
-        assert_eq!(expected, resp);
+        //let resp = response_to_event(res).await.unwrap();
+        assert_eq!(expected, res);
     }
 
     #[tokio::test]
@@ -234,9 +248,16 @@ mod tests {
             .create();
 
         let client = reqwest::Client::new();
-        let res = client.get(&url).send().await.unwrap();
+        let res = client
+            .get(&url)
+            .send()
+            .await
+            .unwrap()
+            .response()
+            .await
+            .unwrap();
 
-        let resp = response_to_event(res).await.unwrap();
-        assert_eq!(expected, resp);
+        //let resp = response_to_event(res).await.unwrap();
+        assert_eq!(expected, res);
     }
 }

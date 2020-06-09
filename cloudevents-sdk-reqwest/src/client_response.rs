@@ -108,15 +108,15 @@ pub async fn response_to_event(res: Response) -> Result<Event> {
     MessageDeserializer::into_event(ResponseDeserializer::new(h, b))
 }
 
-/// Extention Trait for [`Response`]
+/// Extention Trait for [`Response`]which acts as a wrapper for the function [`request_to_event()`]
 #[async_trait]
 pub trait ResponseExt {
-    async fn to_event(self) -> Result<Event>;
+    async fn into_event(self) -> Result<Event>;
 }
 
 #[async_trait]
 impl ResponseExt for Response {
-    async fn to_event(self) -> Result<Event> {
+    async fn into_event(self) -> Result<Event> {
         response_to_event(self).await
     }
 }
@@ -163,7 +163,7 @@ mod tests {
             .send()
             .await
             .unwrap()
-            .to_event()
+            .into_event()
             .await
             .unwrap();
 
@@ -206,7 +206,7 @@ mod tests {
             .send()
             .await
             .unwrap()
-            .to_event()
+            .into_event()
             .await
             .unwrap();
 
@@ -246,7 +246,7 @@ mod tests {
             .send()
             .await
             .unwrap()
-            .to_event()
+            .into_event()
             .await
             .unwrap();
 

@@ -67,7 +67,7 @@ pub fn event_to_request(event: Event, request_builder: RequestBuilder) -> Result
     BinaryDeserializer::deserialize_binary(event, RequestSerializer::new(request_builder))
 }
 
-/// Extention Trait for [`RequestBuilderExt`]
+/// Extention Trait for [`RequestBuilder`] which acts as a wrapper for the function [`event_to_request()`]
 pub trait RequestBuilderExt {
     fn event(self, event: Event) -> Result<RequestBuilder>;
 }

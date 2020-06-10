@@ -1,4 +1,5 @@
 use cloudevents::{EventBuilder, EventBuilderV10};
+use cloudevents_sdk_reqwest::RequestBuilderExt;
 use wasm_bindgen::prelude::*;
 
 #[wasm_bindgen]
@@ -16,7 +17,9 @@ pub async fn run(
 
     println!("Going to send event: {:?}", event);
 
-    cloudevents_sdk_reqwest::event_to_request(event, reqwest::Client::new().post(&target))
+    reqwest::Client::new()
+        .post(&target)
+        .event(event)
         .map_err(|e| e.to_string())?
         .header("Access-Control-Allow-Origin", "*")
         .send()

@@ -76,22 +76,22 @@ pub async fn event_to_response(
         .map_err(actix_web::error::ErrorBadRequest)
 }
 
-/// Extention Trait for [`Event`]which acts as a wrapper for the function [`event_to_response()`]
+/// Extention Trait for [`HttpResponseBuilder`]which acts as a wrapper for the function [`event_to_response()`]
 #[async_trait(?Send)]
-pub trait EventExt {
-    async fn into_response(
+pub trait HttpResponseBuilderExt {
+    async fn event(
         self,
-        response: HttpResponseBuilder,
+        event: Event,
     ) -> std::result::Result<HttpResponse, actix_web::error::Error>;
 }
 
 #[async_trait(?Send)]
-impl EventExt for Event {
-    async fn into_response(
+impl HttpResponseBuilderExt for HttpResponseBuilder {
+    async fn event(
         self,
-        response: HttpResponseBuilder,
+        event: Event,
     ) -> std::result::Result<HttpResponse, actix_web::error::Error> {
-        event_to_response(self, response).await
+        event_to_response(event, self).await
     }
 }
 
@@ -117,8 +117,8 @@ mod tests {
             .build()
             .unwrap();
 
-        let resp = input
-            .into_response(HttpResponseBuilder::new(StatusCode::OK))
+        let resp = HttpResponseBuilder::new(StatusCode::OK)
+            .event(input)
             .await
             .unwrap();
 
@@ -161,8 +161,8 @@ mod tests {
             .build()
             .unwrap();
 
-        let mut resp = input
-            .into_response(HttpResponseBuilder::new(StatusCode::OK))
+        let mut resp = HttpResponseBuilder::new(StatusCode::OK)
+            .event(input)
             .await
             .unwrap();
 

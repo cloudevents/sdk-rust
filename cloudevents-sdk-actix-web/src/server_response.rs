@@ -78,12 +78,18 @@ pub async fn event_to_response(
 
 #[async_trait(?Send)]
 pub trait EventExt {
-    async fn into_response(self, response: HttpResponseBuilder) -> std::result::Result<HttpResponse, actix_web::error::Error>;
+    async fn into_response(
+        self,
+        response: HttpResponseBuilder,
+    ) -> std::result::Result<HttpResponse, actix_web::error::Error>;
 }
 
 #[async_trait(?Send)]
 impl EventExt for Event {
-    async fn into_response(self, response: HttpResponseBuilder) -> std::result::Result<HttpResponse, actix_web::error::Error> {
+    async fn into_response(
+        self,
+        response: HttpResponseBuilder,
+    ) -> std::result::Result<HttpResponse, actix_web::error::Error> {
         event_to_response(self, response).await
     }
 }
@@ -110,7 +116,8 @@ mod tests {
             .build()
             .unwrap();
 
-        let resp = input.into_response(HttpResponseBuilder::new(StatusCode::OK))
+        let resp = input
+            .into_response(HttpResponseBuilder::new(StatusCode::OK))
             .await
             .unwrap();
 
@@ -153,7 +160,8 @@ mod tests {
             .build()
             .unwrap();
 
-        let mut resp = input.into_response(HttpResponseBuilder::new(StatusCode::OK))
+        let mut resp = input
+            .into_response(HttpResponseBuilder::new(StatusCode::OK))
             .await
             .unwrap();
 

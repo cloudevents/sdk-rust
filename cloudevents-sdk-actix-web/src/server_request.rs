@@ -114,12 +114,18 @@ pub async fn request_to_event(
 
 #[async_trait(?Send)]
 pub trait RequestExt {
-    async fn into_event(&self, mut payload: web::Payload) -> std::result::Result<Event, actix_web::error::Error>;
+    async fn into_event(
+        &self,
+        mut payload: web::Payload,
+    ) -> std::result::Result<Event, actix_web::error::Error>;
 }
 
 #[async_trait(?Send)]
 impl RequestExt for HttpRequest {
-    async fn into_event(&self, payload: web::Payload) -> std::result::Result<Event, actix_web::error::Error> {
+    async fn into_event(
+        &self,
+        payload: web::Payload,
+    ) -> std::result::Result<Event, actix_web::error::Error> {
         request_to_event(self, payload).await
     }
 }

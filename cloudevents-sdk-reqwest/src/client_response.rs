@@ -1,4 +1,5 @@
 use super::headers;
+use async_trait::async_trait;
 use bytes::Bytes;
 use cloudevents::event::SpecVersion;
 use cloudevents::message::{
@@ -107,6 +108,19 @@ pub async fn response_to_event(res: Response) -> Result<Event> {
     MessageDeserializer::into_event(ResponseDeserializer::new(h, b))
 }
 
+/// Extention Trait for [`Response`]which acts as a wrapper for the function [`request_to_event()`]
+#[async_trait(?Send)]
+pub trait ResponseExt {
+    async fn into_event(self) -> Result<Event>;
+}
+
+#[async_trait(?Send)]
+impl ResponseExt for Response {
+    async fn into_event(self) -> Result<Event> {
+        response_to_event(self).await
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -144,10 +158,16 @@ mod tests {
             .unwrap();
 
         let client = reqwest::Client::new();
-        let res = client.get(&url).send().await.unwrap();
+        let res = client
+            .get(&url)
+            .send()
+            .await
+            .unwrap()
+            .into_event()
+            .await
+            .unwrap();
 
-        let resp = response_to_event(res).await.unwrap();
-        assert_eq!(expected, resp);
+        assert_eq!(expected, res);
     }
 
     #[tokio::test]
@@ -181,10 +201,16 @@ mod tests {
             .unwrap();
 
         let client = reqwest::Client::new();
-        let res = client.get(&url).send().await.unwrap();
+        let res = client
+            .get(&url)
+            .send()
+            .await
+            .unwrap()
+            .into_event()
+            .await
+            .unwrap();
 
-        let resp = response_to_event(res).await.unwrap();
-        assert_eq!(expected, resp);
+        assert_eq!(expected, res);
     }
 
     #[tokio::test]
@@ -215,9 +241,15 @@ mod tests {
             .create();
 
         let client = reqwest::Client::new();
-        let res = client.get(&url).send().await.unwrap();
+        let res = client
+            .get(&url)
+            .send()
+            .await
+            .unwrap()
+            .into_event()
+            .await
+            .unwrap();
 
-        let resp = response_to_event(res).await.unwrap();
-        assert_eq!(expected, resp);
+        assert_eq!(expected, res);
     }
 }

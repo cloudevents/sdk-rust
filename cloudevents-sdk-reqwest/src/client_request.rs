@@ -67,6 +67,17 @@ pub fn event_to_request(event: Event, request_builder: RequestBuilder) -> Result
     BinaryDeserializer::deserialize_binary(event, RequestSerializer::new(request_builder))
 }
 
+/// Extention Trait for [`RequestBuilder`] which acts as a wrapper for the function [`event_to_request()`]
+pub trait RequestBuilderExt {
+    fn event(self, event: Event) -> Result<RequestBuilder>;
+}
+
+impl RequestBuilderExt for RequestBuilder {
+    fn event(self, event: Event) -> Result<RequestBuilder> {
+        event_to_request(event, self)
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -98,7 +109,10 @@ mod tests {
             .unwrap();
 
         let client = reqwest::Client::new();
-        event_to_request(input, client.post(&url))
+
+        client
+            .post(&url)
+            .event(input)
             .unwrap()
             .send()
             .await
@@ -132,7 +146,10 @@ mod tests {
             .unwrap();
 
         let client = reqwest::Client::new();
-        event_to_request(input, client.post(&url))
+
+        client
+            .post(&url)
+            .event(input)
             .unwrap()
             .send()
             .await

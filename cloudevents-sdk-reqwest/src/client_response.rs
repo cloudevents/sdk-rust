@@ -109,12 +109,12 @@ pub async fn response_to_event(res: Response) -> Result<Event> {
 }
 
 /// Extention Trait for [`Response`]which acts as a wrapper for the function [`request_to_event()`]
-#[async_trait]
+#[async_trait(?Send)]
 pub trait ResponseExt {
     async fn into_event(self) -> Result<Event>;
 }
 
-#[async_trait]
+#[async_trait(?Send)]
 impl ResponseExt for Response {
     async fn into_event(self) -> Result<Event> {
         response_to_event(self).await

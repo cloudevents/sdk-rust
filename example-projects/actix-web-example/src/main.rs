@@ -1,12 +1,13 @@
 use actix_web::{get, post, web, App, HttpRequest, HttpResponse, HttpServer};
 use cloudevents::{EventBuilder, EventBuilderV10};
+use cloudevents_sdk_actix_web::{EventExt, RequestExt};
 use serde_json::json;
 use std::str::FromStr;
 use url::Url;
 
 #[post("/")]
 async fn post_event(req: HttpRequest, payload: web::Payload) -> Result<String, actix_web::Error> {
-    let event = cloudevents_sdk_actix_web::request_to_event(&req, payload).await?;
+    let event = req.into_event(payload).await?;
     println!("Received Event: {:?}", event);
     Ok(format!("{:?}", event))
 }
@@ -15,18 +16,16 @@ async fn post_event(req: HttpRequest, payload: web::Payload) -> Result<String, a
 async fn get_event() -> Result<HttpResponse, actix_web::Error> {
     let payload = json!({"hello": "world"});
 
-    Ok(cloudevents_sdk_actix_web::event_to_response(
-        EventBuilderV10::new()
-            .id("0001")
-            .ty("example.test")
-            .source(Url::from_str("http://localhost/").unwrap())
-            .data("application/json", payload)
-            .extension("someint", "10")
-            .build()
-            .unwrap(),
-        HttpResponse::Ok(),
-    )
-    .await?)
+    Ok(EventBuilderV10::new()
+        .id("0001")
+        .ty("example.test")
+        .source(Url::from_str("http://localhost/").unwrap())
+        .data("application/json", payload)
+        .extension("someint", "10")
+        .build()
+        .unwrap()
+        .into_response(HttpResponse::Ok())
+        .await?)
 }
 
 #[actix_rt::main]

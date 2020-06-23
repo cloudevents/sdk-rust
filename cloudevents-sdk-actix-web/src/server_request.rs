@@ -112,7 +112,7 @@ pub async fn request_to_event(
         .map_err(actix_web::error::ErrorBadRequest)
 }
 
-/// Extention Trait for [`HttpRequest`]which acts as a wrapper for the function [`request_to_event()`]
+/// Extention Trait for [`HttpRequest`] which acts as a wrapper for the function [`request_to_event()`]
 #[async_trait(?Send)]
 pub trait RequestExt {
     async fn into_event(

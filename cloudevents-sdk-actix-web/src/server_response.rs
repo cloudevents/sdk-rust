@@ -76,7 +76,7 @@ pub async fn event_to_response(
         .map_err(actix_web::error::ErrorBadRequest)
 }
 
-/// Extention Trait for [`HttpResponseBuilder`]which acts as a wrapper for the function [`event_to_response()`]
+/// Extention Trait for [`HttpResponseBuilder`] which acts as a wrapper for the function [`event_to_response()`]
 #[async_trait(?Send)]
 pub trait HttpResponseBuilderExt {
     async fn event(

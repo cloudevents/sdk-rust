@@ -2,6 +2,7 @@ use super::headers;
 use actix_web::dev::HttpResponseBuilder;
 use actix_web::http::{HeaderName, HeaderValue};
 use actix_web::HttpResponse;
+use async_trait::async_trait;
 use cloudevents::event::SpecVersion;
 use cloudevents::message::{
     BinaryDeserializer, BinarySerializer, MessageAttributeValue, Result, StructuredSerializer,
@@ -75,6 +76,25 @@ pub async fn event_to_response(
         .map_err(actix_web::error::ErrorBadRequest)
 }
 
+/// Extention Trait for [`HttpResponseBuilder`] which acts as a wrapper for the function [`event_to_response()`]
+#[async_trait(?Send)]
+pub trait HttpResponseBuilderExt {
+    async fn event(
+        self,
+        event: Event,
+    ) -> std::result::Result<HttpResponse, actix_web::error::Error>;
+}
+
+#[async_trait(?Send)]
+impl HttpResponseBuilderExt for HttpResponseBuilder {
+    async fn event(
+        self,
+        event: Event,
+    ) -> std::result::Result<HttpResponse, actix_web::error::Error> {
+        event_to_response(event, self).await
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -97,7 +117,8 @@ mod tests {
             .build()
             .unwrap();
 
-        let resp = event_to_response(input, HttpResponseBuilder::new(StatusCode::OK))
+        let resp = HttpResponseBuilder::new(StatusCode::OK)
+            .event(input)
             .await
             .unwrap();
 
@@ -140,7 +161,8 @@ mod tests {
             .build()
             .unwrap();
 
-        let mut resp = event_to_response(input, HttpResponseBuilder::new(StatusCode::OK))
+        let mut resp = HttpResponseBuilder::new(StatusCode::OK)
+            .event(input)
             .await
             .unwrap();
 

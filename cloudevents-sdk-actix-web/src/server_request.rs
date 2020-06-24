@@ -2,6 +2,7 @@ use super::headers;
 use actix_web::http::HeaderName;
 use actix_web::web::{Bytes, BytesMut};
 use actix_web::{web, HttpMessage, HttpRequest};
+use async_trait::async_trait;
 use cloudevents::event::SpecVersion;
 use cloudevents::message::{
     BinaryDeserializer, BinarySerializer, Encoding, MessageAttributeValue, MessageDeserializer,
@@ -111,6 +112,25 @@ pub async fn request_to_event(
         .map_err(actix_web::error::ErrorBadRequest)
 }
 
+/// Extention Trait for [`HttpRequest`] which acts as a wrapper for the function [`request_to_event()`]
+#[async_trait(?Send)]
+pub trait RequestExt {
+    async fn into_event(
+        &self,
+        mut payload: web::Payload,
+    ) -> std::result::Result<Event, actix_web::error::Error>;
+}
+
+#[async_trait(?Send)]
+impl RequestExt for HttpRequest {
+    async fn into_event(
+        &self,
+        payload: web::Payload,
+    ) -> std::result::Result<Event, actix_web::error::Error> {
+        request_to_event(self, payload).await
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -145,7 +165,7 @@ mod tests {
             .header("ce-time", time.to_rfc3339())
             .to_http_parts();
 
-        let resp = request_to_event(&req, web::Payload(payload)).await.unwrap();
+        let resp = req.into_event(web::Payload(payload)).await.unwrap();
         assert_eq!(expected, resp);
     }
 
@@ -177,7 +197,7 @@ mod tests {
             .set_json(&j)
             .to_http_parts();
 
-        let resp = request_to_event(&req, web::Payload(payload)).await.unwrap();
+        let resp = req.into_event(web::Payload(payload)).await.unwrap();
         assert_eq!(expected, resp);
     }
 }

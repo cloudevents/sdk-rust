@@ -1,0 +1,24 @@
+[package]
+name = "cloudevents-sdk-rdkafka"
+version = "0.1.0"
+authors = ["Pranav Bhatt <adpranavb2000@gmail.com>"]
+edition = "2018"
+license-file = "../LICENSE"
+description = "CloudEvents official Rust SDK - Kafka integration"
+documentation = "https://docs.rs/cloudevents-sdk-rdkafka"
+repository = "https://github.com/cloudevents/sdk-rust"
+readme = "README.md"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+cloudevents-sdk = { version = "0.1.0", path = ".." }
+
+[dependencies.rdkafka]
+version = "~0.23"
+features = ["ssl", "sasl"]
+
+#[dev-dependencies]
+#url = { version = "^2.1", features = ["serde"] }
+#serde_json = "^1.0"
+#chrono = { version = "^0.4", features = ["serde"] }

@@ -46,7 +46,7 @@ impl<'a,K: ToBytes + ?Sized,P: ToBytes + ?Sized> BinarySerializer<FutureRecord<'
     }
 
     fn end_with_data(self, bytes: Vec<u8>) -> Result<FutureRecord<'a,K,P>> {
-        Ok(self.req.payload(bytes.to_bytes()))
+        Ok(self.req.payload(&bytes))
     }
 
     fn end(self) -> Result<FutureRecord<'a,K,P>> {
@@ -58,7 +58,7 @@ impl<'a,K: ToBytes + ?Sized,P: ToBytes + ?Sized> StructuredSerializer<FutureReco
     fn set_structured_event(self, bytes: Vec<u8>) -> Result<FutureRecord<'a,K,P>> {
         Ok(self
             .req
-            .payload(bytes.to_bytes())
+            .payload(&bytes)
             .headers(
                 self.headers.add("content-type",
                 headers::CLOUDEVENTS_JSON_HEADER.clone(),

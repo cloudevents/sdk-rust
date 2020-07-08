@@ -5,7 +5,6 @@ use cloudevents::message::{
 };
 use rdkafka::producer::{FutureRecord};
 use cloudevents::Event;
-use bytes::Bytes;
 use rdkafka::message::{OwnedHeaders, ToBytes};
 
 /// Wrapper for [`RequestBuilder`] that implements [`StructuredSerializer`] & [`BinarySerializer`] traits
@@ -14,39 +13,47 @@ pub struct RequestSerializer<'a,K: ToBytes + ?Sized,P: ToBytes + ?Sized> {
     headers: OwnedHeaders,
 }
 
-impl<'a,K: ToBytes + ?Sized,P: ToBytes + ?Sized> RequestSerializer<'a,K,P> {
-    pub fn new(FutureRec: FutureRecord<'a,K,P>) -> RequestSerializer<'a,K,P> {
-        let req = FutureRec;
-        let headers = OwnedHeaders::new();
-        RequestSerializer { req, headers }
+
+impl<'a,K: ToBytes + ?Sized> RequestSerializer<'a,K,Vec<u8>> {
+    pub fn new(FutureRec: FutureRecord<'a,K,Vec<u8>>) -> RequestSerializer<'a,K,Vec<u8>> {
+        
+        RequestSerializer { req: FutureRec, headers: OwnedHeaders::new()}
+
     }
 }
 
 impl<'a,K: ToBytes + ?Sized> BinarySerializer<FutureRecord<'a,K,Vec<u8>>> for RequestSerializer<'a,K,Vec<u8>> {
     fn set_spec_version(mut self, spec_version: SpecVersion) -> Result<Self> {
+        self.headers = self.headers.add("ce_specversion", spec_version.as_str());
+
         self.req = self
             .req
-            .headers(self.headers.add("ce_specversion", spec_version.as_str()));
+            .headers(self.headers.clone());
         Ok(
             self)
     }
 
     fn set_attribute(mut self, name: &str, value: MessageAttributeValue) -> Result<Self> {
-        self.req = self.req.headers(self.headers.add(
+        self.headers = self.headers.add(
             &headers::ATTRIBUTES_TO_HEADERS.get(name).unwrap().clone()[..],
             &value.to_string()[..],
-        ));
+        );
+        
+        self.req = self.req.headers(self.headers.clone());
         Ok(self)
     }
 
     fn set_extension(mut self, name: &str, value: MessageAttributeValue) -> Result<Self> {
+        self.headers = self.headers.add(&attribute_name_to_header!(name)[..], &value.to_string()[..]);
+
         self.req = self
             .req
-            .headers(self.headers.add(&attribute_name_to_header!(name)[..], &value.to_string()[..]));
+            .headers(self.headers.clone());
         Ok(self)
     }
 
     fn end_with_data(self, bytes: Vec<u8>) -> Result<FutureRecord<'a,K,Vec<u8>>> {
+        
         Ok(self.req.payload(&bytes))
     }
 
@@ -56,14 +63,14 @@ impl<'a,K: ToBytes + ?Sized> BinarySerializer<FutureRecord<'a,K,Vec<u8>>> for Re
 }
 
 impl<'a,K: ToBytes + ?Sized> StructuredSerializer<FutureRecord<'a,K,Vec<u8>>> for RequestSerializer<'a,K,Vec<u8>> {
-    fn set_structured_event(self, bytes: Vec<u8>) -> Result<FutureRecord<'a,K,Vec<u8>>> {
+    fn set_structured_event(mut self, bytes: Vec<u8>) -> Result<FutureRecord<'a,K,Vec<u8>>> {
+        self.headers = self.headers.add("content-type","application/cloudevents+json",);
+        
         Ok(self
             .req
             .payload(&bytes)
             .headers(
-                self.headers.add("content-type",
-                headers::CLOUDEVENTS_JSON_HEADER.clone(),
-                )
+                self.headers.clone()
             )
         )
     }

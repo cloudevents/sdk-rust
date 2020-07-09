@@ -1,34 +1,36 @@
 #[macro_use]
 use async_trait::async_trait;
-use std::collections::HashMap;
-use rdkafka::message::{Headers, Message, OwnedMessage};
 use bytes::Bytes;
-use std::str;
 use cloudevents::event::SpecVersion;
 use cloudevents::message::{
-    BinaryDeserializer, BinarySerializer, Encoding, MessageAttributeValue,
-    MessageDeserializer, Result, StructuredDeserializer, StructuredSerializer,
+    BinaryDeserializer, BinarySerializer, Encoding, MessageAttributeValue, MessageDeserializer,
+    Result, StructuredDeserializer, StructuredSerializer,
 };
-use cloudevents::{Event,message};
+use cloudevents::{message, Event};
+use rdkafka::message::{Headers, Message, OwnedMessage};
+use std::collections::HashMap;
 use std::convert::TryFrom;
+use std::str;
 
 pub struct ResponseDeserializer {
-    headers: HashMap<String,Bytes>,
+    headers: HashMap<String, Bytes>,
     payload: Bytes,
 }
 
 impl ResponseDeserializer {
     pub fn new(message: &OwnedMessage) -> ResponseDeserializer {
-        let mut resp_des = ResponseDeserializer { 
-                        headers: HashMap::new(), 
-                        payload: Bytes::new()
-                    };
-        let headers = message.headers().unwrap(); 
+        let mut resp_des = ResponseDeserializer {
+            headers: HashMap::new(),
+            payload: Bytes::new(),
+        };
+        let headers = message.headers().unwrap();
         for i in 0..headers.count() {
             let header = headers.get(i).unwrap();
-            resp_des.headers.insert(header.0.to_string(), Bytes::copy_from_slice(header.1));
+            resp_des
+                .headers
+                .insert(header.0.to_string(), Bytes::copy_from_slice(header.1));
         }
-        
+
         resp_des.payload = Bytes::copy_from_slice(message.payload().unwrap());
 
         resp_des
@@ -41,9 +43,10 @@ impl BinaryDeserializer for ResponseDeserializer {
             return Err(message::Error::WrongEncoding {});
         }
 
-        let spec_version = SpecVersion::try_from(
-            header_value_to_str!(self.headers.get("ce_specversion").unwrap())?,
-        )?;
+        let spec_version = SpecVersion::try_from(header_value_to_str!(self
+            .headers
+            .get("ce_specversion")
+            .unwrap())?)?;
 
         visitor = visitor.set_spec_version(spec_version.clone())?;
 
@@ -60,7 +63,7 @@ impl BinaryDeserializer for ResponseDeserializer {
                 visitor = visitor.set_attribute(
                     name,
                     MessageAttributeValue::String(String::from(header_value_to_str!(hv)?)),
-                    )?
+                )?
             } else {
                 visitor = visitor.set_extension(
                     name,
@@ -95,15 +98,11 @@ impl StructuredDeserializer for ResponseDeserializer {
 
 impl MessageDeserializer for ResponseDeserializer {
     fn encoding(&self) -> Encoding {
-    
         match (
-            str::from_utf8(self.headers
-                .get("content-type")
-                .unwrap())
+            str::from_utf8(self.headers.get("content-type").unwrap())
                 .unwrap_or("UNKNOWN")
                 .starts_with("application/cloudevents+json"),
-            self.headers
-                .get("ce_specversion"),
+            self.headers.get("ce_specversion"),
         ) {
             (true, _) => Encoding::STRUCTURED,
             (_, Some(_)) => Encoding::BINARY,

@@ -3,34 +3,34 @@ use cloudevents::event::SpecVersion;
 use cloudevents::message::{
     BinaryDeserializer, BinarySerializer, MessageAttributeValue, Result, StructuredSerializer,
 };
-use rdkafka::producer::{FutureRecord};
 use cloudevents::Event;
 use rdkafka::message::{OwnedHeaders, ToBytes};
+use rdkafka::producer::FutureRecord;
 
 /// Wrapper for [`RequestBuilder`] that implements [`StructuredSerializer`] & [`BinarySerializer`] traits
-pub struct RequestSerializer<'a,K: ToBytes + ?Sized,P: ToBytes + ?Sized> {
-    req: FutureRecord<'a,K,P>,
+pub struct RequestSerializer<'a, K: ToBytes + ?Sized, P: ToBytes + ?Sized> {
+    req: FutureRecord<'a, K, P>,
     headers: OwnedHeaders,
 }
 
-
-impl<'a,K: ToBytes + ?Sized> RequestSerializer<'a,K,Vec<u8>> {
-    pub fn new(FutureRec: FutureRecord<'a,K,Vec<u8>>) -> RequestSerializer<'a,K,Vec<u8>> {
-        
-        RequestSerializer { req: FutureRec, headers: OwnedHeaders::new()}
-
+impl<'a, K: ToBytes + ?Sized, P: ToBytes + ?Sized> RequestSerializer<'a, K, P> {
+    pub fn new(FutureRec: FutureRecord<'a, K, P>) -> RequestSerializer<'a, K, P> {
+        RequestSerializer {
+            req: FutureRec,
+            headers: OwnedHeaders::new(),
+        }
     }
 }
 
-impl<'a,K: ToBytes + ?Sized> BinarySerializer<FutureRecord<'a,K,Vec<u8>>> for RequestSerializer<'a,K,Vec<u8>> {
+
+impl<'a, K: ToBytes + ?Sized> BinarySerializer<FutureRecord<'a, K, Vec<u8>>>
+    for RequestSerializer<'a, K, Vec<u8>>
+{
     fn set_spec_version(mut self, spec_version: SpecVersion) -> Result<Self> {
         self.headers = self.headers.add("ce_specversion", spec_version.as_str());
 
-        self.req = self
-            .req
-            .headers(self.headers.clone());
-        Ok(
-            self)
+        self.req = self.req.headers(self.headers.clone());
+        Ok(self)
     }
 
     fn set_attribute(mut self, name: &str, value: MessageAttributeValue) -> Result<Self> {
@@ -38,56 +38,57 @@ impl<'a,K: ToBytes + ?Sized> BinarySerializer<FutureRecord<'a,K,Vec<u8>>> for Re
             &headers::ATTRIBUTES_TO_HEADERS.get(name).unwrap().clone()[..],
             &value.to_string()[..],
         );
-        
+
         self.req = self.req.headers(self.headers.clone());
         Ok(self)
     }
 
     fn set_extension(mut self, name: &str, value: MessageAttributeValue) -> Result<Self> {
-        self.headers = self.headers.add(&attribute_name_to_header!(name)[..], &value.to_string()[..]);
+        self.headers = self
+            .headers
+            .add(&attribute_name_to_header!(name)[..], &value.to_string()[..]);
 
-        self.req = self
-            .req
-            .headers(self.headers.clone());
+        self.req = self.req.headers(self.headers.clone());
         Ok(self)
     }
 
-    fn end_with_data(self, bytes: Vec<u8>) -> Result<FutureRecord<'a,K,Vec<u8>>> {
-        
-        Ok(self.req.payload(&bytes))
+    fn end_with_data(self, bytes: Vec<u8>) -> Result<FutureRecord<'a, K, Vec<u8>>> {
+        let resultant = Ok(self.req.payload(&bytes));
+        resultant
     }
 
-    fn end(self) -> Result<FutureRecord<'a,K,Vec<u8>>> {
+    fn end(self) -> Result<FutureRecord<'a, K, Vec<u8>>> {
         Ok(self.req)
     }
 }
 
-impl<'a,K: ToBytes + ?Sized> StructuredSerializer<FutureRecord<'a,K,Vec<u8>>> for RequestSerializer<'a,K,Vec<u8>> {
-    fn set_structured_event(mut self, bytes: Vec<u8>) -> Result<FutureRecord<'a,K,Vec<u8>>> {
-        self.headers = self.headers.add("content-type","application/cloudevents+json",);
-        
-        Ok(self
-            .req
-            .payload(&bytes)
-            .headers(
-                self.headers.clone()
-            )
-        )
+impl<'a, K: ToBytes + ?Sized> StructuredSerializer<FutureRecord<'a, K, Vec<u8>>>
+    for RequestSerializer<'a, K, Vec<u8>>
+{
+    fn set_structured_event(mut self, bytes: Vec<u8>) -> Result<FutureRecord<'a, K, Vec<u8>>> {
+        self.headers = self
+            .headers
+            .add("content-type", "application/cloudevents+json");
+
+        Ok(self.req.payload(&bytes).headers(self.headers.clone()))
     }
 }
 
 /// Method to fill a [`RequestBuilder`] with an [`Event`]
-pub fn event_to_request<'a,K: ToBytes + ?Sized>(event: Event, request_builder: FutureRecord<'a,K,Vec<u8>>) -> Result<FutureRecord<'a,K,Vec<u8>>> {
+pub fn event_to_request<'a, K: ToBytes + ?Sized>(
+    event: Event,
+    request_builder: FutureRecord<'a, K, Vec<u8>>,
+) -> Result<FutureRecord<'a, K, Vec<u8>>> {
     BinaryDeserializer::deserialize_binary(event, RequestSerializer::new(request_builder))
 }
 
 /// Extention Trait for [`RequestBuilder`] which acts as a wrapper for the function [`event_to_request()`]
-pub trait FutureRecordExt<'a,K: ToBytes + ?Sized> {
-    fn event(self, event: Event) -> Result<FutureRecord<'a,K,Vec<u8>>>;
+pub trait FutureRecordExt<'a, K: ToBytes + ?Sized> {
+    fn event(self, event: Event) -> Result<FutureRecord<'a, K, Vec<u8>>>;
 }
 
-impl<'a,K: ToBytes + ?Sized> FutureRecordExt<'a,K> for FutureRecord<'a,K,Vec<u8>> {
-    fn event(self, event: Event) -> Result<FutureRecord<'a,K,Vec<u8>>> {
+impl<'a, K: ToBytes + ?Sized> FutureRecordExt<'a, K> for FutureRecord<'a, K, Vec<u8>> {
+    fn event(self, event: Event) -> Result<FutureRecord<'a, K, Vec<u8>>> {
         event_to_request(event, self)
     }
 }

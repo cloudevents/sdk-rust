@@ -6,7 +6,7 @@ use cloudevents::message::{
     Result, StructuredDeserializer, StructuredSerializer,
 };
 use cloudevents::{message, Event};
-use rdkafka::message::{BorrowedMessage, Headers, Message};
+use rdkafka::message::{Headers, Message, OwnedMessage};
 use std::collections::HashMap;
 use std::convert::TryFrom;
 use std::str;
@@ -17,7 +17,7 @@ pub struct ConsumerRecordDeserializer {
 }
 
 impl ConsumerRecordDeserializer {
-    pub fn new(message: &BorrowedMessage) -> ConsumerRecordDeserializer {
+    pub fn new(message: &OwnedMessage) -> ConsumerRecordDeserializer {
         let mut resp_des = ConsumerRecordDeserializer {
             headers: HashMap::new(),
             payload: Bytes::new(),
@@ -29,7 +29,6 @@ impl ConsumerRecordDeserializer {
                 .headers
                 .insert(header.0.to_string(), Bytes::copy_from_slice(header.1));
         }
-        println!("headers are: {:?}", resp_des.headers);
 
         resp_des.payload = Bytes::copy_from_slice(message.payload().unwrap());
 
@@ -51,16 +50,15 @@ impl BinaryDeserializer for ConsumerRecordDeserializer {
         visitor = visitor.set_spec_version(spec_version.clone())?;
 
         let attributes = spec_version.attribute_names();
-        println!("\n attributes are: {:?} \n", attributes);
+
         for (hn, hv) in self
             .headers
             .iter()
-            .filter(|(hn, _)| String::from("ce_specversion") != **hn && hn.starts_with("ce"))
+            .filter(|(hn, _)| "ce_specversion" != **hn && hn.starts_with("ce-"))
         {
             let name = &hn["ce_".len()..];
 
             if attributes.contains(&name) {
-                println!("\nsetting: {}\n", name);
                 visitor = visitor.set_attribute(
                     name,
                     MessageAttributeValue::String(String::from(header_value_to_str!(hv)?)),
@@ -72,7 +70,6 @@ impl BinaryDeserializer for ConsumerRecordDeserializer {
                 )?
             }
         }
-        println!("out of the for loop");
 
         if let Some(hv) = self.headers.get("content-type") {
             visitor = visitor.set_attribute(
@@ -114,18 +111,18 @@ impl MessageDeserializer for ConsumerRecordDeserializer {
 }
 
 /// Method to transform an incoming [`Response`] to [`Event`]
-pub fn record_to_event(res: &BorrowedMessage) -> Result<Event> {
-    MessageDeserializer::into_event(ConsumerRecordDeserializer::new(res))
+pub fn record_to_event(res: OwnedMessage) -> Result<Event> {
+    MessageDeserializer::into_event(ConsumerRecordDeserializer::new(&res))
 }
 
 //#[async_trait(?Send)]
-pub trait BorrowedMessageExt {
-    fn into_event(&self) -> Result<Event>;
+pub trait OwnedMessageExt {
+    fn into_event(self) -> Result<Event>;
 }
 
 //#[async_trait(?Send)]
-impl BorrowedMessageExt for BorrowedMessage<'_> {
-    fn into_event(&self) -> Result<Event> {
+impl OwnedMessageExt for OwnedMessage {
+    fn into_event(self) -> Result<Event> {
         record_to_event(self)
     }
 }

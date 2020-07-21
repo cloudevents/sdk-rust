@@ -10,8 +10,8 @@ use rdkafka::producer::FutureRecord;
 /// Wrapper for [`RequestBuilder`] that implements [`StructuredSerializer`] & [`BinarySerializer`] traits
 #[derive(Debug)]
 pub struct ProducerRecordSerializer {
-    pub payload: Option<Vec<u8>>,
-    pub headers: OwnedHeaders,
+    payload: Option<Vec<u8>>,
+    headers: OwnedHeaders,
 }
 
 impl ProducerRecordSerializer {

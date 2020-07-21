@@ -1,0 +1,32 @@
+[package]
+name = "rdkafka-example"
+version = "0.1.0"
+authors = ["Pranav Bhatt <adpranavb2000@gmail.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+async-trait = "^0.1.33"
+cloudevents-sdk = { path = "../.." }
+cloudevents-sdk-rdkafka = { path = "../../cloudevents-sdk-rdkafka" }
+lazy_static = "1.4.0"
+bytes = "^0.5"
+url = { version = "^2.1", features = ["serde"] }
+serde_json = "^1.0"
+chrono = { version = "^0.4", features = ["serde"] }
+futures = "^0.3"
+env_logger = "0.7.1"
+tokio = { version = "^0.2", features = ["full"] }
+log = "0.4.11"
+clap = "2.33.1"
+
+[dependencies.rdkafka]
+version = "~0.23"
+features = ["ssl", "sasl"]
+
+[[example]]
+name = "consumer"
+
+
+[workspace]

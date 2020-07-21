@@ -46,5 +46,6 @@ members = [
 ]
 exclude = [
   "example-projects/actix-web-example",
-  "example-projects/reqwest-wasm-example"
+  "example-projects/reqwest-wasm-example",
+  "example-projects/rdkafka-example",
 ]

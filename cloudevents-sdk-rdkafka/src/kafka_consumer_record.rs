@@ -1,4 +1,3 @@
-#[macro_use]
 use async_trait::async_trait;
 use bytes::Bytes;
 use cloudevents::event::SpecVersion;
@@ -12,14 +11,14 @@ use std::collections::HashMap;
 use std::convert::TryFrom;
 use std::str;
 
-pub struct ResponseDeserializer {
+pub struct ConsumerRecordDeserializer {
     headers: HashMap<String, Bytes>,
     payload: Bytes,
 }
 
-impl ResponseDeserializer {
-    pub fn new(message: &OwnedMessage) -> ResponseDeserializer {
-        let mut resp_des = ResponseDeserializer {
+impl ConsumerRecordDeserializer {
+    pub fn new(message: &OwnedMessage) -> ConsumerRecordDeserializer {
+        let mut resp_des = ConsumerRecordDeserializer {
             headers: HashMap::new(),
             payload: Bytes::new(),
         };
@@ -37,7 +36,7 @@ impl ResponseDeserializer {
     }
 }
 
-impl BinaryDeserializer for ResponseDeserializer {
+impl BinaryDeserializer for ConsumerRecordDeserializer {
     fn deserialize_binary<R: Sized, V: BinarySerializer<R>>(self, mut visitor: V) -> Result<R> {
         if self.encoding() != Encoding::BINARY {
             return Err(message::Error::WrongEncoding {});
@@ -87,7 +86,7 @@ impl BinaryDeserializer for ResponseDeserializer {
     }
 }
 
-impl StructuredDeserializer for ResponseDeserializer {
+impl StructuredDeserializer for ConsumerRecordDeserializer {
     fn deserialize_structured<R: Sized, V: StructuredSerializer<R>>(self, visitor: V) -> Result<R> {
         if self.encoding() != Encoding::STRUCTURED {
             return Err(message::Error::WrongEncoding {});
@@ -96,7 +95,7 @@ impl StructuredDeserializer for ResponseDeserializer {
     }
 }
 
-impl MessageDeserializer for ResponseDeserializer {
+impl MessageDeserializer for ConsumerRecordDeserializer {
     fn encoding(&self) -> Encoding {
         match (
             str::from_utf8(self.headers.get("content-type").unwrap())
@@ -112,18 +111,18 @@ impl MessageDeserializer for ResponseDeserializer {
 }
 
 /// Method to transform an incoming [`Response`] to [`Event`]
-pub async fn response_to_event(res: OwnedMessage) -> Result<Event> {
-    MessageDeserializer::into_event(ResponseDeserializer::new(&res))
+pub fn record_to_event(res: OwnedMessage) -> Result<Event> {
+    MessageDeserializer::into_event(ConsumerRecordDeserializer::new(&res))
 }
 
-#[async_trait(?Send)]
+//#[async_trait(?Send)]
 pub trait OwnedMessageExt {
-    async fn into_event(self) -> Result<Event>;
+    fn into_event(self) -> Result<Event>;
 }
 
-#[async_trait(?Send)]
+//#[async_trait(?Send)]
 impl OwnedMessageExt for OwnedMessage {
-    async fn into_event(self) -> Result<Event> {
-        response_to_event(self).await
+    fn into_event(self) -> Result<Event> {
+        record_to_event(self)
     }
 }

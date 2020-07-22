@@ -8,7 +8,6 @@ use std::str::FromStr;
 use url::Url;
 
 use rdkafka::config::ClientConfig;
-use rdkafka::message::OwnedHeaders;
 use rdkafka::producer::{FutureProducer, FutureRecord};
 use rdkafka::util::get_rdkafka_version;
 
@@ -37,9 +36,9 @@ async fn produce(brokers: &str, topic_name: &str) {
                 .extension("someint", "10")
                 .build()
                 .unwrap();
-                
-            info!("Sending event: {:#?}",event);
-            
+
+            info!("Sending event: {:#?}", event);
+
             let delivery_status = producer
                 .send(
                     FutureRecord::to(topic_name)

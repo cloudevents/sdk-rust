@@ -4,14 +4,14 @@ use log::{info, warn};
 use std::pin::Pin;
 
 use cloudevents;
-use cloudevents_sdk_rdkafka::OwnedMessageExt;
+use cloudevents_sdk_rdkafka::BorrowedMessageExt;
 
-use rdkafka::message::{Headers,Message};
 use rdkafka::client::ClientContext;
 use rdkafka::config::{ClientConfig, RDKafkaLogLevel};
 use rdkafka::consumer::stream_consumer::StreamConsumer;
 use rdkafka::consumer::{CommitMode, Consumer, ConsumerContext, Rebalance};
 use rdkafka::error::KafkaResult;
+use rdkafka::message::{Headers, Message};
 use rdkafka::topic_partition_list::TopicPartitionList;
 use rdkafka::util::get_rdkafka_version;
 
@@ -69,25 +69,10 @@ async fn consume_and_print(brokers: &str, group_id: &str, topics: &[&str]) {
         match message {
             Err(e) => warn!("Kafka error: {}", e),
             Ok(m) => {
+
+                let event = m.into_event().unwrap();
+                info!("Received Event: {:#?}", event);
                 
-                let payload = match m.payload_view::<str>() {
-                    None => "",
-                    Some(Ok(s)) => s,
-                    Some(Err(e)) => {
-                        warn!("Error while deserializing message payload: {:?}", e);
-                        ""
-                    }
-                };
-                info!("key: '{:?}', payload: '{}', topic: {}, partition: {}, offset: {}, timestamp: {:?}",
-                      m.key(), payload, m.topic(), m.partition(), m.offset(), m.timestamp());
-                if let Some(headers) = m.headers() {
-                    for i in 0..headers.count() {
-                        let header = headers.get(i).unwrap();
-                        info!("  Header {:#?}: {:?}", header.0, header.1);
-                    }
-                }
-                //let event = m.detach();
-                //println!("Received Event: {:?}", event);
                 consumer.commit_message(&m, CommitMode::Async).unwrap();
             }
         };

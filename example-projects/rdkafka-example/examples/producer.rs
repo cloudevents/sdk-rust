@@ -2,11 +2,10 @@ use clap::{App, Arg};
 use log::info;
 
 use cloudevents::{EventBuilder, EventBuilderV10};
-use cloudevents_sdk_rdkafka::{FutureRecordExt, EventExt};
+use cloudevents_sdk_rdkafka::{EventExt, FutureRecordExt};
 use serde_json::json;
 use std::str::FromStr;
 use url::Url;
-
 
 use rdkafka::config::ClientConfig;
 use rdkafka::message::OwnedHeaders;
@@ -30,22 +29,23 @@ async fn produce(brokers: &str, topic_name: &str) {
         .map(|i| async move {
             // The send operation on the topic returns a future, which will be
             // completed once the result or failure from Kafka is received.
+            let event = EventBuilderV10::new()
+                .id("0001")
+                .ty("example.test")
+                .source(Url::from_str("http://localhost/").unwrap())
+                .data("application/json", json!({"hello": "world"}))
+                .extension("someint", "10")
+                .build()
+                .unwrap();
+                
+            info!("Sending event: {:#?}",event);
+            
             let delivery_status = producer
                 .send(
                     FutureRecord::to(topic_name)
-                        .event(&EventBuilderV10::new()
-                            .id("0001")
-                            .ty("example.test")
-                            .source(Url::from_str("http://localhost/").unwrap())
-                            .data("application/json", json!({"hello": "world"}))
-                            .extension("someint", "10")
-                            .build()
-                            .unwrap()
-                            .serialize_event()
-                            .unwrap()
-                        )
+                        .event(&event.serialize_event().unwrap())
                         .unwrap()
-                        .key(&format!("Key {}", i)), 
+                        .key(&format!("Key {}", i)),
                     0,
                 )
                 .await;

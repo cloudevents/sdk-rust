@@ -12,7 +12,6 @@ readme = "README.md"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-async-trait = "^0.1.33"
 cloudevents-sdk = { version = "0.1.0", path = ".." }
 lazy_static = "1.4.0"
 bytes = "^0.5"
@@ -20,8 +19,3 @@ bytes = "^0.5"
 [dependencies.rdkafka]
 version = "~0.23"
 features = ["ssl", "sasl"]
-
-#[dev-dependencies]
-#url = { version = "^2.1", features = ["serde"] }
-#serde_json = "^1.0"
-#chrono = { version = "^0.4", features = ["serde"] }

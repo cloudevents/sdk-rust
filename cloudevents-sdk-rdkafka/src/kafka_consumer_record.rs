@@ -1,4 +1,3 @@
-use async_trait::async_trait;
 use bytes::Bytes;
 use cloudevents::event::SpecVersion;
 use cloudevents::message::{
@@ -6,7 +5,7 @@ use cloudevents::message::{
     Result, StructuredDeserializer, StructuredSerializer,
 };
 use cloudevents::{message, Event};
-use rdkafka::message::{Headers, Message, OwnedMessage};
+use rdkafka::message::{BorrowedMessage, Headers, Message};
 use std::collections::HashMap;
 use std::convert::TryFrom;
 use std::str;
@@ -17,7 +16,7 @@ pub struct ConsumerRecordDeserializer {
 }
 
 impl ConsumerRecordDeserializer {
-    pub fn new(message: &OwnedMessage) -> ConsumerRecordDeserializer {
+    pub fn new(message: &BorrowedMessage) -> ConsumerRecordDeserializer {
         let mut resp_des = ConsumerRecordDeserializer {
             headers: HashMap::new(),
             payload: Bytes::new(),
@@ -54,7 +53,7 @@ impl BinaryDeserializer for ConsumerRecordDeserializer {
         for (hn, hv) in self
             .headers
             .iter()
-            .filter(|(hn, _)| "ce_specversion" != **hn && hn.starts_with("ce-"))
+            .filter(|(hn, _)| "ce_specversion" != **hn && hn.starts_with("ce_"))
         {
             let name = &hn["ce_".len()..];
 
@@ -111,18 +110,18 @@ impl MessageDeserializer for ConsumerRecordDeserializer {
 }
 
 /// Method to transform an incoming [`Response`] to [`Event`]
-pub fn record_to_event(res: OwnedMessage) -> Result<Event> {
-    MessageDeserializer::into_event(ConsumerRecordDeserializer::new(&res))
+pub fn record_to_event(res: &BorrowedMessage) -> Result<Event> {
+    MessageDeserializer::into_event(ConsumerRecordDeserializer::new(res))
 }
 
 //#[async_trait(?Send)]
-pub trait OwnedMessageExt {
-    fn into_event(self) -> Result<Event>;
+pub trait BorrowedMessageExt {
+    fn into_event(&self) -> Result<Event>;
 }
 
 //#[async_trait(?Send)]
-impl OwnedMessageExt for OwnedMessage {
-    fn into_event(self) -> Result<Event> {
+impl BorrowedMessageExt for BorrowedMessage<'_> {
+    fn into_event(&self) -> Result<Event> {
         record_to_event(self)
     }
 }

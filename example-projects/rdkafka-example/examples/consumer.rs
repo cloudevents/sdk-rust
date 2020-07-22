@@ -4,14 +4,14 @@ use log::{info, warn};
 use std::pin::Pin;
 
 use cloudevents;
-use cloudevents_sdk_rdkafka::OwnedMessageExt;
+use cloudevents_sdk_rdkafka::BorrowedMessageExt;
 
-use rdkafka::message::{Headers,Message};
 use rdkafka::client::ClientContext;
 use rdkafka::config::{ClientConfig, RDKafkaLogLevel};
 use rdkafka::consumer::stream_consumer::StreamConsumer;
 use rdkafka::consumer::{CommitMode, Consumer, ConsumerContext, Rebalance};
 use rdkafka::error::KafkaResult;
+use rdkafka::message::{Headers, Message};
 use rdkafka::topic_partition_list::TopicPartitionList;
 use rdkafka::util::get_rdkafka_version;
 
@@ -69,7 +69,6 @@ async fn consume_and_print(brokers: &str, group_id: &str, topics: &[&str]) {
         match message {
             Err(e) => warn!("Kafka error: {}", e),
             Ok(m) => {
-                
                 let payload = match m.payload_view::<str>() {
                     None => "",
                     Some(Ok(s)) => s,
@@ -86,8 +85,8 @@ async fn consume_and_print(brokers: &str, group_id: &str, topics: &[&str]) {
                         info!("  Header {:#?}: {:?}", header.0, header.1);
                     }
                 }
-                //let event = m.detach();
-                //println!("Received Event: {:?}", event);
+                let event = &m.into_event().unwrap();
+                println!("Received Event: {:#?}", event);
                 consumer.commit_message(&m, CommitMode::Async).unwrap();
             }
         };

@@ -5,18 +5,18 @@ use cloudevents::message::{
     Result, StructuredDeserializer, StructuredSerializer,
 };
 use cloudevents::{message, Event};
-use rdkafka::message::{BorrowedMessage, Headers, Message};
+use rdkafka::message::{BorrowedMessage, Headers, Message, OwnedMessage};
 use std::collections::HashMap;
 use std::convert::TryFrom;
 use std::str;
 
 pub struct ConsumerRecordDeserializer {
-    headers: HashMap<String, Bytes>,
-    payload: Bytes,
+    pub(crate) headers: HashMap<String, Bytes>,
+    pub(crate) payload: Bytes,
 }
 
 impl ConsumerRecordDeserializer {
-    pub fn new(message: &BorrowedMessage) -> ConsumerRecordDeserializer {
+    pub fn owned_new(message: OwnedMessage) -> ConsumerRecordDeserializer {
         let mut resp_des = ConsumerRecordDeserializer {
             headers: HashMap::new(),
             payload: Bytes::new(),
@@ -29,7 +29,31 @@ impl ConsumerRecordDeserializer {
                 .insert(header.0.to_string(), Bytes::copy_from_slice(header.1));
         }
 
-        resp_des.payload = Bytes::copy_from_slice(message.payload().unwrap());
+        match message.payload() {
+            Some(s) => resp_des.payload = Bytes::copy_from_slice(s),
+            None => resp_des.payload = resp_des.payload,
+        }
+
+        resp_des
+    }
+
+    pub fn borrowed_new(message: &BorrowedMessage) -> ConsumerRecordDeserializer {
+        let mut resp_des = ConsumerRecordDeserializer {
+            headers: HashMap::new(),
+            payload: Bytes::new(),
+        };
+        let headers = message.headers().unwrap();
+        for i in 0..headers.count() {
+            let header = headers.get(i).unwrap();
+            resp_des
+                .headers
+                .insert(header.0.to_string(), Bytes::copy_from_slice(header.1));
+        }
+
+        match message.payload() {
+            Some(s) => resp_des.payload = Bytes::copy_from_slice(s),
+            None => resp_des.payload = resp_des.payload,
+        }
 
         resp_des
     }
@@ -97,7 +121,7 @@ impl StructuredDeserializer for ConsumerRecordDeserializer {
 impl MessageDeserializer for ConsumerRecordDeserializer {
     fn encoding(&self) -> Encoding {
         match (
-            str::from_utf8(self.headers.get("content-type").unwrap())
+            str::from_utf8(self.headers.get("content-type").unwrap_or(&Bytes::new()))
                 .unwrap_or("UNKNOWN")
                 .starts_with("application/cloudevents+json"),
             self.headers.get("ce_specversion"),
@@ -110,18 +134,131 @@ impl MessageDeserializer for ConsumerRecordDeserializer {
 }
 
 /// Method to transform an incoming [`Response`] to [`Event`]
-pub fn record_to_event(res: &BorrowedMessage) -> Result<Event> {
-    MessageDeserializer::into_event(ConsumerRecordDeserializer::new(res))
+pub fn owned_record_to_event(res: OwnedMessage) -> Result<Event> {
+    MessageDeserializer::into_event(ConsumerRecordDeserializer::owned_new(res))
 }
 
-//#[async_trait(?Send)]
+pub fn borrowed_record_to_event(res: &BorrowedMessage) -> Result<Event> {
+    MessageDeserializer::into_event(ConsumerRecordDeserializer::borrowed_new(res))
+}
+
 pub trait BorrowedMessageExt {
     fn into_event(&self) -> Result<Event>;
 }
 
-//#[async_trait(?Send)]
 impl BorrowedMessageExt for BorrowedMessage<'_> {
     fn into_event(&self) -> Result<Event> {
-        record_to_event(self)
+        borrowed_record_to_event(self)
+    }
+}
+
+pub trait OwnedMessageExt {
+    fn into_event(self) -> Result<Event>;
+}
+
+impl OwnedMessageExt for OwnedMessage {
+    fn into_event(self) -> Result<Event> {
+        owned_record_to_event(self)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::kafka_producer_record::ProducerRecordSerializer;
+    use crate::EventExt;
+
+    use chrono::Utc;
+    use cloudevents::{EventBuilder, EventBuilderV10};
+    use serde_json::json;
+    use std::str::FromStr;
+    use url::Url;
+
+    #[test]
+    fn test_binary_record() {
+        let time = Utc::now();
+
+        let expected = EventBuilderV10::new()
+            .id("0001")
+            .ty("example.test")
+            //TODO this is required now because the message deserializer implictly set default values
+            // As soon as this defaulting doesn't happen anymore, we can remove it (Issues #40/#41)
+            .time(time)
+            .source(Url::from_str("http://localhost").unwrap())
+            .extension("someint", "10")
+            .build()
+            .unwrap();
+
+        // Since there is neither a way provided by rust-rdkafka to convert FutureProducer back into
+        // OwnedMessage or BorrowedMessage, nor is there a way to create a BorrowedMessage struct,
+        // the test uses OwnedMessage instead, which consumes the message instead of borrowing it like
+        // in the case of BorrowedMessage
+
+        let serialized_event = EventBuilderV10::new()
+            .id("0001")
+            .ty("example.test")
+            .time(time)
+            .source(Url::from_str("http://localhost").unwrap())
+            .extension("someint", "10")
+            .build()
+            .unwrap()
+            .serialize_event()
+            .unwrap();
+
+        let owned_message = OwnedMessage::new(
+            serialized_event.payload,
+            Some(String::from("test key").into_bytes()),
+            String::from("test topic"),
+            rdkafka::message::Timestamp::NotAvailable,
+            10,
+            10,
+            Some(serialized_event.headers),
+        );
+
+        assert_eq!(owned_message.into_event().unwrap(), expected)
+    }
+
+    #[test]
+    fn test_structured_record() {
+        let j = json!({"hello": "world"});
+
+        let expected = EventBuilderV10::new()
+            .id("0001")
+            .ty("example.test")
+            .source(Url::from_str("http://localhost").unwrap())
+            .data("application/json", j.clone())
+            .extension("someint", "10")
+            .build()
+            .unwrap();
+
+        // Since there is neither a way provided by rust-rdkafka to convert FutureProducer back into
+        // OwnedMessage or BorrowedMessage, nor is there a way to create a BorrowedMessage struct,
+        // the test uses OwnedMessage instead, which consumes the message instead of borrowing it like
+        // in the case of BorrowedMessage
+
+        let input = EventBuilderV10::new()
+            .id("0001")
+            .ty("example.test")
+            .source(Url::from_str("http://localhost").unwrap())
+            .data("application/json", j.clone())
+            .extension("someint", "10")
+            .build()
+            .unwrap();
+
+        let serialized_event =
+            StructuredDeserializer::deserialize_structured(input, ProducerRecordSerializer::new())
+                .unwrap();
+
+        let owned_message = OwnedMessage::new(
+            serialized_event.payload,
+            Some(String::from("test key").into_bytes()),
+            String::from("test topic"),
+            rdkafka::message::Timestamp::NotAvailable,
+            10,
+            10,
+            Some(serialized_event.headers),
+        );
+
+        assert_eq!(owned_message.into_event().unwrap(), expected)
     }
 }

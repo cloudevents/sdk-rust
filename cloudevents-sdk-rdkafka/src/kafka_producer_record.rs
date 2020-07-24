@@ -1,4 +1,5 @@
 use super::headers;
+use super::headers::{CLOUDEVENTS_JSON_HEADER, SPEC_VERSION_HEADER};
 use cloudevents::event::SpecVersion;
 use cloudevents::message::{
     BinaryDeserializer, BinarySerializer, MessageAttributeValue, Result, StructuredSerializer,
@@ -25,7 +26,7 @@ impl ProducerRecordSerializer {
 
 impl BinarySerializer<ProducerRecordSerializer> for ProducerRecordSerializer {
     fn set_spec_version(mut self, spec_version: SpecVersion) -> Result<Self> {
-        self.headers = self.headers.add("ce_specversion", spec_version.as_str());
+        self.headers = self.headers.add(SPEC_VERSION_HEADER, spec_version.as_str());
 
         Ok(self)
     }
@@ -60,9 +61,7 @@ impl BinarySerializer<ProducerRecordSerializer> for ProducerRecordSerializer {
 
 impl StructuredSerializer<ProducerRecordSerializer> for ProducerRecordSerializer {
     fn set_structured_event(mut self, bytes: Vec<u8>) -> Result<ProducerRecordSerializer> {
-        self.headers = self
-            .headers
-            .add("content-type", "application/cloudevents+json");
+        self.headers = self.headers.add("content-type", CLOUDEVENTS_JSON_HEADER);
 
         self.payload = Some(bytes);
 

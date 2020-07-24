@@ -30,6 +30,7 @@ fn attributes_to_headers(it: impl Iterator<Item = &'static str>) -> HashMap<&'st
 lazy_static! {
     pub(crate) static ref ATTRIBUTES_TO_HEADERS: HashMap<&'static str, String> =
         attributes_to_headers(SpecVersion::all_attribute_names());
-    pub(crate) static ref SPEC_VERSION_HEADER: &'static str = "ce_specversion";
-    pub(crate) static ref CLOUDEVENTS_JSON_HEADER: &'static str = "application/cloudevents+json";
 }
+
+pub(crate) static SPEC_VERSION_HEADER: &'static str = "ce_specversion";
+pub(crate) static CLOUDEVENTS_JSON_HEADER: &'static str = "application/cloudevents+json";

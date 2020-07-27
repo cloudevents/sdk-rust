@@ -51,23 +51,29 @@ pub(crate) trait AttributesSerializer {
     fn serialize_attribute(&mut self, name: &str, value: MessageAttributeValue) -> Result<()>;
 }
 
-impl StructuredSerializer<Event> for Event {
-    fn set_structured_event(mut self, bytes: Vec<u8>) -> Result<Event> {
-        let new_event: Event = serde_json::from_slice(&bytes)?;
-        self.attributes = new_event.attributes;
-        self.data = new_event.data;
-        self.extensions = new_event.extensions;
-        Ok(self)
+#[derive(Debug)]
+pub(crate) struct EventStructuredSerializer {}
+
+impl StructuredSerializer<Event> for EventStructuredSerializer {
+    fn set_structured_event(self, bytes: Vec<u8>) -> Result<Event> {
+        Ok(serde_json::from_slice(&bytes)?)
     }
 }
 
-enum EventBinarySerializer {
+#[derive(Debug)]
+pub(crate) enum EventBinarySerializer {
     V10(EventBuilderV10),
     V03(EventBuilderV03)
 }
 
+impl EventBinarySerializer {
+    pub(crate) fn new() -> Self {
+        EventBinarySerializer::V10(EventBuilderV10::new())
+    }
+}
+
 impl BinarySerializer<Event> for EventBinarySerializer {
-    fn set_spec_version(mut self, spec_version: SpecVersion) -> Result<Self> {
+    fn set_spec_version(self, spec_version: SpecVersion) -> Result<Self> {
         Ok(match spec_version {
             SpecVersion::V03 => EventBinarySerializer::V03(EventBuilderV03::new()),
             SpecVersion::V10 => EventBinarySerializer::V10(EventBuilderV10::new())
@@ -82,7 +88,7 @@ impl BinarySerializer<Event> for EventBinarySerializer {
         Ok(self)
     }
 
-    fn set_extension(mut self, name: &str, value: MessageAttributeValue) -> Result<Self> {
+    fn set_extension(self, name: &str, value: MessageAttributeValue) -> Result<Self> {
         Ok(match self {
             EventBinarySerializer::V03(eb) => EventBinarySerializer::V03(
                 eb.extension(name, value)
@@ -93,7 +99,7 @@ impl BinarySerializer<Event> for EventBinarySerializer {
         })
     }
 
-    fn end_with_data(mut self, bytes: Vec<u8>) -> Result<Event> {
+    fn end_with_data(self, bytes: Vec<u8>) -> Result<Event> {
         Ok(match self {
             EventBinarySerializer::V03(eb) => eb.data_without_content_type(Data::Binary(bytes)).build(),
             EventBinarySerializer::V10(eb) => eb.data_without_content_type(Data::Binary(bytes)).build()
@@ -105,5 +111,55 @@ impl BinarySerializer<Event> for EventBinarySerializer {
             EventBinarySerializer::V03(eb) => eb.build(),
             EventBinarySerializer::V10(eb) => eb.build()
         }?)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::message::Error;
+
+    #[test]
+    fn binary_deserializer_unrecognized_attribute_v03() {
+        assert_eq!(
+            Error::UnrecognizedAttributeName {
+                name: "dataschema".to_string()
+            }.to_string(),
+            EventBinarySerializer::new()
+                .set_spec_version(SpecVersion::V03).unwrap()
+                .set_attribute("dataschema", MessageAttributeValue::Boolean(true))
+                .expect_err("Should return an error")
+                .to_string()
+        )
+    }
+
+    #[test]
+    fn binary_deserializer_missing_id() {
+        assert_eq!(
+            Error::EventBuilderError {
+                source: crate::event::EventBuilderError::MissingRequiredAttribute {
+                    attribute_name: "id"
+                },
+            }.to_string(),
+            EventBinarySerializer::new()
+                .set_spec_version(SpecVersion::V10).unwrap()
+                .end()
+                .unwrap_err()
+                .to_string()
+        )
+    }
+
+    #[test]
+    fn binary_deserializer_unrecognized_attribute_v10() {
+        assert_eq!(
+            Error::UnrecognizedAttributeName {
+                name: "schemaurl".to_string()
+            }.to_string(),
+            EventBinarySerializer::new()
+                .set_spec_version(SpecVersion::V10).unwrap()
+                .set_attribute("schemaurl", MessageAttributeValue::Boolean(true))
+                .expect_err("Should return an error")
+                .to_string()
+        )
     }
 }

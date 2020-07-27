@@ -9,7 +9,7 @@ use crate::message::MessageAttributeValue;
 use std::convert::TryInto;
 
 /// Builder to create a CloudEvent V1.0
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct EventBuilder {
     id: Option<String>,
     ty: Option<String>,

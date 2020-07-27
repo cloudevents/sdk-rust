@@ -17,6 +17,8 @@ pub use builder::EventBuilder;
 pub use data::Data;
 pub use event::Event;
 pub use extensions::ExtensionValue;
+pub(crate) use message::EventStructuredSerializer;
+pub(crate) use message::EventBinarySerializer;
 pub use spec_version::InvalidSpecVersion;
 pub use spec_version::SpecVersion;
 pub use types::{TryIntoTime, TryIntoUrl};

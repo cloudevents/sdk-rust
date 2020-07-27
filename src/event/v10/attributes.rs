@@ -2,11 +2,11 @@ use crate::event::attributes::{
     default_hostname, AttributeValue, AttributesConverter, DataAttributesWriter,
 };
 use crate::event::{AttributesReader, AttributesV03, AttributesWriter, SpecVersion};
+use crate::message::{BinarySerializer, MessageAttributeValue};
 use chrono::{DateTime, Utc};
 use core::fmt::Debug;
 use url::Url;
 use uuid::Uuid;
-use crate::message::{BinarySerializer, MessageAttributeValue};
 
 pub(crate) const ATTRIBUTE_NAMES: [&'static str; 8] = [
     "specversion",
@@ -168,7 +168,10 @@ impl Default for Attributes {
 }
 
 impl crate::event::message::AttributesDeserializer for super::Attributes {
-    fn deserialize_attributes<R: Sized, V: BinarySerializer<R>>(self, mut visitor: V) -> crate::message::Result<V> {
+    fn deserialize_attributes<R: Sized, V: BinarySerializer<R>>(
+        self,
+        mut visitor: V,
+    ) -> crate::message::Result<V> {
         visitor = visitor.set_attribute("id", MessageAttributeValue::String(self.id))?;
         visitor = visitor.set_attribute("type", MessageAttributeValue::String(self.ty))?;
         visitor = visitor.set_attribute("source", MessageAttributeValue::UriRef(self.source))?;

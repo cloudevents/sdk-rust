@@ -2,11 +2,11 @@ use super::Attributes as AttributesV03;
 use crate::event::{
     Attributes, Data, Event, EventBuilderError, ExtensionValue, TryIntoTime, TryIntoUrl,
 };
+use crate::message::MessageAttributeValue;
 use chrono::{DateTime, Utc};
 use std::collections::HashMap;
-use url::Url;
-use crate::message::MessageAttributeValue;
 use std::convert::TryInto;
+use url::Url;
 
 /// Builder to create a CloudEvent V0.3
 #[derive(Clone, Debug)]
@@ -182,7 +182,11 @@ impl crate::event::builder::EventBuilder for EventBuilder {
 }
 
 impl crate::event::message::AttributesSerializer for EventBuilder {
-    fn serialize_attribute(&mut self, name: &str, value: MessageAttributeValue) -> crate::message::Result<()> {
+    fn serialize_attribute(
+        &mut self,
+        name: &str,
+        value: MessageAttributeValue,
+    ) -> crate::message::Result<()> {
         match name {
             "id" => self.id = Some(value.to_string()),
             "type" => self.ty = Some(value.to_string()),

@@ -1,11 +1,8 @@
 mod test_data;
-use cloudevents::message::{
-    BinaryDeserializer, Result,
-    StructuredDeserializer,
-};
+use cloudevents::message::{BinaryDeserializer, Result, StructuredDeserializer};
 
+use cloudevents::{AttributesReader, EventBuilder, EventBuilderV03, EventBuilderV10};
 use test_data::*;
-use cloudevents::{EventBuilder, EventBuilderV03, EventBuilderV10, AttributesReader};
 
 #[test]
 fn message_v03_roundtrip_structured() -> Result<()> {
@@ -25,7 +22,8 @@ fn message_v03_roundtrip_binary() -> Result<()> {
     let bytes = serde_json::to_vec(&data)?;
     let expected = EventBuilderV03::from(wanna_be_expected.clone())
         .data(wanna_be_expected.get_datacontenttype().unwrap(), bytes)
-        .build().unwrap();
+        .build()
+        .unwrap();
 
     assert_eq!(
         expected,
@@ -52,7 +50,8 @@ fn message_v10_roundtrip_binary() -> Result<()> {
     let bytes = serde_json::to_vec(&data)?;
     let expected = EventBuilderV10::from(wanna_be_expected.clone())
         .data(wanna_be_expected.get_datacontenttype().unwrap(), bytes)
-        .build().unwrap();
+        .build()
+        .unwrap();
 
     assert_eq!(
         expected,

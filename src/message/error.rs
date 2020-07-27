@@ -7,12 +7,16 @@ pub enum Error {
     WrongEncoding {},
     #[snafu(display("{}", source))]
     #[snafu(context(false))]
-    InvalidSpecVersion { source: crate::event::InvalidSpecVersion },
+    InvalidSpecVersion {
+        source: crate::event::InvalidSpecVersion,
+    },
     #[snafu(display("Unrecognized attribute name: {}", name))]
     UnrecognizedAttributeName { name: String },
     #[snafu(display("Error while building the final event: {}", source))]
     #[snafu(context(false))]
-    EventBuilderError { source: crate::event::EventBuilderError },
+    EventBuilderError {
+        source: crate::event::EventBuilderError,
+    },
     #[snafu(display("Error while parsing a time string: {}", source))]
     #[snafu(context(false))]
     ParseTimeError { source: chrono::ParseError },

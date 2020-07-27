@@ -1,6 +1,6 @@
-use super::{BinarySerializer, Encoding, Result, Error, StructuredSerializer};
-use crate::Event;
+use super::{BinarySerializer, Encoding, Error, Result, StructuredSerializer};
 use crate::event::{EventBinarySerializer, EventStructuredSerializer};
+use crate::Event;
 
 /// Deserializer trait for a Message that can be encoded as structured mode
 pub trait StructuredDeserializer
@@ -15,7 +15,7 @@ where
 
     /// Convert this Message to [`Event`]
     fn into_event(self) -> Result<Event> {
-        self.deserialize_structured(EventStructuredSerializer{})
+        self.deserialize_structured(EventStructuredSerializer {})
     }
 }
 
@@ -46,7 +46,7 @@ where
         match self.encoding() {
             Encoding::BINARY => BinaryDeserializer::into_event(self),
             Encoding::STRUCTURED => StructuredDeserializer::into_event(self),
-            _ => Err(Error::WrongEncoding{})
+            _ => Err(Error::WrongEncoding {}),
         }
     }
 

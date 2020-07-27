@@ -195,7 +195,7 @@ mod tests {
             // As soon as this defaulting doesn't happen anymore, we can remove it (Issues #40/#41)
             .time(time)
             .source(Url::from_str("http://localhost").unwrap())
-            .data("application/json", j.clone())
+            .data("application/json", j.to_string().into_bytes())
             .extension("someint", "10")
             .build()
             .unwrap();

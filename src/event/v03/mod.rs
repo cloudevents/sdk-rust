@@ -1,7 +1,6 @@
 mod attributes;
 mod builder;
 mod format;
-mod message;
 
 pub use attributes::Attributes;
 pub(crate) use attributes::AttributesIntoIterator;

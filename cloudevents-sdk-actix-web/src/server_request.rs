@@ -181,7 +181,7 @@ mod tests {
             //TODO this is required now because the message deserializer implictly set default values
             // As soon as this defaulting doesn't happen anymore, we can remove it (Issues #40/#41)
             .time(time)
-            .data("application/json", j.clone())
+            .data("application/json", j.to_string().into_bytes())
             .extension("someint", "10")
             .build()
             .unwrap();

@@ -2,6 +2,7 @@ use crate::event::attributes::{
     default_hostname, AttributeValue, AttributesConverter, DataAttributesWriter,
 };
 use crate::event::{AttributesReader, AttributesV03, AttributesWriter, SpecVersion};
+use crate::message::{BinarySerializer, MessageAttributeValue};
 use chrono::{DateTime, Utc};
 use core::fmt::Debug;
 use url::Url;
@@ -163,6 +164,40 @@ impl Default for Attributes {
             subject: None,
             time: Some(Utc::now()),
         }
+    }
+}
+
+impl crate::event::message::AttributesDeserializer for super::Attributes {
+    fn deserialize_attributes<R: Sized, V: BinarySerializer<R>>(
+        self,
+        mut visitor: V,
+    ) -> crate::message::Result<V> {
+        visitor = visitor.set_attribute("id", MessageAttributeValue::String(self.id))?;
+        visitor = visitor.set_attribute("type", MessageAttributeValue::String(self.ty))?;
+        visitor = visitor.set_attribute("source", MessageAttributeValue::UriRef(self.source))?;
+        if self.datacontenttype.is_some() {
+            visitor = visitor.set_attribute(
+                "datacontenttype",
+                MessageAttributeValue::String(self.datacontenttype.unwrap()),
+            )?;
+        }
+        if self.dataschema.is_some() {
+            visitor = visitor.set_attribute(
+                "dataschema",
+                MessageAttributeValue::Uri(self.dataschema.unwrap()),
+            )?;
+        }
+        if self.subject.is_some() {
+            visitor = visitor.set_attribute(
+                "subject",
+                MessageAttributeValue::String(self.subject.unwrap()),
+            )?;
+        }
+        if self.time.is_some() {
+            visitor = visitor
+                .set_attribute("time", MessageAttributeValue::DateTime(self.time.unwrap()))?;
+        }
+        Ok(visitor)
     }
 }
 

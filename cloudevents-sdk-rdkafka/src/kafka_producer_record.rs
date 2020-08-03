@@ -1,5 +1,4 @@
 use super::headers;
-use super::headers::{CLOUDEVENTS_JSON_HEADER, SPEC_VERSION_HEADER};
 use cloudevents::event::SpecVersion;
 use cloudevents::message::{
     BinaryDeserializer, BinarySerializer, MessageAttributeValue, Result, StructuredSerializer,
@@ -26,14 +25,22 @@ impl ProducerRecordSerializer {
 
 impl BinarySerializer<ProducerRecordSerializer> for ProducerRecordSerializer {
     fn set_spec_version(mut self, spec_version: SpecVersion) -> Result<Self> {
-        self.headers = self.headers.add(SPEC_VERSION_HEADER, spec_version.as_str());
+        self.headers = self
+            .headers
+            .add(headers::SPEC_VERSION_HEADER, spec_version.as_str());
 
         Ok(self)
     }
 
     fn set_attribute(mut self, name: &str, value: MessageAttributeValue) -> Result<Self> {
         self.headers = self.headers.add(
-            &headers::ATTRIBUTES_TO_HEADERS.get(name).unwrap().clone()[..],
+            &headers::ATTRIBUTES_TO_HEADERS
+                .get(name)
+                .ok_or(cloudevents::message::Error::UnrecognizedAttributeName {
+                    name: String::from(name),
+                })
+                .unwrap()
+                .clone()[..],
             &value.to_string()[..],
         );
 
@@ -61,7 +68,10 @@ impl BinarySerializer<ProducerRecordSerializer> for ProducerRecordSerializer {
 
 impl StructuredSerializer<ProducerRecordSerializer> for ProducerRecordSerializer {
     fn set_structured_event(mut self, bytes: Vec<u8>) -> Result<ProducerRecordSerializer> {
-        self.headers = self.headers.add("content-type", CLOUDEVENTS_JSON_HEADER);
+        self.headers = self.headers.add(
+            headers::SPEC_VERSION_HEADER,
+            headers::CLOUDEVENTS_JSON_HEADER,
+        );
 
         self.payload = Some(bytes);
 
@@ -77,7 +87,11 @@ pub fn event_to_record<'a, K: ToBytes + ?Sized>(
     let header = event.headers.clone();
 
     record = record.headers(header);
-    record = record.payload(event.payload.as_ref().unwrap());
+
+    match event.payload.as_ref() {
+        Some(s) => record = record.payload(s),
+        None => record = record,
+    }
 
     Ok(record)
 }

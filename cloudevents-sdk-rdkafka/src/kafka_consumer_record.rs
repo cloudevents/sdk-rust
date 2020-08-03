@@ -1,4 +1,4 @@
-use bytes::Bytes;
+use crate::headers;
 use cloudevents::event::SpecVersion;
 use cloudevents::message::{
     BinaryDeserializer, BinarySerializer, Encoding, MessageAttributeValue, MessageDeserializer,
@@ -11,26 +11,26 @@ use std::convert::TryFrom;
 use std::str;
 
 pub struct ConsumerRecordDeserializer {
-    pub(crate) headers: HashMap<String, Bytes>,
-    pub(crate) payload: Bytes,
+    pub(crate) headers: HashMap<String, Vec<u8>>,
+    pub(crate) payload: Vec<u8>,
 }
 
 impl ConsumerRecordDeserializer {
     pub fn owned_new(message: OwnedMessage) -> ConsumerRecordDeserializer {
         let mut resp_des = ConsumerRecordDeserializer {
             headers: HashMap::new(),
-            payload: Bytes::new(),
+            payload: Vec::new(),
         };
         let headers = message.headers().unwrap();
         for i in 0..headers.count() {
             let header = headers.get(i).unwrap();
             resp_des
                 .headers
-                .insert(header.0.to_string(), Bytes::copy_from_slice(header.1));
+                .insert(header.0.to_string(), Vec::from(header.1));
         }
 
         match message.payload() {
-            Some(s) => resp_des.payload = Bytes::copy_from_slice(s),
+            Some(s) => resp_des.payload = Vec::from(s),
             None => resp_des.payload = resp_des.payload,
         }
 
@@ -40,18 +40,18 @@ impl ConsumerRecordDeserializer {
     pub fn borrowed_new(message: &BorrowedMessage) -> ConsumerRecordDeserializer {
         let mut resp_des = ConsumerRecordDeserializer {
             headers: HashMap::new(),
-            payload: Bytes::new(),
+            payload: Vec::new(),
         };
         let headers = message.headers().unwrap();
         for i in 0..headers.count() {
             let header = headers.get(i).unwrap();
             resp_des
                 .headers
-                .insert(header.0.to_string(), Bytes::copy_from_slice(header.1));
+                .insert(header.0.to_string(), Vec::from(header.1));
         }
 
         match message.payload() {
-            Some(s) => resp_des.payload = Bytes::copy_from_slice(s),
+            Some(s) => resp_des.payload = Vec::from(s),
             None => resp_des.payload = resp_des.payload,
         }
 
@@ -67,7 +67,7 @@ impl BinaryDeserializer for ConsumerRecordDeserializer {
 
         let spec_version = SpecVersion::try_from(header_value_to_str!(self
             .headers
-            .get("ce_specversion")
+            .get(headers::SPEC_VERSION_HEADER)
             .unwrap())?)?;
 
         visitor = visitor.set_spec_version(spec_version.clone())?;
@@ -77,27 +77,31 @@ impl BinaryDeserializer for ConsumerRecordDeserializer {
         for (hn, hv) in self
             .headers
             .iter()
-            .filter(|(hn, _)| "ce_specversion" != **hn && hn.starts_with("ce_"))
+            .filter(|(hn, _)| headers::SPEC_VERSION_HEADER != **hn && hn.starts_with("ce_"))
         {
             let name = &hn["ce_".len()..];
 
             if attributes.contains(&name) {
                 visitor = visitor.set_attribute(
                     name,
-                    MessageAttributeValue::String(String::from(header_value_to_str!(hv)?)),
+                    MessageAttributeValue::String(String::from_utf8(*hv).map_err(|e| cloudevents::message::Error::Other {
+                        source: Box::new(e),
+                    })?),
                 )?
             } else {
                 visitor = visitor.set_extension(
                     name,
-                    MessageAttributeValue::String(String::from(header_value_to_str!(hv)?)),
+                    MessageAttributeValue::String(String::from_utf8(*hv).map_err(|e| cloudevents::message::Error::Other {
+                        source: Box::new(e),
+                    })?),
                 )?
             }
         }
 
-        if let Some(hv) = self.headers.get("content-type") {
+        if let Some(hv) = self.headers.get(headers::CONTENT_TYPE) {
             visitor = visitor.set_attribute(
                 "datacontenttype",
-                MessageAttributeValue::String(String::from(header_value_to_str!(hv)?)),
+                MessageAttributeValue::String(header_value_to_string!(hv)?),
             )?
         }
 
@@ -120,11 +124,21 @@ impl StructuredDeserializer for ConsumerRecordDeserializer {
 
 impl MessageDeserializer for ConsumerRecordDeserializer {
     fn encoding(&self) -> Encoding {
+        /*str::from_utf8(
+            self.headers
+                .get(headers::CONTENT_TYPE)
+                .unwrap_or(&Vec::new()),
+        )
+        .unwrap_or("UNKNOWN")
+        .starts_with(headers::CLOUDEVENTS_JSON_HEADER)*/
         match (
-            str::from_utf8(self.headers.get("content-type").unwrap_or(&Bytes::new()))
-                .unwrap_or("UNKNOWN")
-                .starts_with("application/cloudevents+json"),
-            self.headers.get("ce_specversion"),
+            self.headers
+                .get("content-type")
+                .map(|s| String::from_utf8(s.to_vec()).ok())
+                .flatten()
+                .map(|s| s.starts_with(headers::CLOUDEVENTS_JSON_HEADER))
+                .unwrap(),
+            self.headers.get(headers::SPEC_VERSION_HEADER),
         ) {
             (true, _) => Encoding::STRUCTURED,
             (_, Some(_)) => Encoding::BINARY,
@@ -134,12 +148,12 @@ impl MessageDeserializer for ConsumerRecordDeserializer {
 }
 
 /// Method to transform an incoming [`Response`] to [`Event`]
-pub fn owned_record_to_event(res: OwnedMessage) -> Result<Event> {
-    MessageDeserializer::into_event(ConsumerRecordDeserializer::owned_new(res))
+pub fn owned_record_to_event(msg: OwnedMessage) -> Result<Event> {
+    MessageDeserializer::into_event(ConsumerRecordDeserializer::owned_new(msg))
 }
 
-pub fn borrowed_record_to_event(res: &BorrowedMessage) -> Result<Event> {
-    MessageDeserializer::into_event(ConsumerRecordDeserializer::borrowed_new(res))
+pub fn borrowed_record_to_event(msg: &BorrowedMessage) -> Result<Event> {
+    MessageDeserializer::into_event(ConsumerRecordDeserializer::borrowed_new(msg))
 }
 
 pub trait BorrowedMessageExt {

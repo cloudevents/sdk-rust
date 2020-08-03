@@ -25,8 +25,4 @@ clap = "2.33.1"
 version = "~0.23"
 features = ["ssl", "sasl"]
 
-[[example]]
-name = "consumer"
-
-
 [workspace]

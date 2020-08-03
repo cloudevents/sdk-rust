@@ -80,17 +80,14 @@ impl Default for Event {
 impl Event {
     /// Returns an [`Iterator`] for all the available [CloudEvents Context attributes](https://github.com/cloudevents/spec/blob/master/spec.md#context-attributes) and extensions.
     /// Same as chaining [`Event::iter_attributes()`] and [`Event::iter_extensions()`]
-    pub fn iter(&self) -> impl Iterator<Item=(&str, AttributeValue)> {
-        self.iter_attributes().chain(
-            self.extensions
-                .iter()
-                .map(|(k, v)| (k.as_str(), v.into()))
-        )
+    pub fn iter(&self) -> impl Iterator<Item = (&str, AttributeValue)> {
+        self.iter_attributes()
+            .chain(self.extensions.iter().map(|(k, v)| (k.as_str(), v.into())))
     }
 
     /// Returns an [`Iterator`] for all the available [CloudEvents Context attributes](https://github.com/cloudevents/spec/blob/master/spec.md#context-attributes), excluding extensions.
     /// This iterator does not contain the `data` field.
-    pub fn iter_attributes(&self) -> impl Iterator<Item=(&str, AttributeValue)> {
+    pub fn iter_attributes(&self) -> impl Iterator<Item = (&str, AttributeValue)> {
         match &self.attributes {
             Attributes::V03(a) => AttributesIter::IterV03(a.into_iter()),
             Attributes::V10(a) => AttributesIter::IterV10(a.into_iter()),
@@ -98,10 +95,8 @@ impl Event {
     }
 
     /// Get all the [extensions](https://github.com/cloudevents/spec/blob/master/spec.md#extension-context-attributes)
-    pub fn iter_extensions(&self) -> impl Iterator<Item=(&str, &ExtensionValue)> {
-        self.extensions
-            .iter()
-            .map(|(k, v)| (k.as_str(), v))
+    pub fn iter_extensions(&self) -> impl Iterator<Item = (&str, &ExtensionValue)> {
+        self.extensions.iter().map(|(k, v)| (k.as_str(), v))
     }
 
     /// Remove `data`, `dataschema` and `datacontenttype` from this `Event`
@@ -259,7 +254,10 @@ mod tests {
 
         let mut v: HashMap<&str, AttributeValue> = e.iter().collect();
 
-        assert_eq!(v.remove("specversion"), Some(AttributeValue::SpecVersion(SpecVersion::V10)));
+        assert_eq!(
+            v.remove("specversion"),
+            Some(AttributeValue::SpecVersion(SpecVersion::V10))
+        );
         assert_eq!(v.remove("aaa"), Some(AttributeValue::String("bbb")))
     }
 }

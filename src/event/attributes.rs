@@ -1,10 +1,11 @@
 use super::{
-    AttributesIntoIteratorV03, AttributesIntoIteratorV10, AttributesV03, AttributesV10, SpecVersion, ExtensionValue
+    AttributesIntoIteratorV03, AttributesIntoIteratorV10, AttributesV03, AttributesV10,
+    ExtensionValue, SpecVersion,
 };
 use chrono::{DateTime, Utc};
+use serde::Serializer;
 use std::fmt;
 use url::Url;
-use serde::Serializer;
 
 /// Value of a CloudEvent attribute
 #[derive(Debug, PartialEq)]
@@ -18,12 +19,12 @@ pub enum AttributeValue<'a> {
     Time(&'a DateTime<Utc>),
 }
 
-impl <'a> From<&'a ExtensionValue> for AttributeValue<'a> {
+impl<'a> From<&'a ExtensionValue> for AttributeValue<'a> {
     fn from(ev: &'a ExtensionValue) -> Self {
         match ev {
             ExtensionValue::String(s) => AttributeValue::String(s),
             ExtensionValue::Boolean(b) => AttributeValue::Boolean(b),
-            ExtensionValue::Integer(i) => AttributeValue::Integer(i)
+            ExtensionValue::Integer(i) => AttributeValue::Integer(i),
         }
     }
 }

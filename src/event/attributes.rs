@@ -1,17 +1,32 @@
 use super::{
-    AttributesIntoIteratorV03, AttributesIntoIteratorV10, AttributesV03, AttributesV10, SpecVersion,
+    AttributesIntoIteratorV03, AttributesIntoIteratorV10, AttributesV03, AttributesV10,
+    ExtensionValue, SpecVersion,
 };
 use chrono::{DateTime, Utc};
+use serde::Serializer;
 use std::fmt;
 use url::Url;
 
+/// Value of a CloudEvent attribute
 #[derive(Debug, PartialEq)]
 pub enum AttributeValue<'a> {
     SpecVersion(SpecVersion),
     String(&'a str),
     URI(&'a Url),
     URIRef(&'a Url),
+    Boolean(&'a bool),
+    Integer(&'a i64),
     Time(&'a DateTime<Utc>),
+}
+
+impl<'a> From<&'a ExtensionValue> for AttributeValue<'a> {
+    fn from(ev: &'a ExtensionValue) -> Self {
+        match ev {
+            ExtensionValue::String(s) => AttributeValue::String(s),
+            ExtensionValue::Boolean(b) => AttributeValue::Boolean(b),
+            ExtensionValue::Integer(i) => AttributeValue::Integer(i),
+        }
+    }
 }
 
 impl fmt::Display for AttributeValue<'_> {
@@ -22,6 +37,8 @@ impl fmt::Display for AttributeValue<'_> {
             AttributeValue::URI(s) => f.write_str(&s.as_str()),
             AttributeValue::URIRef(s) => f.write_str(&s.as_str()),
             AttributeValue::Time(s) => f.write_str(&s.to_rfc3339()),
+            AttributeValue::Boolean(b) => f.serialize_bool(**b),
+            AttributeValue::Integer(i) => f.serialize_i64(**i),
         }
     }
 }

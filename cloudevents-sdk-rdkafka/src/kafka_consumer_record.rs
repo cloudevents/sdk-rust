@@ -60,49 +60,59 @@ impl ConsumerRecordDeserializer {
 }
 
 impl BinaryDeserializer for ConsumerRecordDeserializer {
-    fn deserialize_binary<R: Sized, V: BinarySerializer<R>>(self, mut visitor: V) -> Result<R> {
+    fn deserialize_binary<R: Sized, V: BinarySerializer<R>>(mut self, mut visitor: V) -> Result<R> {
         if self.encoding() != Encoding::BINARY {
             return Err(message::Error::WrongEncoding {});
         }
 
-        let spec_version = SpecVersion::try_from(header_value_to_str!(self
-            .headers
-            .get(headers::SPEC_VERSION_HEADER)
-            .unwrap())?)?;
+        let spec_version = SpecVersion::try_from(
+            str::from_utf8(&self.headers.remove(headers::SPEC_VERSION_HEADER).unwrap()[..])
+                .map_err(|e| cloudevents::message::Error::Other {
+                    source: Box::new(e),
+                })?,
+        )?;
 
         visitor = visitor.set_spec_version(spec_version.clone())?;
 
         let attributes = spec_version.attribute_names();
 
+        if let Some(hv) = self.headers.remove(headers::CONTENT_TYPE) {
+            visitor = visitor.set_attribute(
+                "datacontenttype",
+                MessageAttributeValue::String(String::from_utf8(hv).map_err(|e| {
+                    cloudevents::message::Error::Other {
+                        source: Box::new(e),
+                    }
+                })?),
+            )?
+        }
+
         for (hn, hv) in self
             .headers
-            .iter()
-            .filter(|(hn, _)| headers::SPEC_VERSION_HEADER != **hn && hn.starts_with("ce_"))
+            .into_iter()
+            .filter(|(hn, _)| headers::SPEC_VERSION_HEADER != *hn && hn.starts_with("ce_"))
         {
             let name = &hn["ce_".len()..];
 
             if attributes.contains(&name) {
                 visitor = visitor.set_attribute(
                     name,
-                    MessageAttributeValue::String(String::from_utf8(*hv).map_err(|e| cloudevents::message::Error::Other {
-                        source: Box::new(e),
+                    MessageAttributeValue::String(String::from_utf8(hv).map_err(|e| {
+                        cloudevents::message::Error::Other {
+                            source: Box::new(e),
+                        }
                     })?),
                 )?
             } else {
                 visitor = visitor.set_extension(
                     name,
-                    MessageAttributeValue::String(String::from_utf8(*hv).map_err(|e| cloudevents::message::Error::Other {
-                        source: Box::new(e),
+                    MessageAttributeValue::String(String::from_utf8(hv).map_err(|e| {
+                        cloudevents::message::Error::Other {
+                            source: Box::new(e),
+                        }
                     })?),
                 )?
             }
-        }
-
-        if let Some(hv) = self.headers.get(headers::CONTENT_TYPE) {
-            visitor = visitor.set_attribute(
-                "datacontenttype",
-                MessageAttributeValue::String(header_value_to_string!(hv)?),
-            )?
         }
 
         if self.payload.len() != 0 {
@@ -124,20 +134,13 @@ impl StructuredDeserializer for ConsumerRecordDeserializer {
 
 impl MessageDeserializer for ConsumerRecordDeserializer {
     fn encoding(&self) -> Encoding {
-        /*str::from_utf8(
-            self.headers
-                .get(headers::CONTENT_TYPE)
-                .unwrap_or(&Vec::new()),
-        )
-        .unwrap_or("UNKNOWN")
-        .starts_with(headers::CLOUDEVENTS_JSON_HEADER)*/
         match (
             self.headers
                 .get("content-type")
                 .map(|s| String::from_utf8(s.to_vec()).ok())
                 .flatten()
                 .map(|s| s.starts_with(headers::CLOUDEVENTS_JSON_HEADER))
-                .unwrap(),
+                .unwrap_or(false),
             self.headers.get(headers::SPEC_VERSION_HEADER),
         ) {
             (true, _) => Encoding::STRUCTURED,

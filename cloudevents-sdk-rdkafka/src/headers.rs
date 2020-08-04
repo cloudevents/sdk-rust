@@ -2,22 +2,6 @@ use cloudevents::event::SpecVersion;
 use lazy_static::lazy_static;
 use std::collections::HashMap;
 
-macro_rules! header_value_to_string {
-    ($header_value:expr) => {
-        String::from_utf8($header_value.to_vec()).map_err(|e| cloudevents::message::Error::Other {
-            source: Box::new(e),
-        })
-    };
-}
-
-macro_rules! header_value_to_str {
-    ($header_value:expr) => {
-        str::from_utf8($header_value).map_err(|e| cloudevents::message::Error::Other {
-            source: Box::new(e),
-        })
-    };
-}
-
 macro_rules! attribute_name_to_header {
     ($attribute:expr) => {
         format!("ce_{}", $attribute)

@@ -16,14 +16,12 @@ pub struct ConsumerRecordDeserializer {
 }
 
 impl ConsumerRecordDeserializer {
-    fn get_kafka_headers(message: OwnedMessage) -> Result<HashMap<String, Vec<u8>>> {
+    pub fn get_kafka_headers(message: &impl Message) -> Result<HashMap<String, Vec<u8>>> {
         let mut hm = HashMap::new();
         let headers = message
             .headers()
-            .ok_or(|e| cloudevents::message::Error::Other {
-                source: Box::new(e),
-            })
-            .unwrap();
+            // TODO create an error variant for invalid headers
+            .ok_or(cloudevents::message::Error::WrongEncoding {})?;
         for i in 0..headers.count() {
             let header = headers.get(i).unwrap();
             hm.insert(header.0.to_string(), Vec::from(header.1));
@@ -31,40 +29,18 @@ impl ConsumerRecordDeserializer {
         Ok(hm)
     }
 
-    pub fn owned_new(message: OwnedMessage) -> ConsumerRecordDeserializer {
-        let mut resp_des = ConsumerRecordDeserializer {
-            headers: HashMap::new(),
+    pub fn owned_new(message: OwnedMessage) -> Result<ConsumerRecordDeserializer> {
+        Ok(ConsumerRecordDeserializer {
+            headers: Self::get_kafka_headers(&message)?,
             payload: message.payload().map(|s| Vec::from(s)),
-        };
-        let headers = message.headers().unwrap();
-        for i in 0..headers.count() {
-            let header = headers.get(i).unwrap();
-            resp_des
-                .headers
-                .insert(header.0.to_string(), Vec::from(header.1));
-        }
-
-        resp_des
+        })
     }
 
-    pub fn borrowed_new(message: &BorrowedMessage) -> ConsumerRecordDeserializer {
-        let mut resp_des = ConsumerRecordDeserializer {
-            headers: HashMap::new(),
-            payload: None,
-        };
-        let headers = message.headers().unwrap();
-        for i in 0..headers.count() {
-            let header = headers.get(i).unwrap();
-            resp_des
-                .headers
-                .insert(header.0.to_string(), Vec::from(header.1));
-        }
-
-        if let Some(s) = message.payload() {
-            resp_des.payload = Some(Vec::from(s))
-        }
-
-        resp_des
+    pub fn borrowed_new(message: &BorrowedMessage) -> Result<ConsumerRecordDeserializer> {
+        Ok(ConsumerRecordDeserializer {
+            headers: Self::get_kafka_headers(message)?,
+            payload: message.payload().map(|s| Vec::from(s)),
+        })
     }
 }
 
@@ -161,11 +137,11 @@ impl MessageDeserializer for ConsumerRecordDeserializer {
 
 /// Method to transform an incoming [`Response`] to [`Event`]
 pub fn owned_record_to_event(msg: OwnedMessage) -> Result<Event> {
-    MessageDeserializer::into_event(ConsumerRecordDeserializer::owned_new(msg))
+    MessageDeserializer::into_event(ConsumerRecordDeserializer::owned_new(msg)?)
 }
 
 pub fn borrowed_record_to_event(msg: &BorrowedMessage) -> Result<Event> {
-    MessageDeserializer::into_event(ConsumerRecordDeserializer::borrowed_new(msg))
+    MessageDeserializer::into_event(ConsumerRecordDeserializer::borrowed_new(msg)?)
 }
 
 pub trait BorrowedMessageExt {

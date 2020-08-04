@@ -16,7 +16,7 @@ pub struct ConsumerRecordDeserializer {
 }
 
 impl ConsumerRecordDeserializer {
-    pub fn get_kafka_headers(message: &impl Message) -> Result<HashMap<String, Vec<u8>>> {
+    fn get_kafka_headers(message: &impl Message) -> Result<HashMap<String, Vec<u8>>> {
         let mut hm = HashMap::new();
         let headers = message
             .headers()
@@ -29,14 +29,7 @@ impl ConsumerRecordDeserializer {
         Ok(hm)
     }
 
-    pub fn owned_new(message: OwnedMessage) -> Result<ConsumerRecordDeserializer> {
-        Ok(ConsumerRecordDeserializer {
-            headers: Self::get_kafka_headers(&message)?,
-            payload: message.payload().map(|s| Vec::from(s)),
-        })
-    }
-
-    pub fn borrowed_new(message: &BorrowedMessage) -> Result<ConsumerRecordDeserializer> {
+    pub fn new(message: &impl Message) -> Result<ConsumerRecordDeserializer> {
         Ok(ConsumerRecordDeserializer {
             headers: Self::get_kafka_headers(message)?,
             payload: message.payload().map(|s| Vec::from(s)),
@@ -136,31 +129,27 @@ impl MessageDeserializer for ConsumerRecordDeserializer {
 }
 
 /// Method to transform an incoming [`Response`] to [`Event`]
-pub fn owned_record_to_event(msg: OwnedMessage) -> Result<Event> {
-    MessageDeserializer::into_event(ConsumerRecordDeserializer::owned_new(msg)?)
-}
-
-pub fn borrowed_record_to_event(msg: &BorrowedMessage) -> Result<Event> {
-    MessageDeserializer::into_event(ConsumerRecordDeserializer::borrowed_new(msg)?)
+pub fn record_to_event(msg: &impl Message) -> Result<Event> {
+    MessageDeserializer::into_event(ConsumerRecordDeserializer::new(msg)?)
 }
 
 pub trait BorrowedMessageExt {
-    fn from_event(&self) -> Result<Event>;
+    fn event_from(&self) -> Result<Event>;
 }
 
 impl BorrowedMessageExt for BorrowedMessage<'_> {
-    fn from_event(&self) -> Result<Event> {
-        borrowed_record_to_event(self)
+    fn event_from(&self) -> Result<Event> {
+        record_to_event(self)
     }
 }
 
 pub trait OwnedMessageExt {
-    fn into_event(self) -> Result<Event>;
+    fn event_from(&self) -> Result<Event>;
 }
 
 impl OwnedMessageExt for OwnedMessage {
-    fn into_event(self) -> Result<Event> {
-        owned_record_to_event(self)
+    fn event_from(&self) -> Result<Event> {
+        record_to_event(self)
     }
 }
 
@@ -215,7 +204,7 @@ mod tests {
             Some(serialized_event.headers),
         );
 
-        assert_eq!(owned_message.into_event().unwrap(), expected)
+        assert_eq!(owned_message.event_from().unwrap(), expected)
     }
 
     #[test]
@@ -259,6 +248,6 @@ mod tests {
             Some(serialized_event.headers),
         );
 
-        assert_eq!(owned_message.into_event().unwrap(), expected)
+        assert_eq!(owned_message.event_from().unwrap(), expected)
     }
 }

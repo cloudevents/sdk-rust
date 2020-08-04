@@ -1,13 +1,7 @@
-use chrono::prelude::*;
 use clap::{App, Arg};
-use env_logger::fmt::Formatter;
-use env_logger::Builder;
 use futures::StreamExt;
-use log::{info, warn, LevelFilter, Record};
 use serde_json::json;
-use std::io::Write;
 use std::str::FromStr;
-use std::thread;
 use url::Url;
 
 use cloudevents::{EventBuilder, EventBuilderV10};
@@ -20,40 +14,8 @@ use rdkafka::consumer::{CommitMode, Consumer, ConsumerContext, Rebalance};
 use rdkafka::error::KafkaResult;
 use rdkafka::producer::{FutureProducer, FutureRecord};
 use rdkafka::topic_partition_list::TopicPartitionList;
-use rdkafka::util::get_rdkafka_version;
 
 // run a kafka lense: docker run --rm --net=host -e ADV_HOST=localhost -e SAMPLEDATA=0 lensesio/fast-data-dev
-
-pub fn setup_logger(log_thread: bool, rust_log: Option<&str>) {
-    let output_format = move |formatter: &mut Formatter, record: &Record| {
-        let thread_name = if log_thread {
-            format!("(t: {}) ", thread::current().name().unwrap_or("unknown"))
-        } else {
-            "".to_string()
-        };
-
-        let local_time: DateTime<Local> = Local::now();
-        let time_str = local_time.format("%H:%M:%S%.3f").to_string();
-        write!(
-            formatter,
-            "{} {}{} - {} - {}\n",
-            time_str,
-            thread_name,
-            record.level(),
-            record.target(),
-            record.args()
-        )
-    };
-
-    let mut builder = Builder::new();
-    builder
-        .format(output_format)
-        .filter(None, LevelFilter::Info);
-
-    rust_log.map(|conf| builder.parse_filters(conf));
-
-    builder.init();
-}
 
 // A context can be used to change the behavior of producers and consumers by adding callbacks
 // that will be executed by librdkafka.
@@ -104,25 +66,15 @@ async fn consume_and_print(brokers: &str, group_id: &str, topics: &[&str]) {
 
     while let Some(message) = message_stream.next().await {
         match message {
-            Err(e) => warn!("Kafka error: {}", e),
+            Err(e) => println!("Kafka error: {}", e),
             Ok(m) => {
-                let event = m.into_event().unwrap();
-                info!("Received Event: {:#?}", event);
+                let event = m.from_event().unwrap();
+                println!("Received Event: {:#?}", event);
 
                 consumer.commit_message(&m, CommitMode::Async).unwrap();
             }
         };
     }
-}
-
-#[tokio::main]
-async fn consumer_example(log: Option<&str>, brokers: &str, group_id: &str, topics: Vec<&str>) {
-    setup_logger(true, log);
-
-    let (version_n, version_s) = get_rdkafka_version();
-    info!("rd_kafka_version: 0x{:08x}, {}", version_n, version_s);
-
-    consume_and_print(brokers, group_id, &topics).await
 }
 
 async fn produce(brokers: &str, topic_name: &str) {
@@ -147,7 +99,7 @@ async fn produce(brokers: &str, topic_name: &str) {
                 .build()
                 .unwrap();
 
-            info!("Sending event: {:#?}", event);
+            println!("Sending event: {:#?}", event);
 
             let delivery_status = producer
                 .send(
@@ -160,28 +112,19 @@ async fn produce(brokers: &str, topic_name: &str) {
                 .await;
 
             // This will be executed when the result is received.
-            info!("Delivery status for message {} received", i);
+            println!("Delivery status for message {} received", i);
             delivery_status
         })
         .collect::<Vec<_>>();
 
     // This loop will wait until all delivery statuses have been received.
     for future in futures {
-        info!("Future completed. Result: {:?}", future.await);
+        println!("Future completed. Result: {:?}", future.await);
     }
 }
 
 #[tokio::main]
-async fn producer_example(log: Option<&str>, brokers: &str, topic: &str) {
-    setup_logger(true, log);
-
-    let (version_n, version_s) = get_rdkafka_version();
-    info!("rd_kafka_version: 0x{:08x}, {}", version_n, version_s);
-
-    produce(brokers, topic).await;
-}
-
-fn main() {
+async fn main() {
     let selector = App::new("Main Application")
         .version(option_env!("CARGO_PKG_VERSION").unwrap_or(""))
         .about("select consumer or producer")
@@ -224,26 +167,21 @@ fn main() {
                 .takes_value(true)
                 .default_value("example_consumer_group_id"),
         )
-        .arg(
-            Arg::with_name("log-conf")
-                .long("log-conf")
-                .help("Configure the logging format (example: 'rdkafka=trace')")
-                .takes_value(true),
-        )
         .get_matches();
 
     match selector.value_of("mode").unwrap() {
-        "producer" => producer_example(
-            selector.value_of("log-conf"),
-            selector.value_of("brokers").unwrap(),
-            selector.value_of("topic").unwrap(),
-        ),
-        "consumer" => consumer_example(
-            selector.value_of("log-conf"),
+        "producer" => {
+            produce(
+                selector.value_of("brokers").unwrap(),
+                selector.value_of("topic").unwrap(),
+            )
+            .await
+        }
+        "consumer" => consume_and_print(
             selector.value_of("brokers").unwrap(),
             selector.value_of("group-id").unwrap(),
-            selector.values_of("topics").unwrap().collect::<Vec<&str>>(),
-        ),
+            &selector.values_of("topics").unwrap().collect::<Vec<&str>>(),
+        ).await,
         _ => (),
     };
 }

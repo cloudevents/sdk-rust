@@ -8,17 +8,16 @@ use rdkafka::message::{OwnedHeaders, ToBytes};
 use rdkafka::producer::FutureRecord;
 
 /// Wrapper for [`RequestBuilder`] that implements [`StructuredSerializer`] & [`BinarySerializer`] traits
-#[derive(Debug)]
 pub struct ProducerRecordSerializer {
-    pub(crate) payload: Option<Vec<u8>>,
     pub(crate) headers: OwnedHeaders,
+    pub(crate) payload: Option<Vec<u8>>,
 }
 
 impl ProducerRecordSerializer {
     pub fn new() -> ProducerRecordSerializer {
         ProducerRecordSerializer {
-            payload: None,
             headers: OwnedHeaders::new(),
+            payload: None,
         }
     }
 }
@@ -38,8 +37,7 @@ impl BinarySerializer<ProducerRecordSerializer> for ProducerRecordSerializer {
                 .get(name)
                 .ok_or(cloudevents::message::Error::UnrecognizedAttributeName {
                     name: String::from(name),
-                })
-                .unwrap()
+                })?
                 .clone()[..],
             &value.to_string()[..],
         );

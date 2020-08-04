@@ -12,14 +12,29 @@ use std::str;
 
 pub struct ConsumerRecordDeserializer {
     pub(crate) headers: HashMap<String, Vec<u8>>,
-    pub(crate) payload: Vec<u8>,
+    pub(crate) payload: Option<Vec<u8>>,
 }
 
 impl ConsumerRecordDeserializer {
+    fn get_kafka_headers(message: OwnedMessage) -> Result<HashMap<String, Vec<u8>>> {
+        let mut hm = HashMap::new();
+        let headers = message
+            .headers()
+            .ok_or(|e| cloudevents::message::Error::Other {
+                source: Box::new(e),
+            })
+            .unwrap();
+        for i in 0..headers.count() {
+            let header = headers.get(i).unwrap();
+            hm.insert(header.0.to_string(), Vec::from(header.1));
+        }
+        Ok(hm)
+    }
+
     pub fn owned_new(message: OwnedMessage) -> ConsumerRecordDeserializer {
         let mut resp_des = ConsumerRecordDeserializer {
             headers: HashMap::new(),
-            payload: Vec::new(),
+            payload: message.payload().map(|s| Vec::from(s)),
         };
         let headers = message.headers().unwrap();
         for i in 0..headers.count() {
@@ -27,11 +42,6 @@ impl ConsumerRecordDeserializer {
             resp_des
                 .headers
                 .insert(header.0.to_string(), Vec::from(header.1));
-        }
-
-        match message.payload() {
-            Some(s) => resp_des.payload = Vec::from(s),
-            None => resp_des.payload = resp_des.payload,
         }
 
         resp_des
@@ -40,7 +50,7 @@ impl ConsumerRecordDeserializer {
     pub fn borrowed_new(message: &BorrowedMessage) -> ConsumerRecordDeserializer {
         let mut resp_des = ConsumerRecordDeserializer {
             headers: HashMap::new(),
-            payload: Vec::new(),
+            payload: None,
         };
         let headers = message.headers().unwrap();
         for i in 0..headers.count() {
@@ -50,9 +60,8 @@ impl ConsumerRecordDeserializer {
                 .insert(header.0.to_string(), Vec::from(header.1));
         }
 
-        match message.payload() {
-            Some(s) => resp_des.payload = Vec::from(s),
-            None => resp_des.payload = resp_des.payload,
+        if let Some(s) = message.payload() {
+            resp_des.payload = Some(Vec::from(s))
         }
 
         resp_des
@@ -115,8 +124,8 @@ impl BinaryDeserializer for ConsumerRecordDeserializer {
             }
         }
 
-        if self.payload.len() != 0 {
-            visitor.end_with_data(self.payload.to_vec())
+        if self.payload != None {
+            visitor.end_with_data(self.payload.unwrap())
         } else {
             visitor.end()
         }
@@ -128,7 +137,7 @@ impl StructuredDeserializer for ConsumerRecordDeserializer {
         if self.encoding() != Encoding::STRUCTURED {
             return Err(message::Error::WrongEncoding {});
         }
-        visitor.set_structured_event(self.payload.to_vec())
+        visitor.set_structured_event(self.payload.unwrap())
     }
 }
 
@@ -160,11 +169,11 @@ pub fn borrowed_record_to_event(msg: &BorrowedMessage) -> Result<Event> {
 }
 
 pub trait BorrowedMessageExt {
-    fn into_event(&self) -> Result<Event>;
+    fn from_event(&self) -> Result<Event>;
 }
 
 impl BorrowedMessageExt for BorrowedMessage<'_> {
-    fn into_event(&self) -> Result<Event> {
+    fn from_event(&self) -> Result<Event> {
         borrowed_record_to_event(self)
     }
 }
@@ -198,8 +207,6 @@ mod tests {
         let expected = EventBuilderV10::new()
             .id("0001")
             .ty("example.test")
-            //TODO this is required now because the message deserializer implictly set default values
-            // As soon as this defaulting doesn't happen anymore, we can remove it (Issues #40/#41)
             .time(time)
             .source(Url::from_str("http://localhost").unwrap())
             .extension("someint", "10")

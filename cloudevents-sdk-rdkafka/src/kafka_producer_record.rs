@@ -68,10 +68,9 @@ impl BinarySerializer<ProducerRecordSerializer> for ProducerRecordSerializer {
 
 impl StructuredSerializer<ProducerRecordSerializer> for ProducerRecordSerializer {
     fn set_structured_event(mut self, bytes: Vec<u8>) -> Result<ProducerRecordSerializer> {
-        self.headers = self.headers.add(
-            headers::CONTENT_TYPE,
-            headers::CLOUDEVENTS_JSON_HEADER,
-        );
+        self.headers = self
+            .headers
+            .add(headers::CONTENT_TYPE, headers::CLOUDEVENTS_JSON_HEADER);
 
         self.payload = Some(bytes);
 

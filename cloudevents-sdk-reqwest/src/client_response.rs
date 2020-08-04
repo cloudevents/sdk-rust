@@ -11,7 +11,7 @@ use reqwest::header::{HeaderMap, HeaderName};
 use reqwest::Response;
 use std::convert::TryFrom;
 
-/// Wrapper for [`Response`] that implements [`MessageDeserializer`] trait
+/// Wrapper for [`Response`] that implements [`MessageDeserializer`] trait.
 pub struct ResponseDeserializer {
     headers: HeaderMap,
     body: Bytes,
@@ -98,7 +98,7 @@ impl MessageDeserializer for ResponseDeserializer {
     }
 }
 
-/// Method to transform an incoming [`Response`] to [`Event`]
+/// Method to transform an incoming [`Response`] to [`Event`].
 pub async fn response_to_event(res: Response) -> Result<Event> {
     let h = res.headers().to_owned();
     let b = res.bytes().await.map_err(|e| Error::Other {
@@ -108,7 +108,7 @@ pub async fn response_to_event(res: Response) -> Result<Event> {
     MessageDeserializer::into_event(ResponseDeserializer::new(h, b))
 }
 
-/// Extention Trait for [`Response`]which acts as a wrapper for the function [`request_to_event()`]
+/// Extention Trait for [`Response`]which acts as a wrapper for the function [`request_to_event()`].
 #[async_trait(?Send)]
 pub trait ResponseExt {
     async fn into_event(self) -> Result<Event>;

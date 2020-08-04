@@ -10,7 +10,7 @@ use cloudevents::message::{
 use cloudevents::Event;
 use std::str::FromStr;
 
-/// Wrapper for [`HttpResponseBuilder`] that implements [`StructuredSerializer`] and [`BinarySerializer`]
+/// Wrapper for [`HttpResponseBuilder`] that implements [`StructuredSerializer`] and [`BinarySerializer`].
 pub struct HttpResponseSerializer {
     builder: HttpResponseBuilder,
 }
@@ -67,7 +67,7 @@ impl StructuredSerializer<HttpResponse> for HttpResponseSerializer {
     }
 }
 
-/// Method to fill an [`HttpResponseBuilder`] with an [`Event`]
+/// Method to fill an [`HttpResponseBuilder`] with an [`Event`].
 pub async fn event_to_response(
     event: Event,
     response: HttpResponseBuilder,
@@ -76,7 +76,7 @@ pub async fn event_to_response(
         .map_err(actix_web::error::ErrorBadRequest)
 }
 
-/// Extention Trait for [`HttpResponseBuilder`] which acts as a wrapper for the function [`event_to_response()`]
+/// Extention Trait for [`HttpResponseBuilder`] which acts as a wrapper for the function [`event_to_response()`].
 #[async_trait(?Send)]
 pub trait HttpResponseBuilderExt {
     async fn event(

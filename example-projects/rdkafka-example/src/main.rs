@@ -15,7 +15,7 @@ use rdkafka::error::KafkaResult;
 use rdkafka::producer::{FutureProducer, FutureRecord};
 use rdkafka::topic_partition_list::TopicPartitionList;
 
-// run a kafka lense: docker run --rm --net=host -e ADV_HOST=localhost -e SAMPLEDATA=0 lensesio/fast-data-dev
+// run a Kafka lense or a Kafka Docker container to try out this example
 
 // A context can be used to change the behavior of producers and consumers by adding callbacks
 // that will be executed by librdkafka.
@@ -38,10 +38,7 @@ impl ConsumerContext for CustomContext {
     }
 }
 
-// A type alias with your custom consumer can be created for convenience.
-type LoggingConsumer = StreamConsumer<CustomContext>;
-
-async fn consume_and_print(brokers: &str, group_id: &str, topics: &[&str]) {
+async fn consume(brokers: &str, group_id: &str, topics: &[&str]) {
     let context = CustomContext;
 
     let consumer: LoggingConsumer = ClientConfig::new()
@@ -91,11 +88,10 @@ async fn produce(brokers: &str, topic_name: &str) {
             // The send operation on the topic returns a future, which will be
             // completed once the result or failure from Kafka is received.
             let event = EventBuilderV10::new()
-                .id("0001")
+                .id(i)
                 .ty("example.test")
-                .source(Url::from_str("http://localhost/").unwrap())
+                .source("http://localhost/")
                 .data("application/json", json!({"hello": "world"}))
-                .extension("someint", "10")
                 .build()
                 .unwrap();
 
@@ -125,7 +121,7 @@ async fn produce(brokers: &str, topic_name: &str) {
 
 #[tokio::main]
 async fn main() {
-    let selector = App::new("Main Application")
+    let selector = App::new("CloudEvents Kafka Example")
         .version(option_env!("CARGO_PKG_VERSION").unwrap_or(""))
         .about("select consumer or producer")
         .arg(
@@ -177,7 +173,7 @@ async fn main() {
             )
             .await
         }
-        "consumer" => consume_and_print(
+        "consumer" => consume(
             selector.value_of("brokers").unwrap(),
             selector.value_of("group-id").unwrap(),
             &selector.values_of("topics").unwrap().collect::<Vec<&str>>(),

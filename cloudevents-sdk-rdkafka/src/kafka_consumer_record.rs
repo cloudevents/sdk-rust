@@ -10,7 +10,11 @@ use std::collections::HashMap;
 use std::convert::TryFrom;
 use std::str;
 
-pub struct ConsumerRecordDeserializer {
+/// struct facilitating the creation of [`Event`](https://docs.rs/cloudevents-sdk/0.1.0/cloudevents/event/index.html) from 
+/// ['OwnedMessage'](https://docs.rs/rdkafka/0.24.0/rdkafka/message/struct.OwnedMessage.html) or 
+/// ['BorrowedMessage'](https://docs.rs/rdkafka/0.24.0/rdkafka/message/struct.BorrowedMessage.html). 
+/// Implements [`StructuredDeserializer`] & [`BinaryDeserializer`] traits.
+pub(crate) struct ConsumerRecordDeserializer {
     pub(crate) headers: HashMap<String, Vec<u8>>,
     pub(crate) payload: Option<Vec<u8>>,
 }
@@ -128,27 +132,37 @@ impl MessageDeserializer for ConsumerRecordDeserializer {
     }
 }
 
-/// Method to transform an incoming [`Response`] to [`Event`]
+/// Method to transform an incoming [`OwnedMessage`](https://docs.rs/rdkafka/0.24.0/rdkafka/message/struct.OwnedMessage.html) or 
+/// ['BorrowedMessage'](https://docs.rs/rdkafka/0.24.0/rdkafka/message/struct.BorrowedMessage.html) into 
+/// [`Event`](https://docs.rs/cloudevents-sdk/0.1.0/cloudevents/event/index.html)
 pub fn record_to_event(msg: &impl Message) -> Result<Event> {
     MessageDeserializer::into_event(ConsumerRecordDeserializer::new(msg)?)
 }
 
+/// Extension Trait for [`BorrowedMessage`](https://docs.rs/rdkafka/0.24.0/rdkafka/message/struct.BorrowedMessage.html) 
+/// which acts as a wrapper for the function [`record_to_event()`](method.record_to_event.html)
 pub trait BorrowedMessageExt {
-    fn event_from(&self) -> Result<Event>;
+    /// Generates [`Event`](https://docs.rs/cloudevents-sdk/0.1.0/cloudevents/event/index.html) 
+    /// from [`BorrowedMessage`](https://docs.rs/rdkafka/0.24.0/rdkafka/message/struct.BorrowedMessage.html)
+    fn to_event(&self) -> Result<Event>;
 }
 
 impl BorrowedMessageExt for BorrowedMessage<'_> {
-    fn event_from(&self) -> Result<Event> {
+    fn to_event(&self) -> Result<Event> {
         record_to_event(self)
     }
 }
 
+/// Extension Trait for [`OwnedMessage`](https://docs.rs/rdkafka/0.24.0/rdkafka/message/struct.OwnedMessage.html) 
+/// which acts as a wrapper for the function [`record_to_event()`](method.record_to_event.html)
 pub trait OwnedMessageExt {
-    fn event_from(&self) -> Result<Event>;
+    /// Generates [`Event`](https://docs.rs/cloudevents-sdk/0.1.0/cloudevents/event/index.html) from 
+    /// [`OwnedMessage`](https://docs.rs/rdkafka/0.24.0/rdkafka/message/struct.OwnedMessage.html)
+    fn to_event(&self) -> Result<Event>;
 }
 
 impl OwnedMessageExt for OwnedMessage {
-    fn event_from(&self) -> Result<Event> {
+    fn to_event(&self) -> Result<Event> {
         record_to_event(self)
     }
 }
@@ -204,7 +218,7 @@ mod tests {
             Some(serialized_event.headers),
         );
 
-        assert_eq!(owned_message.event_from().unwrap(), expected)
+        assert_eq!(owned_message.to_event().unwrap(), expected)
     }
 
     #[test]
@@ -248,6 +262,6 @@ mod tests {
             Some(serialized_event.headers),
         );
 
-        assert_eq!(owned_message.event_from().unwrap(), expected)
+        assert_eq!(owned_message.to_event().unwrap(), expected)
     }
 }

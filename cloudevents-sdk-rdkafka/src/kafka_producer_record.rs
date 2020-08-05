@@ -81,14 +81,16 @@ impl StructuredSerializer<ProducerRecordSerializer> for ProducerRecordSerializer
 /// Method to fill a [`FutureRecord`](https://docs.rs/rdkafka/0.24.0/rdkafka/producer/future_producer/struct.FutureRecord.html)
 /// with an [`Event`](https://docs.rs/cloudevents-sdk/0.1.0/cloudevents/event/index.html)
 pub fn event_to_record<'a, K: ToBytes + ?Sized>(
-    event: &'a ProducerRecordSerializer,
+    event: Event,
     mut record: FutureRecord<'a, K, Vec<u8>>,
 ) -> Result<FutureRecord<'a, K, Vec<u8>>> {
-    let header = event.headers.clone();
+    
+    let producer_record = BinaryDeserializer::deserialize_binary(event, ProducerRecordSerializer::new())?;
+    let header = producer_record.headers.clone();
 
     record = record.headers(header);
 
-    if let Some(s) = event.payload.as_ref() {
+    if let Some(s) = producer_record.payload.as_ref() {
         record = record.payload(s)
     }
 
@@ -100,15 +102,16 @@ pub fn event_to_record<'a, K: ToBytes + ?Sized>(
 pub trait FutureRecordExt<'a, K: ToBytes + ?Sized> {
     /// Generates [`FutureRecord`](https://docs.rs/rdkafka/0.24.0/rdkafka/producer/future_producer/struct.FutureRecord.html) from
     /// [`Event`](https://docs.rs/cloudevents-sdk/0.1.0/cloudevents/event/index.html)
-    fn event(self, event: &'a ProducerRecordSerializer) -> Result<FutureRecord<'a, K, Vec<u8>>>;
+    fn event(self, event: Event) -> Result<FutureRecord<'a, K, Vec<u8>>>;
 }
 
 impl<'a, K: ToBytes + ?Sized> FutureRecordExt<'a, K> for FutureRecord<'a, K, Vec<u8>> {
-    fn event(self, event: &'a ProducerRecordSerializer) -> Result<FutureRecord<'a, K, Vec<u8>>> {
+    fn event(self, event: Event) -> Result<FutureRecord<'a, K, Vec<u8>>> {
         event_to_record(event, self)
     }
 }
 
+/*
 /// Extention Trait for [`Event`](https://docs.rs/cloudevents-sdk/0.1.0/cloudevents/event/index.html)
 /// for producing a [`ProducerRecordSerializer`] by transforming the provided Event struct
 pub trait EventExt {
@@ -121,3 +124,4 @@ impl EventExt for Event {
         BinaryDeserializer::deserialize_binary(self, ProducerRecordSerializer::new())
     }
 }
+*/

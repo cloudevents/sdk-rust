@@ -7,8 +7,8 @@ use cloudevents::Event;
 use rdkafka::message::{OwnedHeaders, ToBytes};
 use rdkafka::producer::FutureRecord;
 
-/// struct facilitating the creation of [`FutureRecord`](https://docs.rs/rdkafka/0.24.0/rdkafka/producer/future_producer/struct.FutureRecord.html) from
-/// ['Event'](https://docs.rs/cloudevents-sdk/0.1.0/cloudevents/event/index.html).
+/// struct facilitating the creation of [`FutureRecord`] from
+/// ['Event'].
 /// Implements [`StructuredSerializer`] & [`BinarySerializer`] traits.
 pub struct ProducerRecordSerializer {
     pub(crate) headers: OwnedHeaders,
@@ -78,44 +78,39 @@ impl StructuredSerializer<ProducerRecordSerializer> for ProducerRecordSerializer
     }
 }
 
-/// Method to fill a [`FutureRecord`](https://docs.rs/rdkafka/0.24.0/rdkafka/producer/future_producer/struct.FutureRecord.html)
-/// with an [`Event`](https://docs.rs/cloudevents-sdk/0.1.0/cloudevents/event/index.html)
+/// Method to fill a [`FutureRecord`] with an [`Event`]
 pub fn event_to_record<'a, K: ToBytes + ?Sized>(
-    event: Event,
+    event: &'a ProducerRecordSerializer,
     mut record: FutureRecord<'a, K, Vec<u8>>,
 ) -> Result<FutureRecord<'a, K, Vec<u8>>> {
-    
-    let producer_record = BinaryDeserializer::deserialize_binary(event, ProducerRecordSerializer::new())?;
-    let header = producer_record.headers.clone();
+    let header = event.headers.clone();
 
     record = record.headers(header);
 
-    if let Some(s) = producer_record.payload.as_ref() {
+    if let Some(s) = event.payload.as_ref() {
         record = record.payload(s)
     }
 
     Ok(record)
 }
 
-/// Extension Trait for [`FutureRecord`](https://docs.rs/rdkafka/0.24.0/rdkafka/producer/future_producer/struct.FutureRecord.html)
-/// which acts as a wrapper for the function [`event_to_record()`](method.event_to_record.html)
+/// Extension Trait for [`FutureRecord`] which acts as a wrapper for the function [`event_to_record()`]:: method.event_to_record.html
 pub trait FutureRecordExt<'a, K: ToBytes + ?Sized> {
-    /// Generates [`FutureRecord`](https://docs.rs/rdkafka/0.24.0/rdkafka/producer/future_producer/struct.FutureRecord.html) from
-    /// [`Event`](https://docs.rs/cloudevents-sdk/0.1.0/cloudevents/event/index.html)
-    fn event(self, event: Event) -> Result<FutureRecord<'a, K, Vec<u8>>>;
+    /// Generates [`FutureRecord`] from
+    /// [`Event`]
+    fn event(self, event: &'a ProducerRecordSerializer) -> Result<FutureRecord<'a, K, Vec<u8>>>;
 }
 
 impl<'a, K: ToBytes + ?Sized> FutureRecordExt<'a, K> for FutureRecord<'a, K, Vec<u8>> {
-    fn event(self, event: Event) -> Result<FutureRecord<'a, K, Vec<u8>>> {
+    fn event(self, event: &'a ProducerRecordSerializer) -> Result<FutureRecord<'a, K, Vec<u8>>> {
         event_to_record(event, self)
     }
 }
 
-/*
-/// Extention Trait for [`Event`](https://docs.rs/cloudevents-sdk/0.1.0/cloudevents/event/index.html)
+/// Extention Trait for [`Event`]
 /// for producing a [`ProducerRecordSerializer`] by transforming the provided Event struct
 pub trait EventExt {
-    /// Generates [`ProducerRecordSerializer`] from [`Event`](https://docs.rs/cloudevents-sdk/0.1.0/cloudevents/event/index.html)
+    /// Generates [`ProducerRecordSerializer`] from [`Event`]
     fn serialize_event(self) -> Result<ProducerRecordSerializer>;
 }
 
@@ -124,4 +119,3 @@ impl EventExt for Event {
         BinaryDeserializer::deserialize_binary(self, ProducerRecordSerializer::new())
     }
 }
-*/

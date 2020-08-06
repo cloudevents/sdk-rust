@@ -19,8 +19,8 @@
 //!
 //! If you're looking for Protocol Binding implementations, look at crates:
 //!
-//! * `cloudevents-sdk-actix-web`: Integration with [Actix Web](https://github.com/actix/actix-web)
-//! * `cloudevents-sdk-reqwest`: Integration with [reqwest](https://github.com/seanmonstar/reqwest)
+//! * [cloudevents-sdk-actix-web](https://docs.rs/cloudevents-sdk-actix-web): Integration with [Actix Web](https://github.com/actix/actix-web)
+//! * [cloudevents-sdk-reqwest](https://docs.rs/cloudevents-sdk-reqwest): Integration with [reqwest](https://github.com/seanmonstar/reqwest)
 //!
 
 extern crate serde;

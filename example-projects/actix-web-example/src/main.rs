@@ -2,8 +2,6 @@ use actix_web::{get, post, web, App, HttpRequest, HttpResponse, HttpServer};
 use cloudevents::{EventBuilder, EventBuilderV10};
 use cloudevents_sdk_actix_web::{HttpResponseBuilderExt, RequestExt};
 use serde_json::json;
-use std::str::FromStr;
-use url::Url;
 
 #[post("/")]
 async fn post_event(req: HttpRequest, payload: web::Payload) -> Result<String, actix_web::Error> {
@@ -21,7 +19,7 @@ async fn get_event() -> Result<HttpResponse, actix_web::Error> {
             EventBuilderV10::new()
                 .id("0001")
                 .ty("example.test")
-                .source(Url::from_str("http://localhost/").unwrap())
+                .source("http://localhost/")
                 .data("application/json", payload)
                 .extension("someint", "10")
                 .build()

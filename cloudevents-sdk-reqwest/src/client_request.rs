@@ -7,7 +7,7 @@ use cloudevents::Event;
 use reqwest::RequestBuilder;
 use std::str::FromStr;
 
-/// Wrapper for [`RequestBuilder`] that implements [`StructuredSerializer`] & [`BinarySerializer`] traits
+/// Wrapper for [`RequestBuilder`] that implements [`StructuredSerializer`] & [`BinarySerializer`] traits.
 pub struct RequestSerializer {
     req: RequestBuilder,
 }

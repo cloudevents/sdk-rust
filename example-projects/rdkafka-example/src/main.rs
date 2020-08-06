@@ -5,20 +5,15 @@ use serde_json::json;
 use cloudevents::{EventBuilder, EventBuilderV10};
 use cloudevents_sdk_rdkafka::{FutureRecordExt, MessageExt, MessageRecord};
 
-use rdkafka::client::ClientContext;
 use rdkafka::config::{ClientConfig, RDKafkaLogLevel};
 use rdkafka::consumer::stream_consumer::StreamConsumer;
-use rdkafka::consumer::{CommitMode, Consumer, Rebalance};
-use rdkafka::error::KafkaResult;
+use rdkafka::consumer::{CommitMode, Consumer, DefaultConsumerContext};
 use rdkafka::producer::{FutureProducer, FutureRecord};
-use rdkafka::topic_partition_list::TopicPartitionList;
 
 // run a Kafka lense or a Kafka Docker container to try out this example
 
 async fn consume(brokers: &str, group_id: &str, topics: &[&str]) {
-    let context = CustomContext;
-
-    let consumer: StreamConsumer<CustomContext> = ClientConfig::new()
+    let consumer: StreamConsumer<DefaultConsumerContext> = ClientConfig::new()
         .set("group.id", group_id)
         .set("bootstrap.servers", brokers)
         .set("enable.partition.eof", "false")
@@ -27,7 +22,7 @@ async fn consume(brokers: &str, group_id: &str, topics: &[&str]) {
         //.set("statistics.interval.ms", "30000")
         //.set("auto.offset.reset", "smallest")
         .set_log_level(RDKafkaLogLevel::Debug)
-        .create_with_context(context)
+        .create_with_context(DefaultConsumerContext)
         .expect("Consumer creation failed");
 
     consumer

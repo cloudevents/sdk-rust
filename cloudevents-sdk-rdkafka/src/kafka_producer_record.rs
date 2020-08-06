@@ -7,8 +7,7 @@ use cloudevents::Event;
 use rdkafka::message::{OwnedHeaders, ToBytes};
 use rdkafka::producer::FutureRecord;
 
-/// struct facilitating the creation of [`FutureRecord`] from
-/// ['Event'].
+/// struct facilitating the creation of a [`FutureRecord`] from an ['Event'].
 /// Implements [`StructuredSerializer`] & [`BinarySerializer`] traits.
 pub struct ProducerRecordSerializer {
     pub(crate) headers: OwnedHeaders,

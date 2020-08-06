@@ -22,7 +22,7 @@ If you're interested in contributing to sdk-rust, look at [Contributing document
 - Email: https://lists.cncf.io/g/cncf-cloudevents-sdk
 - Contact for additional information: Francesco Guardiani (`@slinkydeveloper` on slack).
 
-[Crates badge]: https://img.shields.io/crates/v/cloudevents-sdk-reqwest.svg
-[crates.io]: https://crates.io/crates/cloudevents-sdk-reqwest
-[Docs badge]: https://docs.rs/cloudevents-sdk-reqwest/badge.svg
-[docs.rs]: https://docs.rs/cloudevents-sdk-reqwest
+[Crates badge]: https://img.shields.io/crates/v/cloudevents-sdk-rdkafka.svg
+[crates.io]: https://crates.io/crates/cloudevents-sdk-rdkafka
+[Docs badge]: https://docs.rs/cloudevents-sdk-rdkafka/badge.svg
+[docs.rs]: https://docs.rs/cloudevents-sdk-rdkafka

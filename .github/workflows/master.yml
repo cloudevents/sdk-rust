@@ -44,23 +44,39 @@ jobs:
         toolchain: ${{ matrix.toolchain }}
         target: ${{ matrix.target }}
         override: true
+
+    # If glibc, compile and test all
     - uses: actions-rs/cargo@v1
-      if: matrix.target != 'wasm32-unknown-unknown'
+      if: matrix.target == 'x86_64-unknown-linux-gnu'
       with:
         command: build
         toolchain: ${{ matrix.toolchain }}
-        args: --target ${{ matrix.target }} --all
+        args: --target ${{ matrix.target }} --workspace
     - uses: actions-rs/cargo@v1
-      if: matrix.target != 'wasm32-unknown-unknown'
+      if: matrix.target == 'x86_64-unknown-linux-gnu'
       with:
         command: test
         toolchain: ${{ matrix.toolchain }}
-        args: --target ${{ matrix.target }} --all
+        args: --target ${{ matrix.target }} --workspace
 
-    # If wasm, then we don't need to compile --all
+    # If musl, compile and test all excluding kafka
+    - uses: actions-rs/cargo@v1
+      if: matrix.target == 'x86_64-unknown-linux-musl'
+      with:
+        command: build
+        toolchain: ${{ matrix.toolchain }}
+        args: --target ${{ matrix.target }} --workspace --exclude cloudevents-sdk-rdkafka
+    - uses: actions-rs/cargo@v1
+      if: matrix.target == 'x86_64-unknown-linux-musl'
+      with:
+        command: test
+        toolchain: ${{ matrix.toolchain }}
+        args: --target ${{ matrix.target }} --workspace --exclude cloudevents-sdk-rdkafka
+
+    # If wasm, then we test only the main module and cloudevents-sdk-reqwest
     - uses: actions-rs/cargo@v1
       if: matrix.target == 'wasm32-unknown-unknown'
       with:
         command: build
         toolchain: ${{ matrix.toolchain }}
-        args: --target wasm32-unknown-unknown
+        args: --target wasm32-unknown-unknown --package cloudevents-sdk --package cloudevents-sdk-reqwest

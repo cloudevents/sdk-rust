@@ -10,9 +10,8 @@ use std::collections::HashMap;
 use std::convert::TryFrom;
 use std::str;
 
-/// struct facilitating the creation of an [`Event`] from an ['OwnedMessage'] or a ['BorrowedMessage'].
-/// Implements [`StructuredDeserializer`] & [`BinaryDeserializer`] traits.
-pub(crate) struct ConsumerRecordDeserializer {
+/// Wrapper for [`Message`] that implements [`MessageDeserializer`] trait.
+pub struct ConsumerRecordDeserializer {
     pub(crate) headers: HashMap<String, Vec<u8>>,
     pub(crate) payload: Option<Vec<u8>>,
 }
@@ -130,32 +129,24 @@ impl MessageDeserializer for ConsumerRecordDeserializer {
     }
 }
 
-/// Method to fill an [`Event`] with an [`OwnedMessage`] or a [`BorrowedMessage`]
+/// Method to transform a [`Message`] to [`Event`].
 pub fn record_to_event(msg: &impl Message) -> Result<Event> {
     MessageDeserializer::into_event(ConsumerRecordDeserializer::new(msg)?)
 }
 
-/// Extension Trait for [`BorrowedMessage`] which acts as a wrapper for the function [`record_to_event()`]:: method.record_to_event.html
-pub trait BorrowedMessageExt {
-    /// Generates [`Event`]
-    /// from [`BorrowedMessage`]
+/// Extension Trait for [`Message`] which acts as a wrapper for the function [`record_to_event()`]
+pub trait MessageExt {
+    /// Generates [`Event`] from [`BorrowedMessage`].
     fn to_event(&self) -> Result<Event>;
 }
 
-impl BorrowedMessageExt for BorrowedMessage<'_> {
+impl MessageExt for BorrowedMessage<'_> {
     fn to_event(&self) -> Result<Event> {
         record_to_event(self)
     }
 }
 
-/// Extension Trait for [`OwnedMessage`] which acts as a wrapper for the function [`record_to_event()`]:: method.record_to_event.html
-pub trait OwnedMessageExt {
-    /// Generates [`Event`] from
-    /// [`OwnedMessage`]
-    fn to_event(&self) -> Result<Event>;
-}
-
-impl OwnedMessageExt for OwnedMessage {
+impl MessageExt for OwnedMessage {
     fn to_event(&self) -> Result<Event> {
         record_to_event(self)
     }
@@ -164,7 +155,7 @@ impl OwnedMessageExt for OwnedMessage {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::kafka_producer_record::{EventExt, ProducerRecordSerializer};
+    use crate::kafka_producer_record::MessageRecord;
 
     use chrono::Utc;
     use cloudevents::{EventBuilder, EventBuilderV10};
@@ -190,25 +181,25 @@ mod tests {
         // the test uses OwnedMessage instead, which consumes the message instead of borrowing it like
         // in the case of BorrowedMessage
 
-        let serialized_event = EventBuilderV10::new()
-            .id("0001")
-            .ty("example.test")
-            .time(time)
-            .source(Url::from_str("http://localhost").unwrap())
-            .extension("someint", "10")
-            .build()
-            .unwrap()
-            .serialize_event()
-            .unwrap();
+        let message_record = MessageRecord::from_event(
+            EventBuilderV10::new()
+                .id("0001")
+                .ty("example.test")
+                .time(time)
+                .source(Url::from_str("http://localhost").unwrap())
+                .extension("someint", "10")
+                .build()
+                .unwrap()
+        ).unwrap();
 
         let owned_message = OwnedMessage::new(
-            serialized_event.payload,
+            message_record.payload,
             Some(String::from("test key").into_bytes()),
             String::from("test topic"),
             rdkafka::message::Timestamp::NotAvailable,
             10,
             10,
-            Some(serialized_event.headers),
+            Some(message_record.headers),
         );
 
         assert_eq!(owned_message.to_event().unwrap(), expected)
@@ -242,7 +233,7 @@ mod tests {
             .unwrap();
 
         let serialized_event =
-            StructuredDeserializer::deserialize_structured(input, ProducerRecordSerializer::new())
+            StructuredDeserializer::deserialize_structured(input, MessageRecord::new())
                 .unwrap();
 
         let owned_message = OwnedMessage::new(

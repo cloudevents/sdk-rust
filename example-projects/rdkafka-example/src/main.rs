@@ -1,11 +1,9 @@
 use clap::{App, Arg};
 use futures::StreamExt;
 use serde_json::json;
-use std::str::FromStr;
-use url::Url;
 
 use cloudevents::{EventBuilder, EventBuilderV10};
-use cloudevents_sdk_rdkafka::{BorrowedMessageExt, EventExt, FutureRecordExt};
+use cloudevents_sdk_rdkafka::{FutureRecordExt, MessageExt, MessageRecord};
 
 use rdkafka::client::ClientContext;
 use rdkafka::config::{ClientConfig, RDKafkaLogLevel};
@@ -41,7 +39,7 @@ impl ConsumerContext for CustomContext {
 async fn consume(brokers: &str, group_id: &str, topics: &[&str]) {
     let context = CustomContext;
 
-    let consumer: LoggingConsumer = ClientConfig::new()
+    let consumer: StreamConsumer<CustomContext> = ClientConfig::new()
         .set("group.id", group_id)
         .set("bootstrap.servers", brokers)
         .set("enable.partition.eof", "false")
@@ -65,7 +63,7 @@ async fn consume(brokers: &str, group_id: &str, topics: &[&str]) {
         match message {
             Err(e) => println!("Kafka error: {}", e),
             Ok(m) => {
-                let event = m.from_event().unwrap();
+                let event = m.to_event().unwrap();
                 println!("Received Event: {:#?}", event);
 
                 consumer.commit_message(&m, CommitMode::Async).unwrap();
@@ -88,7 +86,7 @@ async fn produce(brokers: &str, topic_name: &str) {
             // The send operation on the topic returns a future, which will be
             // completed once the result or failure from Kafka is received.
             let event = EventBuilderV10::new()
-                .id(i)
+                .id(i.to_string())
                 .ty("example.test")
                 .source("http://localhost/")
                 .data("application/json", json!({"hello": "world"}))
@@ -97,11 +95,13 @@ async fn produce(brokers: &str, topic_name: &str) {
 
             println!("Sending event: {:#?}", event);
 
+            let message_record =
+                MessageRecord::from_event(event).expect("error while serializing the event");
+
             let delivery_status = producer
                 .send(
                     FutureRecord::to(topic_name)
-                        .event(&event.serialize_event().unwrap())
-                        .unwrap()
+                        .message_record(&message_record)
                         .key(&format!("Key {}", i)),
                     0,
                 )
@@ -173,11 +173,14 @@ async fn main() {
             )
             .await
         }
-        "consumer" => consume(
-            selector.value_of("brokers").unwrap(),
-            selector.value_of("group-id").unwrap(),
-            &selector.values_of("topics").unwrap().collect::<Vec<&str>>(),
-        ).await,
+        "consumer" => {
+            consume(
+                selector.value_of("brokers").unwrap(),
+                selector.value_of("group-id").unwrap(),
+                &selector.values_of("topics").unwrap().collect::<Vec<&str>>(),
+            )
+            .await
+        }
         _ => (),
     };
 }

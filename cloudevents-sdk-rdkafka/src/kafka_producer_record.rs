@@ -5,7 +5,7 @@ use cloudevents::message::{
 };
 use cloudevents::Event;
 use rdkafka::message::{OwnedHeaders, ToBytes};
-use rdkafka::producer::{FutureRecord, BaseRecord};
+use rdkafka::producer::{BaseRecord, FutureRecord};
 
 /// This struct contains a serialized CloudEvent message in the Kafka shape.
 /// Implements [`StructuredSerializer`] & [`BinarySerializer`] traits.
@@ -90,11 +90,17 @@ impl StructuredSerializer<MessageRecord> for MessageRecord {
 /// Extension Trait for [`BaseRecord`] that fills the record with a [`MessageRecord`].
 pub trait BaseRecordExt<'a, K: ToBytes + ?Sized> {
     /// Fill this [`BaseRecord`] with a [`MessageRecord`].
-    fn message_record(self, event: &'a MessageRecord) -> Result<BaseRecord<'a, K, Vec<u8>>>;
+    fn message_record(
+        self,
+        message_record: &'a MessageRecord,
+    ) -> Result<BaseRecord<'a, K, Vec<u8>>>;
 }
 
 impl<'a, K: ToBytes + ?Sized> BaseRecordExt<'a, K> for BaseRecord<'a, K, Vec<u8>> {
-    fn message_record(mut self, message_record: &'a MessageRecord) -> Result<BaseRecord<'a, K, Vec<u8>>> {
+    fn message_record(
+        mut self,
+        message_record: &'a MessageRecord,
+    ) -> Result<BaseRecord<'a, K, Vec<u8>>> {
         self = self.headers(message_record.headers.clone());
 
         if let Some(s) = message_record.payload.as_ref() {
@@ -108,7 +114,7 @@ impl<'a, K: ToBytes + ?Sized> BaseRecordExt<'a, K> for BaseRecord<'a, K, Vec<u8>
 /// Extension Trait for [`FutureRecord`] that fills the record with a [`MessageRecord`].
 pub trait FutureRecordExt<'a, K: ToBytes + ?Sized> {
     /// Fill this [`FutureRecord`] with a [`MessageRecord`].
-    fn message_record(self, event: &'a MessageRecord) -> FutureRecord<'a, K, Vec<u8>>;
+    fn message_record(self, message_record: &'a MessageRecord) -> FutureRecord<'a, K, Vec<u8>>;
 }
 
 impl<'a, K: ToBytes + ?Sized> FutureRecordExt<'a, K> for FutureRecord<'a, K, Vec<u8>> {

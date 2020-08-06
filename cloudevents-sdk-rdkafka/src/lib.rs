@@ -47,16 +47,15 @@
 //! # }
 //! ```
 
-
 #[macro_use]
 mod headers;
 mod kafka_consumer_record;
 mod kafka_producer_record;
 
-pub use kafka_consumer_record::MessageExt;
 pub use kafka_consumer_record::record_to_event;
 pub use kafka_consumer_record::ConsumerRecordDeserializer;
+pub use kafka_consumer_record::MessageExt;
 
-pub use kafka_producer_record::FutureRecordExt;
 pub use kafka_producer_record::BaseRecordExt;
+pub use kafka_producer_record::FutureRecordExt;
 pub use kafka_producer_record::MessageRecord;

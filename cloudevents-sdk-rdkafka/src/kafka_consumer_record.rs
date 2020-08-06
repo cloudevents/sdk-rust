@@ -189,8 +189,9 @@ mod tests {
                 .source(Url::from_str("http://localhost").unwrap())
                 .extension("someint", "10")
                 .build()
-                .unwrap()
-        ).unwrap();
+                .unwrap(),
+        )
+        .unwrap();
 
         let owned_message = OwnedMessage::new(
             message_record.payload,
@@ -233,8 +234,7 @@ mod tests {
             .unwrap();
 
         let serialized_event =
-            StructuredDeserializer::deserialize_structured(input, MessageRecord::new())
-                .unwrap();
+            StructuredDeserializer::deserialize_structured(input, MessageRecord::new()).unwrap();
 
         let owned_message = OwnedMessage::new(
             serialized_event.payload,

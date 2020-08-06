@@ -21,6 +21,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - run: sudo apt-get update
+    - run: rustup toolchain install nightly 
       if: matrix.target == 'x86_64-unknown-linux-musl'
     - run: sudo apt-get install -y musl musl-dev musl-tools
       if: matrix.target == 'x86_64-unknown-linux-musl'
@@ -65,13 +66,13 @@ jobs:
       with:
         command: build
         toolchain: ${{ matrix.toolchain }}
-        args: --target ${{ matrix.target }} --workspace --exclude cloudevents-sdk-rdkafka
+        args: --target ${{ matrix.target }} --all
     - uses: actions-rs/cargo@v1
       if: matrix.target == 'x86_64-unknown-linux-musl'
       with:
         command: test
         toolchain: ${{ matrix.toolchain }}
-        args: --target ${{ matrix.target }} --workspace --exclude cloudevents-sdk-rdkafka
+        args: --target ${{ matrix.target }} --all
 
     # If wasm, then we test only the main module and cloudevents-sdk-reqwest
     - uses: actions-rs/cargo@v1

@@ -10,7 +10,8 @@ use rdkafka::consumer::stream_consumer::StreamConsumer;
 use rdkafka::consumer::{CommitMode, Consumer, DefaultConsumerContext};
 use rdkafka::producer::{FutureProducer, FutureRecord};
 
-// run a Kafka lense or a Kafka Docker container to try out this example
+// You need a running Kafka cluster to try out this example. 
+// With docker: docker run --rm --net=host -e ADV_HOST=localhost -e SAMPLEDATA=0 lensesio/fast-data-dev
 
 async fn consume(brokers: &str, group_id: &str, topics: &[&str]) {
     let consumer: StreamConsumer<DefaultConsumerContext> = ClientConfig::new()

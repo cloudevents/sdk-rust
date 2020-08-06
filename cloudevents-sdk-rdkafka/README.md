@@ -1,4 +1,4 @@
-# CloudEvents SDK Rust - Reqwest [![Crates badge]][crates.io] [![Docs badge]][docs.rs] 
+# CloudEvents SDK Rust - rdkafka [![Crates badge]][crates.io] [![Docs badge]][docs.rs] 
 
 Integration of [CloudEvents SDK](https://github.com/cloudevents/sdk-rust/) with [rdkafka](https://github.com/fede1024/rust-rdkafka)
 

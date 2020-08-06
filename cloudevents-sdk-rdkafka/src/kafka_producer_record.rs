@@ -77,7 +77,7 @@ impl StructuredSerializer<ProducerRecordSerializer> for ProducerRecordSerializer
     }
 }
 
-/// Method to fill a [`FutureRecord`] with an [`Event`]
+/// Method to fill a [`FutureRecord`] with a [`ProducerRecordSerializer`]
 pub fn event_to_record<'a, K: ToBytes + ?Sized>(
     event: &'a ProducerRecordSerializer,
     mut record: FutureRecord<'a, K, Vec<u8>>,
@@ -93,7 +93,7 @@ pub fn event_to_record<'a, K: ToBytes + ?Sized>(
     Ok(record)
 }
 
-/// Extension Trait for [`FutureRecord`] which acts as a wrapper for the function [`event_to_record()`]:: method.event_to_record.html
+/// Extension Trait for [`FutureRecord`] which acts as a wrapper for the function [`event_to_record()`]: method.event_to_record.html
 pub trait FutureRecordExt<'a, K: ToBytes + ?Sized> {
     /// Generates [`FutureRecord`] from
     /// [`Event`]

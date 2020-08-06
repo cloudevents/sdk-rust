@@ -130,12 +130,12 @@ impl MessageDeserializer for ConsumerRecordDeserializer {
     }
 }
 
-/// Method to fill an [`Event`] with an [`OwnedMessage`] or a [`BorrowedMessage`]
+/// Method to fill an [`Event`] with a [`ConsumerRecordDeserializer`]
 pub fn record_to_event(msg: &impl Message) -> Result<Event> {
     MessageDeserializer::into_event(ConsumerRecordDeserializer::new(msg)?)
 }
 
-/// Extension Trait for [`BorrowedMessage`] which acts as a wrapper for the function [`record_to_event()`]:: method.record_to_event.html
+/// Extension Trait for [`BorrowedMessage`] which acts as a wrapper for the function [`record_to_event()`]: method.record_to_event.html
 pub trait BorrowedMessageExt {
     /// Generates [`Event`]
     /// from [`BorrowedMessage`]
@@ -148,7 +148,7 @@ impl BorrowedMessageExt for BorrowedMessage<'_> {
     }
 }
 
-/// Extension Trait for [`OwnedMessage`] which acts as a wrapper for the function [`record_to_event()`]:: method.record_to_event.html
+/// Extension Trait for [`OwnedMessage`] which acts as a wrapper for the function [`record_to_event()`]: method.record_to_event.html
 pub trait OwnedMessageExt {
     /// Generates [`Event`] from
     /// [`OwnedMessage`]

@@ -108,7 +108,7 @@ pub async fn response_to_event(res: Response) -> Result<Event> {
     MessageDeserializer::into_event(ResponseDeserializer::new(h, b))
 }
 
-/// Extention Trait for [`Response`]which acts as a wrapper for the function [`request_to_event()`].
+/// Extension Trait for [`Response`] which acts as a wrapper for the function [`response_to_event()`].
 #[async_trait(?Send)]
 pub trait ResponseExt {
     async fn into_event(self) -> Result<Event>;

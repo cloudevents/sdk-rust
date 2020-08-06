@@ -30,7 +30,7 @@
 //! # }
 //! ```
 //!
-//! Check out the cloudevents-sdk docs for more details on how to use [`cloudevents::Event`]: https://docs.rs/cloudevents-sdk
+//! Check out the [cloudevents-sdk](https://docs.rs/cloudevents-sdk) docs for more details on how to use [`cloudevents::Event`]
 
 #[macro_use]
 mod headers;

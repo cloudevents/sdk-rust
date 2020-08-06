@@ -1,6 +1,6 @@
 [package]
 name = "cloudevents-sdk-rdkafka"
-version = "0.1.0"
+version = "0.2.0"
 authors = ["Pranav Bhatt <adpranavb2000@gmail.com>"]
 edition = "2018"
 license-file = "../LICENSE"
@@ -13,7 +13,7 @@ readme = "README.md"
 
 [dependencies]
 bytes = "^0.5"
-cloudevents-sdk = { version = "0.1.0", path = ".." }
+cloudevents-sdk = { version = "0.2.0", path = ".." }
 lazy_static = "1.4.0"
 rdkafka = "^0.23"
 

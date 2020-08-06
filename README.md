@@ -13,7 +13,7 @@ Note: This project is WIP under active development, hence all APIs are considere
 | AVRO Event Format             | ✕ | ✕ |
 | HTTP Protocol Binding         | ✓ | ✓ |
 | JSON Event Format             | ✓ | ✓ |
-| Kafka Protocol Binding        | ✕ | ✕ |
+| Kafka Protocol Binding        | ✓ | ✓ |
 | MQTT Protocol Binding         | ✕ | ✕ |
 | NATS Protocol Binding         | ✕ | ✕ |
 | Web hook                      | ✕ | ✕ |
@@ -23,6 +23,7 @@ Note: This project is WIP under active development, hence all APIs are considere
 * `cloudevents-sdk`: Provides Event data structure, JSON Event format implementation. This module is tested to work with GNU libc, WASM and musl toolchains.
 * `cloudevents-sdk-actix-web`: Integration with [Actix Web](https://github.com/actix/actix-web).
 * `cloudevents-sdk-reqwest`: Integration with [reqwest](https://github.com/seanmonstar/reqwest).
+* `cloudevents-sdk-rdkafka`: Integration with [rust-rdkafka](https://fede1024.github.io/rust-rdkafka).
 
 ## Get Started
 
@@ -46,10 +47,11 @@ let event = EventBuilderV10::new()
     .unwrap();
 ```
 
-Checkout the examples using our integrations with `actix-web` and `reqwest` to learn how to send and receive events:
+Checkout the examples using our integrations to learn how to send and receive events:
 
 * [Actix Web Example](example-projects/actix-web-example)
 * [Reqwest/WASM Example](example-projects/reqwest-wasm-example)
+* [Kafka Example](example-projects/rdkafka-example)
 
 ## Development & Contributing
 

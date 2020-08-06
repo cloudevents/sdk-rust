@@ -41,9 +41,11 @@ claim = "0.3.1"
 members = [
   ".",
   "cloudevents-sdk-actix-web",
-  "cloudevents-sdk-reqwest"
+  "cloudevents-sdk-reqwest",
+  "cloudevents-sdk-rdkafka"
 ]
 exclude = [
   "example-projects/actix-web-example",
-  "example-projects/reqwest-wasm-example"
+  "example-projects/reqwest-wasm-example",
+  "example-projects/rdkafka-example",
 ]

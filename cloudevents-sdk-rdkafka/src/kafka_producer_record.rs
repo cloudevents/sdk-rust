@@ -5,25 +5,35 @@ use cloudevents::message::{
 };
 use cloudevents::Event;
 use rdkafka::message::{OwnedHeaders, ToBytes};
-use rdkafka::producer::FutureRecord;
+use rdkafka::producer::{FutureRecord, BaseRecord};
 
-/// struct facilitating the creation of a [`FutureRecord`] from an ['Event'].
+/// This struct contains a serialized CloudEvent message in the Kafka shape.
 /// Implements [`StructuredSerializer`] & [`BinarySerializer`] traits.
-pub struct ProducerRecordSerializer {
+///
+/// To instantiate a new `MessageRecord` from an [`Event`],
+/// look at [`Self::from_event`] or use [`StructuredDeserializer::deserialize_structured`](cloudevents::message::StructuredDeserializer::deserialize_structured)
+/// or [`BinaryDeserializer::deserialize_binary`].
+pub struct MessageRecord {
     pub(crate) headers: OwnedHeaders,
     pub(crate) payload: Option<Vec<u8>>,
 }
 
-impl ProducerRecordSerializer {
-    pub fn new() -> ProducerRecordSerializer {
-        ProducerRecordSerializer {
+impl MessageRecord {
+    /// Create a new empty [`MessageRecord`]
+    pub fn new() -> Self {
+        MessageRecord {
             headers: OwnedHeaders::new(),
             payload: None,
         }
     }
+
+    /// Create a new [`MessageRecord`], filled with `event` serialized in binary mode.
+    pub fn from_event(event: Event) -> Result<Self> {
+        BinaryDeserializer::deserialize_binary(event, MessageRecord::new())
+    }
 }
 
-impl BinarySerializer<ProducerRecordSerializer> for ProducerRecordSerializer {
+impl BinarySerializer<MessageRecord> for MessageRecord {
     fn set_spec_version(mut self, spec_version: SpecVersion) -> Result<Self> {
         self.headers = self
             .headers
@@ -54,19 +64,19 @@ impl BinarySerializer<ProducerRecordSerializer> for ProducerRecordSerializer {
         Ok(self)
     }
 
-    fn end_with_data(mut self, bytes: Vec<u8>) -> Result<ProducerRecordSerializer> {
+    fn end_with_data(mut self, bytes: Vec<u8>) -> Result<MessageRecord> {
         self.payload = Some(bytes);
 
         Ok(self)
     }
 
-    fn end(self) -> Result<ProducerRecordSerializer> {
+    fn end(self) -> Result<MessageRecord> {
         Ok(self)
     }
 }
 
-impl StructuredSerializer<ProducerRecordSerializer> for ProducerRecordSerializer {
-    fn set_structured_event(mut self, bytes: Vec<u8>) -> Result<ProducerRecordSerializer> {
+impl StructuredSerializer<MessageRecord> for MessageRecord {
+    fn set_structured_event(mut self, bytes: Vec<u8>) -> Result<MessageRecord> {
         self.headers = self
             .headers
             .add(headers::CONTENT_TYPE, headers::CLOUDEVENTS_JSON_HEADER);
@@ -77,44 +87,38 @@ impl StructuredSerializer<ProducerRecordSerializer> for ProducerRecordSerializer
     }
 }
 
-/// Method to fill a [`FutureRecord`] with a [`ProducerRecordSerializer`]
-pub fn event_to_record<'a, K: ToBytes + ?Sized>(
-    event: &'a ProducerRecordSerializer,
-    mut record: FutureRecord<'a, K, Vec<u8>>,
-) -> Result<FutureRecord<'a, K, Vec<u8>>> {
-    let header = event.headers.clone();
-
-    record = record.headers(header);
-
-    if let Some(s) = event.payload.as_ref() {
-        record = record.payload(s)
-    }
-
-    Ok(record)
+/// Extension Trait for [`BaseRecord`] that fills the record with a [`MessageRecord`].
+pub trait BaseRecordExt<'a, K: ToBytes + ?Sized> {
+    /// Fill this [`BaseRecord`] with a [`MessageRecord`].
+    fn message_record(self, event: &'a MessageRecord) -> Result<BaseRecord<'a, K, Vec<u8>>>;
 }
 
-/// Extension Trait for [`FutureRecord`] which acts as a wrapper for the function [`event_to_record()`]: method.event_to_record.html
+impl<'a, K: ToBytes + ?Sized> BaseRecordExt<'a, K> for BaseRecord<'a, K, Vec<u8>> {
+    fn message_record(mut self, message_record: &'a MessageRecord) -> Result<BaseRecord<'a, K, Vec<u8>>> {
+        self = self.headers(message_record.headers.clone());
+
+        if let Some(s) = message_record.payload.as_ref() {
+            self = self.payload(s);
+        }
+
+        Ok(self)
+    }
+}
+
+/// Extension Trait for [`FutureRecord`] that fills the record with a [`MessageRecord`].
 pub trait FutureRecordExt<'a, K: ToBytes + ?Sized> {
-    /// Generates [`FutureRecord`] from
-    /// [`Event`]
-    fn event(self, event: &'a ProducerRecordSerializer) -> Result<FutureRecord<'a, K, Vec<u8>>>;
+    /// Fill this [`FutureRecord`] with a [`MessageRecord`].
+    fn message_record(self, event: &'a MessageRecord) -> FutureRecord<'a, K, Vec<u8>>;
 }
 
 impl<'a, K: ToBytes + ?Sized> FutureRecordExt<'a, K> for FutureRecord<'a, K, Vec<u8>> {
-    fn event(self, event: &'a ProducerRecordSerializer) -> Result<FutureRecord<'a, K, Vec<u8>>> {
-        event_to_record(event, self)
-    }
-}
+    fn message_record(mut self, message_record: &'a MessageRecord) -> FutureRecord<'a, K, Vec<u8>> {
+        self = self.headers(message_record.headers.clone());
 
-/// Extention Trait for [`Event`]
-/// for producing a [`ProducerRecordSerializer`] by transforming the provided Event struct
-pub trait EventExt {
-    /// Generates [`ProducerRecordSerializer`] from [`Event`]
-    fn serialize_event(self) -> Result<ProducerRecordSerializer>;
-}
+        if let Some(s) = message_record.payload.as_ref() {
+            self = self.payload(s);
+        }
 
-impl EventExt for Event {
-    fn serialize_event(self) -> Result<ProducerRecordSerializer> {
-        BinaryDeserializer::deserialize_binary(self, ProducerRecordSerializer::new())
+        self
     }
 }

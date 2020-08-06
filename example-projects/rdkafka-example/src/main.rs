@@ -8,7 +8,7 @@ use cloudevents_sdk_rdkafka::{FutureRecordExt, MessageExt, MessageRecord};
 use rdkafka::client::ClientContext;
 use rdkafka::config::{ClientConfig, RDKafkaLogLevel};
 use rdkafka::consumer::stream_consumer::StreamConsumer;
-use rdkafka::consumer::{CommitMode, Consumer, ConsumerContext, Rebalance};
+use rdkafka::consumer::{CommitMode, Consumer, Rebalance};
 use rdkafka::error::KafkaResult;
 use rdkafka::producer::{FutureProducer, FutureRecord};
 use rdkafka::topic_partition_list::TopicPartitionList;

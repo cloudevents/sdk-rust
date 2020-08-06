@@ -160,8 +160,6 @@ mod tests {
     use chrono::Utc;
     use cloudevents::{EventBuilder, EventBuilderV10};
     use serde_json::json;
-    use std::str::FromStr;
-    use url::Url;
 
     #[test]
     fn test_binary_record() {
@@ -171,7 +169,7 @@ mod tests {
             .id("0001")
             .ty("example.test")
             .time(time)
-            .source(Url::from_str("http://localhost").unwrap())
+            .source("http://localhost")
             .extension("someint", "10")
             .build()
             .unwrap();
@@ -186,7 +184,7 @@ mod tests {
                 .id("0001")
                 .ty("example.test")
                 .time(time)
-                .source(Url::from_str("http://localhost").unwrap())
+                .source("http://localhost")
                 .extension("someint", "10")
                 .build()
                 .unwrap(),
@@ -213,7 +211,7 @@ mod tests {
         let expected = EventBuilderV10::new()
             .id("0001")
             .ty("example.test")
-            .source(Url::from_str("http://localhost").unwrap())
+            .source("http://localhost")
             .data("application/json", j.clone())
             .extension("someint", "10")
             .build()
@@ -227,7 +225,7 @@ mod tests {
         let input = EventBuilderV10::new()
             .id("0001")
             .ty("example.test")
-            .source(Url::from_str("http://localhost").unwrap())
+            .source("http://localhost")
             .data("application/json", j.clone())
             .extension("someint", "10")
             .build()

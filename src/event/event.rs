@@ -4,7 +4,7 @@ use super::{
 };
 use crate::event::attributes::DataAttributesWriter;
 use chrono::{DateTime, Utc};
-use delegate::delegate;
+use delegate_attr::delegate;
 use std::collections::HashMap;
 use std::convert::TryFrom;
 use url::Url;
@@ -40,31 +40,25 @@ pub struct Event {
     pub(crate) extensions: HashMap<String, ExtensionValue>,
 }
 
+#[delegate(self.attributes)]
 impl AttributesReader for Event {
-    delegate! {
-        to self.attributes {
-            fn get_id(&self) -> &str;
-            fn get_source(&self) -> &Url;
-            fn get_specversion(&self) -> SpecVersion;
-            fn get_type(&self) -> &str;
-            fn get_datacontenttype(&self) -> Option<&str>;
-            fn get_dataschema(&self) -> Option<&Url>;
-            fn get_subject(&self) -> Option<&str>;
-            fn get_time(&self) -> Option<&DateTime<Utc>>;
-        }
-    }
+    fn get_id(&self) -> &str;
+    fn get_source(&self) -> &Url;
+    fn get_specversion(&self) -> SpecVersion;
+    fn get_type(&self) -> &str;
+    fn get_datacontenttype(&self) -> Option<&str>;
+    fn get_dataschema(&self) -> Option<&Url>;
+    fn get_subject(&self) -> Option<&str>;
+    fn get_time(&self) -> Option<&DateTime<Utc>>;
 }
 
+#[delegate(self.attributes)]
 impl AttributesWriter for Event {
-    delegate! {
-        to self.attributes {
-            fn set_id(&mut self, id: impl Into<String>);
-            fn set_source(&mut self, source: impl Into<Url>);
-            fn set_type(&mut self, ty: impl Into<String>);
-            fn set_subject(&mut self, subject: Option<impl Into<String>>);
-            fn set_time(&mut self, time: Option<impl Into<DateTime<Utc>>>);
-        }
-    }
+    fn set_id(&mut self, id: impl Into<String>);
+    fn set_source(&mut self, source: impl Into<Url>);
+    fn set_type(&mut self, ty: impl Into<String>);
+    fn set_subject(&mut self, subject: Option<impl Into<String>>);
+    fn set_time(&mut self, time: Option<impl Into<DateTime<Utc>>>);
 }
 
 impl Default for Event {

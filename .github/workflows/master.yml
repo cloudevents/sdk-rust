@@ -21,6 +21,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - run: sudo apt-get update
+    - run: sudo apt-get install zlib && ./configure --enable-shared
       if: matrix.target == 'x86_64-unknown-linux-musl'
     - run: sudo apt-get install -y musl musl-dev musl-tools
       if: matrix.target == 'x86_64-unknown-linux-musl'
@@ -59,7 +60,7 @@ jobs:
         toolchain: ${{ matrix.toolchain }}
         args: --target ${{ matrix.target }} --workspace
 
-    # If musl, compile and test all excluding kafka
+    # If musl, compile and test all
     - uses: actions-rs/cargo@v1
       if: matrix.target == 'x86_64-unknown-linux-musl'
       with:

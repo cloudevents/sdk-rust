@@ -21,7 +21,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - run: sudo apt-get update
-    - run: sudo apt-get install zlib-bin && ./configure --enable-shared
+    - run: sudo apt-get install zlib1g-dev && ./configure --enable-shared
       if: matrix.target == 'x86_64-unknown-linux-musl'
     - run: sudo apt-get install -y musl musl-dev musl-tools cmake
       if: matrix.target == 'x86_64-unknown-linux-musl'

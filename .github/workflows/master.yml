@@ -21,10 +21,10 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - run: sudo apt-get update
-    - run: sudo wget https://zlib.net/zlib-1.2.11.tar.gz && tar -xvzf zlib-1.2.11.tar.gz && cd zlib-1.2.11 && ./configure --prefix=/usr/local/zlib --enable-shared && sudo make install
-      if: matrix.target == 'x86_64-unknown-linux-musl'
-    - run: sudo apt-get install -y musl musl-dev musl-tools
-      if: matrix.target == 'x86_64-unknown-linux-musl'
+#    - run: sudo wget https://zlib.net/zlib-1.2.11.tar.gz && tar -xvzf zlib-1.2.11.tar.gz && cd zlib-1.2.11 && ./configure --prefix=/usr/local/zlib --enable-shared && sudo make install
+#      if: matrix.target == 'x86_64-unknown-linux-musl'
+#    - run: sudo apt-get install -y musl musl-dev musl-tools
+#      if: matrix.target == 'x86_64-unknown-linux-musl'
     - name: Cache cargo registry
       uses: actions/cache@v1
       with:

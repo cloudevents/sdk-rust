@@ -15,7 +15,7 @@ readme = "README.md"
 bytes = "^0.5"
 cloudevents-sdk = { version = "0.2.0", path = ".." }
 lazy_static = "1.4.0"
-rdkafka = { version = "^0.23", features = ["libz-static"] }
+rdkafka = { version = "^0.24", features = ["libz-static"] }
 
 
 [dev-dependencies]

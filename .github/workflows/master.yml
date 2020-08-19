@@ -21,7 +21,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - run: sudo apt-get update
-    - run: sudo apt-get install -y musl musl-dev musl-tools cmake && sudo ln -s /bin/g++ /bin/musl-g++ && export PATH=$PATH:/bin/musl-g++
+    - run: sudo apt-get install -y musl musl-dev musl-tools cmake
       if: matrix.target == 'x86_64-unknown-linux-musl'
     - name: Cache cargo registry
       uses: actions/cache@v1
@@ -62,15 +62,17 @@ jobs:
     - uses: actions-rs/cargo@v1
       if: matrix.target == 'x86_64-unknown-linux-musl'
       with:
-        command: build
+        #command: build
         toolchain: ${{ matrix.toolchain }}
-        args: --target ${{ matrix.target }} --all
+        #args: --target ${{ matrix.target }} --all
+    - run: CC=musl-gcc CXX=g++ cargo build --target ${{ matrix.target }} --all
     - uses: actions-rs/cargo@v1
       if: matrix.target == 'x86_64-unknown-linux-musl'
       with:
-        command: test
+        #command: test
         toolchain: ${{ matrix.toolchain }}
-        args: --target ${{ matrix.target }} --all
+        #args: --target ${{ matrix.target }} --all
+    - run: CC=musl-gcc CXX=g++ cargo test --target ${{ matrix.target }} --all
 
     # If wasm, then we test only the main module and cloudevents-sdk-reqwest
     - uses: actions-rs/cargo@v1

@@ -18,7 +18,7 @@
 //!     FutureRecord::to("topic")
 //!         .key("some_event")
 //!         .message_record(&message_record),
-//!     Timeout::Never
+//!     0
 //! ).await;
 //!
 //! # }

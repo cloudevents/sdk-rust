@@ -7,6 +7,7 @@
 //!
 //! use cloudevents::Event;
 //! use rdkafka::producer::{FutureProducer, FutureRecord};
+//! use rdkafka::util::Timeout;
 //! use cloudevents_sdk_rdkafka::{MessageRecord, FutureRecordExt};
 //!
 //! # async fn produce(producer: &FutureProducer, event: Event) {
@@ -17,7 +18,7 @@
 //!     FutureRecord::to("topic")
 //!         .key("some_event")
 //!         .message_record(&message_record),
-//!     Timeout::Never
+//!     0
 //! ).await;
 //!
 //! # }

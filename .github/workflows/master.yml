@@ -66,6 +66,7 @@ jobs:
         toolchain: ${{ matrix.toolchain }}
         #args: --target ${{ matrix.target }} --all
     - run: CC=musl-gcc CXX=g++ cargo build --target ${{ matrix.target }} --all
+      if: matrix.target == 'x86_64-unknown-linux-gnu'
     - uses: actions-rs/cargo@v1
       if: matrix.target == 'x86_64-unknown-linux-musl'
       with:
@@ -73,6 +74,7 @@ jobs:
         toolchain: ${{ matrix.toolchain }}
         #args: --target ${{ matrix.target }} --all
     - run: CC=musl-gcc CXX=g++ cargo test --target ${{ matrix.target }} --all
+      if: matrix.target == 'x86_64-unknown-linux-gnu'
 
     # If wasm, then we test only the main module and cloudevents-sdk-reqwest
     - uses: actions-rs/cargo@v1

@@ -62,17 +62,13 @@ jobs:
     - uses: actions-rs/cargo@v1
       if: matrix.target == 'x86_64-unknown-linux-musl'
       with:
-        #command: build
         toolchain: ${{ matrix.toolchain }}
-        #args: --target ${{ matrix.target }} --all
     - run: CC=musl-gcc CXX=g++ cargo build --target ${{ matrix.target }} --all
       if: matrix.target == 'x86_64-unknown-linux-gnu'
     - uses: actions-rs/cargo@v1
       if: matrix.target == 'x86_64-unknown-linux-musl'
       with:
-        #command: test
         toolchain: ${{ matrix.toolchain }}
-        #args: --target ${{ matrix.target }} --all
     - run: CC=musl-gcc CXX=g++ cargo test --target ${{ matrix.target }} --all
       if: matrix.target == 'x86_64-unknown-linux-gnu'
 

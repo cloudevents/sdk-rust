@@ -21,6 +21,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - run: sudo apt-get update
+      if: matrix.target == 'x86_64-unknown-linux-musl'
     - run: sudo apt-get install -y musl musl-dev musl-tools cmake
       if: matrix.target == 'x86_64-unknown-linux-musl'
     - name: Cache cargo registry
@@ -64,7 +65,7 @@ jobs:
       with:
         command: build
         toolchain: ${{ matrix.toolchain }}
-        args: --target ${{ matrix.target }} --all
+        args: --target ${{ matrix.target }} --workspace
       env:
         CC: musl-gcc
         CXX: g++
@@ -73,7 +74,7 @@ jobs:
       with:
         command: test
         toolchain: ${{ matrix.toolchain }}
-        args: --target ${{ matrix.target }} --all
+        args: --target ${{ matrix.target }} --workspace
       env:
         CC: musl-gcc
         CXX: g++

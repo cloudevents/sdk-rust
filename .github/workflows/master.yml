@@ -22,7 +22,7 @@ jobs:
     - uses: actions/checkout@v2
     - run: sudo apt-get update
       if: matrix.target == 'x86_64-unknown-linux-musl'
-    - run: sudo apt-get install -y musl musl-dev musl-tools
+    - run: sudo apt-get install -y musl musl-dev musl-tools cmake
       if: matrix.target == 'x86_64-unknown-linux-musl'
     - name: Cache cargo registry
       uses: actions/cache@v1
@@ -59,20 +59,25 @@ jobs:
         toolchain: ${{ matrix.toolchain }}
         args: --target ${{ matrix.target }} --workspace
 
-    # If musl, compile and test all excluding kafka
+    # If musl, compile and test all
     - uses: actions-rs/cargo@v1
       if: matrix.target == 'x86_64-unknown-linux-musl'
       with:
         command: build
         toolchain: ${{ matrix.toolchain }}
-        args: --target ${{ matrix.target }} --workspace --exclude cloudevents-sdk-rdkafka
+        args: --target ${{ matrix.target }} --workspace
+      env:
+        CC: musl-gcc
+        CXX: g++
     - uses: actions-rs/cargo@v1
       if: matrix.target == 'x86_64-unknown-linux-musl'
       with:
         command: test
         toolchain: ${{ matrix.toolchain }}
-        args: --target ${{ matrix.target }} --workspace --exclude cloudevents-sdk-rdkafka
-
+        args: --target ${{ matrix.target }} --workspace
+      env:
+        CC: musl-gcc
+        CXX: g++
     # If wasm, then we test only the main module and cloudevents-sdk-reqwest
     - uses: actions-rs/cargo@v1
       if: matrix.target == 'wasm32-unknown-unknown'

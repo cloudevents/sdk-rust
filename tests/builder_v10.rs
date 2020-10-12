@@ -6,6 +6,7 @@ use cloudevents::event::{
     AttributesReader, EventBuilder, EventBuilderError, ExtensionValue, SpecVersion,
 };
 use cloudevents::EventBuilderV10;
+use std::convert::TryInto;
 use url::Url;
 
 #[test]
@@ -23,7 +24,7 @@ fn build_event() {
         "hello": "world"
     });
 
-    let event = EventBuilderV10::new()
+    let mut event = EventBuilderV10::new()
         .id(id)
         .source(source.clone())
         .ty(ty)
@@ -47,7 +48,7 @@ fn build_event() {
     assert_eq!(content_type, event.datacontenttype().unwrap());
     assert_eq!(schema, event.dataschema().unwrap().clone());
 
-    let event_data: serde_json::Value = event.try_data().unwrap().unwrap();
+    let event_data: serde_json::Value = event.take_data().2.unwrap().try_into().unwrap();
     assert_eq!(data, event_data);
 }
 

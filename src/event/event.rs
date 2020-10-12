@@ -6,7 +6,6 @@ use crate::event::attributes::DataAttributesWriter;
 use chrono::{DateTime, Utc};
 use delegate_attr::delegate;
 use std::collections::HashMap;
-use std::convert::TryFrom;
 use url::Url;
 
 /// Data structure that represents a [CloudEvent](https://github.com/cloudevents/spec/blob/master/spec.md).
@@ -16,9 +15,11 @@ use url::Url;
 ///
 /// You can build events using [`super::EventBuilder`]
 /// ```
-/// use cloudevents::Event;
-/// use cloudevents::event::AttributesReader;
+/// use cloudevents::*;
+/// use std::convert::TryInto;
 ///
+/// # use std::error::Error;
+/// # fn main() -> Result<(), Box<dyn Error>> {
 /// // Create an event using the Default trait
 /// let mut e = Event::default();
 /// e.write_data(
@@ -30,8 +31,13 @@ use url::Url;
 /// println!("Event id: {}", e.id());
 ///
 /// // Get the event data
-/// let data: serde_json::Value = e.try_data().unwrap().unwrap();
-/// println!("Event data: {}", data)
+/// let data: Option<Data> = e.data().cloned();
+/// match data {
+///     Some(d) => println!("{}", d),
+///     None => println!("No event data")
+/// }
+/// # Ok(())
+/// # }
 /// ```
 #[derive(PartialEq, Debug, Clone)]
 pub struct Event {
@@ -129,6 +135,11 @@ impl Event {
         self.data = Some(data.into());
     }
 
+    /// Get `data` from this `Event`
+    pub fn data(&self) -> Option<&Data> {
+        self.data.as_ref()
+    }
+
     /// Write `data` into this `Event` with the specified `datacontenttype` and `dataschema`.
     ///
     /// ```
@@ -153,11 +164,6 @@ impl Event {
         self.attributes.set_datacontenttype(Some(datacontenttype));
         self.attributes.set_dataschema(Some(dataschema));
         self.data = Some(data.into());
-    }
-
-    /// Get `data` from this `Event`
-    pub fn data(&self) -> Option<&Data> {
-        self.data.as_ref()
     }
 
     /// Get the [extension](https://github.com/cloudevents/spec/blob/master/spec.md#extension-context-attributes) named `extension_name`
@@ -189,45 +195,6 @@ mod tests {
     use super::*;
 
     #[test]
-    fn try_get_data_json() {
-        let expected_data = serde_json::json!({
-            "hello": "world"
-        });
-
-        let mut e = Event::default();
-        e.write_data_with_schema(
-            "application/json",
-            Url::parse("http://localhost:8080/schema").unwrap(),
-            expected_data.clone(),
-        );
-
-        let data: serde_json::Value = e.try_get_data().unwrap().unwrap();
-        assert_eq!(expected_data, data);
-        assert_eq!("application/json", e.get_datacontenttype().unwrap());
-        assert_eq!(
-            &Url::parse("http://localhost:8080/schema").unwrap(),
-            e.get_dataschema().unwrap()
-        )
-    }
-
-    #[test]
-    fn remove_data() {
-        let mut e = Event::default();
-        e.write_data(
-            "application/json",
-            serde_json::json!({
-                "hello": "world"
-            }),
-        );
-
-        e.remove_data();
-
-        assert!(e.try_get_data::<serde_json::Value>().unwrap().is_none());
-        assert!(e.get_dataschema().is_none());
-        assert!(e.get_datacontenttype().is_none());
-    }
-
-    #[test]
     fn take_data() {
         let mut e = Event::default();
         e.write_data(
@@ -237,11 +204,15 @@ mod tests {
             }),
         );
 
-        let _d = e.take_data();
+        let (datacontenttype, dataschema, data) = e.take_data();
 
-        assert!(e.try_get_data::<serde_json::Value>().unwrap().is_none());
-        assert!(e.get_dataschema().is_none());
-        assert!(e.get_datacontenttype().is_none());
+        assert!(datacontenttype.is_some());
+        assert!(dataschema.is_none());
+        assert!(data.is_some());
+
+        assert!(e.data().is_none());
+        assert!(e.dataschema().is_none());
+        assert!(e.datacontenttype().is_none());
     }
 
     #[test]
@@ -250,7 +221,7 @@ mod tests {
         e.set_id("001");
 
         assert_eq!(e.set_id("002"), String::from("001"));
-        assert_eq!(e.get_id(), "002")
+        assert_eq!(e.id(), "002")
     }
 
     #[test]

@@ -33,6 +33,7 @@ pub mod event;
 /// Provides facilities to implement Protocol Bindings
 pub mod message;
 
+pub use event::Data;
 pub use event::Event;
 pub use event::{AttributesReader, AttributesWriter};
 pub use event::{EventBuilder, EventBuilderV03, EventBuilderV10};

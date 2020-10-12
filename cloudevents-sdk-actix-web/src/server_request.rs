@@ -115,7 +115,7 @@ pub async fn request_to_event(
 /// Extention Trait for [`HttpRequest`] which acts as a wrapper for the function [`request_to_event()`].
 #[async_trait(?Send)]
 pub trait RequestExt {
-    async fn into_event(
+    async fn to_event(
         &self,
         mut payload: web::Payload,
     ) -> std::result::Result<Event, actix_web::error::Error>;
@@ -123,7 +123,7 @@ pub trait RequestExt {
 
 #[async_trait(?Send)]
 impl RequestExt for HttpRequest {
-    async fn into_event(
+    async fn to_event(
         &self,
         payload: web::Payload,
     ) -> std::result::Result<Event, actix_web::error::Error> {
@@ -165,7 +165,7 @@ mod tests {
             .header("ce-time", time.to_rfc3339())
             .to_http_parts();
 
-        let resp = req.into_event(web::Payload(payload)).await.unwrap();
+        let resp = req.to_event(web::Payload(payload)).await.unwrap();
         assert_eq!(expected, resp);
     }
 
@@ -197,7 +197,7 @@ mod tests {
             .set_json(&j)
             .to_http_parts();
 
-        let resp = req.into_event(web::Payload(payload)).await.unwrap();
+        let resp = req.to_event(web::Payload(payload)).await.unwrap();
         assert_eq!(expected, resp);
     }
 }

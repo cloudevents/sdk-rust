@@ -8,7 +8,7 @@
 //!
 //! #[post("/")]
 //! async fn post_event(req: HttpRequest, payload: web::Payload) -> Result<String, actix_web::Error> {
-//!     let event = req.into_event(payload).await?;
+//!     let event = req.to_event(payload).await?;
 //!     println!("Received Event: {:?}", event);
 //!     Ok(format!("{:?}", event))
 //! }

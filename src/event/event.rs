@@ -54,11 +54,11 @@ impl AttributesReader for Event {
 
 #[delegate(self.attributes)]
 impl AttributesWriter for Event {
-    fn set_id(&mut self, id: impl Into<String>);
-    fn set_source(&mut self, source: impl Into<Url>);
-    fn set_type(&mut self, ty: impl Into<String>);
-    fn set_subject(&mut self, subject: Option<impl Into<String>>);
-    fn set_time(&mut self, time: Option<impl Into<DateTime<Utc>>>);
+    fn set_id(&mut self, id: impl Into<String>) -> String;
+    fn set_source(&mut self, source: impl Into<Url>) -> Url;
+    fn set_type(&mut self, ty: impl Into<String>) -> String;
+    fn set_subject(&mut self, subject: Option<impl Into<String>>) -> Option<String>;
+    fn set_time(&mut self, time: Option<impl Into<DateTime<Utc>>>) -> Option<DateTime<Utc>>;
 }
 
 impl Default for Event {
@@ -93,11 +93,24 @@ impl Event {
         self.extensions.iter().map(|(k, v)| (k.as_str(), v))
     }
 
-    /// Remove `data`, `dataschema` and `datacontenttype` from this `Event`
-    pub fn remove_data(&mut self) {
-        self.data = None;
-        self.attributes.set_dataschema(None as Option<Url>);
-        self.attributes.set_datacontenttype(None as Option<String>);
+    /// Take (`datacontenttype`, `dataschema`, `data`) from this event, leaving these fields empty
+    ///
+    /// ```
+    /// use cloudevents::Event;
+    /// use serde_json::json;
+    /// use std::convert::Into;
+    ///
+    /// let mut e = Event::default();
+    /// e.write_data("application/json", json!({}));
+    ///
+    /// let (datacontenttype, dataschema, data) = e.take_data();
+    /// ```
+    pub fn take_data(&mut self) -> (Option<String>, Option<Url>, Option<Data>) {
+        (
+            self.attributes.set_datacontenttype(None as Option<String>),
+            self.attributes.set_dataschema(None as Option<Url>),
+            self.data.take(),
+        )
     }
 
     /// Write `data` into this `Event` with the specified `datacontenttype`.
@@ -219,7 +232,7 @@ mod tests {
     }
 
     #[test]
-    fn remove_data() {
+    fn take_data() {
         let mut e = Event::default();
         e.write_data(
             "application/json",
@@ -228,11 +241,20 @@ mod tests {
             }),
         );
 
-        e.remove_data();
+        let _d = e.take_data();
 
         assert!(e.try_get_data::<serde_json::Value>().unwrap().is_none());
         assert!(e.get_dataschema().is_none());
         assert!(e.get_datacontenttype().is_none());
+    }
+
+    #[test]
+    fn set_id() {
+        let mut e = Event::default();
+        e.set_id("001");
+
+        assert_eq!(e.set_id("002"), String::from("001"));
+        assert_eq!(e.get_id(), "002")
     }
 
     #[test]

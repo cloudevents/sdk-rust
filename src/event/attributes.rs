@@ -66,15 +66,20 @@ pub trait AttributesReader {
 /// Trait to set [CloudEvents Context attributes](https://github.com/cloudevents/spec/blob/master/spec.md#context-attributes).
 pub trait AttributesWriter {
     /// Set the [id](https://github.com/cloudevents/spec/blob/master/spec.md#id).
-    fn set_id(&mut self, id: impl Into<String>);
+    /// Returns the previous value.
+    fn set_id(&mut self, id: impl Into<String>) -> String;
     /// Set the [source](https://github.com/cloudevents/spec/blob/master/spec.md#source-1).
-    fn set_source(&mut self, source: impl Into<Url>);
+    /// Returns the previous value.
+    fn set_source(&mut self, source: impl Into<Url>) -> Url;
     /// Set the [type](https://github.com/cloudevents/spec/blob/master/spec.md#type).
-    fn set_type(&mut self, ty: impl Into<String>);
+    /// Returns the previous value.
+    fn set_type(&mut self, ty: impl Into<String>) -> String;
     /// Set the [subject](https://github.com/cloudevents/spec/blob/master/spec.md#subject).
-    fn set_subject(&mut self, subject: Option<impl Into<String>>);
+    /// Returns the previous value.
+    fn set_subject(&mut self, subject: Option<impl Into<String>>) -> Option<String>;
     /// Set the [time](https://github.com/cloudevents/spec/blob/master/spec.md#time).
-    fn set_time(&mut self, time: Option<impl Into<DateTime<Utc>>>);
+    /// Returns the previous value.
+    fn set_time(&mut self, time: Option<impl Into<DateTime<Utc>>>) -> Option<DateTime<Utc>>;
 }
 
 pub(crate) trait AttributesConverter {
@@ -83,8 +88,9 @@ pub(crate) trait AttributesConverter {
 }
 
 pub(crate) trait DataAttributesWriter {
-    fn set_datacontenttype(&mut self, datacontenttype: Option<impl Into<String>>);
-    fn set_dataschema(&mut self, dataschema: Option<impl Into<Url>>);
+    fn set_datacontenttype(&mut self, datacontenttype: Option<impl Into<String>>)
+        -> Option<String>;
+    fn set_dataschema(&mut self, dataschema: Option<impl Into<Url>>) -> Option<Url>;
 }
 
 #[derive(PartialEq, Debug, Clone, Copy)]
@@ -169,35 +175,35 @@ impl AttributesReader for Attributes {
 }
 
 impl AttributesWriter for Attributes {
-    fn set_id(&mut self, id: impl Into<String>) {
+    fn set_id(&mut self, id: impl Into<String>) -> String {
         match self {
             Attributes::V03(a) => a.set_id(id),
             Attributes::V10(a) => a.set_id(id),
         }
     }
 
-    fn set_source(&mut self, source: impl Into<Url>) {
+    fn set_source(&mut self, source: impl Into<Url>) -> Url {
         match self {
             Attributes::V03(a) => a.set_source(source),
             Attributes::V10(a) => a.set_source(source),
         }
     }
 
-    fn set_type(&mut self, ty: impl Into<String>) {
+    fn set_type(&mut self, ty: impl Into<String>) -> String {
         match self {
             Attributes::V03(a) => a.set_type(ty),
             Attributes::V10(a) => a.set_type(ty),
         }
     }
 
-    fn set_subject(&mut self, subject: Option<impl Into<String>>) {
+    fn set_subject(&mut self, subject: Option<impl Into<String>>) -> Option<String> {
         match self {
             Attributes::V03(a) => a.set_subject(subject),
             Attributes::V10(a) => a.set_subject(subject),
         }
     }
 
-    fn set_time(&mut self, time: Option<impl Into<DateTime<Utc>>>) {
+    fn set_time(&mut self, time: Option<impl Into<DateTime<Utc>>>) -> Option<DateTime<Utc>> {
         match self {
             Attributes::V03(a) => a.set_time(time),
             Attributes::V10(a) => a.set_time(time),
@@ -206,14 +212,17 @@ impl AttributesWriter for Attributes {
 }
 
 impl DataAttributesWriter for Attributes {
-    fn set_datacontenttype(&mut self, datacontenttype: Option<impl Into<String>>) {
+    fn set_datacontenttype(
+        &mut self,
+        datacontenttype: Option<impl Into<String>>,
+    ) -> Option<String> {
         match self {
             Attributes::V03(a) => a.set_datacontenttype(datacontenttype),
             Attributes::V10(a) => a.set_datacontenttype(datacontenttype),
         }
     }
 
-    fn set_dataschema(&mut self, dataschema: Option<impl Into<Url>>) {
+    fn set_dataschema(&mut self, dataschema: Option<impl Into<Url>>) -> Option<Url> {
         match self {
             Attributes::V03(a) => a.set_dataschema(dataschema),
             Attributes::V10(a) => a.set_dataschema(dataschema),

@@ -122,34 +122,37 @@ impl AttributesReader for Attributes {
 }
 
 impl AttributesWriter for Attributes {
-    fn set_id(&mut self, id: impl Into<String>) {
-        self.id = id.into()
+    fn set_id(&mut self, id: impl Into<String>) -> String {
+        std::mem::replace(&mut self.id, id.into())
     }
 
-    fn set_source(&mut self, source: impl Into<Url>) {
-        self.source = source.into()
+    fn set_source(&mut self, source: impl Into<Url>) -> Url {
+        std::mem::replace(&mut self.source, source.into())
     }
 
-    fn set_type(&mut self, ty: impl Into<String>) {
-        self.ty = ty.into()
+    fn set_type(&mut self, ty: impl Into<String>) -> String {
+        std::mem::replace(&mut self.ty, ty.into())
     }
 
-    fn set_subject(&mut self, subject: Option<impl Into<String>>) {
-        self.subject = subject.map(Into::into)
+    fn set_subject(&mut self, subject: Option<impl Into<String>>) -> Option<String> {
+        std::mem::replace(&mut self.subject, subject.map(Into::into))
     }
 
-    fn set_time(&mut self, time: Option<impl Into<DateTime<Utc>>>) {
-        self.time = time.map(Into::into)
+    fn set_time(&mut self, time: Option<impl Into<DateTime<Utc>>>) -> Option<DateTime<Utc>> {
+        std::mem::replace(&mut self.time, time.map(Into::into))
     }
 }
 
 impl DataAttributesWriter for Attributes {
-    fn set_datacontenttype(&mut self, datacontenttype: Option<impl Into<String>>) {
-        self.datacontenttype = datacontenttype.map(Into::into)
+    fn set_datacontenttype(
+        &mut self,
+        datacontenttype: Option<impl Into<String>>,
+    ) -> Option<String> {
+        std::mem::replace(&mut self.datacontenttype, datacontenttype.map(Into::into))
     }
 
-    fn set_dataschema(&mut self, dataschema: Option<impl Into<Url>>) {
-        self.schemaurl = dataschema.map(Into::into)
+    fn set_dataschema(&mut self, dataschema: Option<impl Into<Url>>) -> Option<Url> {
+        std::mem::replace(&mut self.schemaurl, dataschema.map(Into::into))
     }
 }
 

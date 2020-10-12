@@ -106,9 +106,7 @@ pub(crate) trait EventFormatDeserializer {
     ) -> Result<Event, E> {
         let attributes = Self::deserialize_attributes(&mut map)?;
         let data = Self::deserialize_data(
-            attributes
-                .datacontenttype()
-                .unwrap_or("application/json"),
+            attributes.datacontenttype().unwrap_or("application/json"),
             &mut map,
         )?;
         let extensions = map

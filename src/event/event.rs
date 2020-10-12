@@ -27,10 +27,10 @@ use url::Url;
 /// );
 ///
 /// // Print the event id
-/// println!("Event id: {}", e.get_id());
+/// println!("Event id: {}", e.id());
 ///
 /// // Get the event data
-/// let data: serde_json::Value = e.try_get_data().unwrap().unwrap();
+/// let data: serde_json::Value = e.try_data().unwrap().unwrap();
 /// println!("Event data: {}", data)
 /// ```
 #[derive(PartialEq, Debug, Clone)]
@@ -42,14 +42,14 @@ pub struct Event {
 
 #[delegate(self.attributes)]
 impl AttributesReader for Event {
-    fn get_id(&self) -> &str;
-    fn get_source(&self) -> &Url;
-    fn get_specversion(&self) -> SpecVersion;
-    fn get_type(&self) -> &str;
-    fn get_datacontenttype(&self) -> Option<&str>;
-    fn get_dataschema(&self) -> Option<&Url>;
-    fn get_subject(&self) -> Option<&str>;
-    fn get_time(&self) -> Option<&DateTime<Utc>>;
+    fn id(&self) -> &str;
+    fn source(&self) -> &Url;
+    fn specversion(&self) -> SpecVersion;
+    fn ty(&self) -> &str;
+    fn datacontenttype(&self) -> Option<&str>;
+    fn dataschema(&self) -> Option<&Url>;
+    fn subject(&self) -> Option<&str>;
+    fn time(&self) -> Option<&DateTime<Utc>>;
 }
 
 #[delegate(self.attributes)]
@@ -156,33 +156,12 @@ impl Event {
     }
 
     /// Get `data` from this `Event`
-    pub fn get_data<T: Sized + From<Data>>(&self) -> Option<T> {
-        match self.data.as_ref() {
-            Some(d) => Some(T::from(d.clone())),
-            None => None,
-        }
-    }
-
-    /// Try to get `data` from this `Event`
-    pub fn try_get_data<T: Sized + TryFrom<Data>>(&self) -> Result<Option<T>, T::Error> {
-        match self.data.as_ref() {
-            Some(d) => Some(T::try_from(d.clone())),
-            None => None,
-        }
-        .transpose()
-    }
-
-    /// Transform this `Event` into the content of `data`
-    pub fn into_data<T: Sized + TryFrom<Data>>(self) -> Result<Option<T>, T::Error> {
-        match self.data {
-            Some(d) => Some(T::try_from(d)),
-            None => None,
-        }
-        .transpose()
+    pub fn data(&self) -> Option<&Data> {
+        self.data.as_ref()
     }
 
     /// Get the [extension](https://github.com/cloudevents/spec/blob/master/spec.md#extension-context-attributes) named `extension_name`
-    pub fn get_extension(&self, extension_name: &str) -> Option<&ExtensionValue> {
+    pub fn extension(&self, extension_name: &str) -> Option<&ExtensionValue> {
         self.extensions.get(extension_name)
     }
 
@@ -229,6 +208,23 @@ mod tests {
             &Url::parse("http://localhost:8080/schema").unwrap(),
             e.get_dataschema().unwrap()
         )
+    }
+
+    #[test]
+    fn remove_data() {
+        let mut e = Event::default();
+        e.write_data(
+            "application/json",
+            serde_json::json!({
+                "hello": "world"
+            }),
+        );
+
+        e.remove_data();
+
+        assert!(e.try_get_data::<serde_json::Value>().unwrap().is_none());
+        assert!(e.get_dataschema().is_none());
+        assert!(e.get_datacontenttype().is_none());
     }
 
     #[test]

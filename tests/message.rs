@@ -3,6 +3,7 @@ use cloudevents::message::{BinaryDeserializer, Result, StructuredDeserializer};
 
 use cloudevents::{AttributesReader, EventBuilder, EventBuilderV03, EventBuilderV10};
 use test_data::*;
+use std::convert::TryInto;
 
 #[test]
 fn message_v03_roundtrip_structured() -> Result<()> {
@@ -18,10 +19,10 @@ fn message_v03_roundtrip_binary() -> Result<()> {
     //TODO this code smells because we're missing a proper way in the public APIs
     // to destructure an event and rebuild it
     let wanna_be_expected = v03::full_json_data();
-    let data: serde_json::Value = wanna_be_expected.try_get_data()?.unwrap();
+    let data: serde_json::Value = wanna_be_expected.data().unwrap().clone().try_into()?;
     let bytes = serde_json::to_vec(&data)?;
     let expected = EventBuilderV03::from(wanna_be_expected.clone())
-        .data(wanna_be_expected.get_datacontenttype().unwrap(), bytes)
+        .data(wanna_be_expected.datacontenttype().unwrap(), bytes)
         .build()
         .unwrap();
 
@@ -46,10 +47,10 @@ fn message_v10_roundtrip_binary() -> Result<()> {
     //TODO this code smells because we're missing a proper way in the public APIs
     // to destructure an event and rebuild it
     let wanna_be_expected = v10::full_json_data();
-    let data: serde_json::Value = wanna_be_expected.try_get_data()?.unwrap();
+    let data: serde_json::Value = wanna_be_expected.try_data()?.unwrap();
     let bytes = serde_json::to_vec(&data)?;
     let expected = EventBuilderV10::from(wanna_be_expected.clone())
-        .data(wanna_be_expected.get_datacontenttype().unwrap(), bytes)
+        .data(wanna_be_expected.datacontenttype().unwrap(), bytes)
         .build()
         .unwrap();
 

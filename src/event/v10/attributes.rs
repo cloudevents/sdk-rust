@@ -88,35 +88,35 @@ impl<'a> Iterator for AttributesIntoIterator<'a> {
 }
 
 impl AttributesReader for Attributes {
-    fn get_id(&self) -> &str {
+    fn id(&self) -> &str {
         &self.id
     }
 
-    fn get_source(&self) -> &Url {
+    fn source(&self) -> &Url {
         &self.source
     }
 
-    fn get_specversion(&self) -> SpecVersion {
+    fn specversion(&self) -> SpecVersion {
         SpecVersion::V10
     }
 
-    fn get_type(&self) -> &str {
+    fn ty(&self) -> &str {
         &self.ty
     }
 
-    fn get_datacontenttype(&self) -> Option<&str> {
+    fn datacontenttype(&self) -> Option<&str> {
         self.datacontenttype.as_deref()
     }
 
-    fn get_dataschema(&self) -> Option<&Url> {
+    fn dataschema(&self) -> Option<&Url> {
         self.dataschema.as_ref()
     }
 
-    fn get_subject(&self) -> Option<&str> {
+    fn subject(&self) -> Option<&str> {
         self.subject.as_deref()
     }
 
-    fn get_time(&self) -> Option<&DateTime<Utc>> {
+    fn time(&self) -> Option<&DateTime<Utc>> {
         self.time.as_ref()
     }
 }

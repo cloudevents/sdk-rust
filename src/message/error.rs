@@ -33,7 +33,9 @@ pub enum Error {
     #[snafu(context(false))]
     IOError { source: std::io::Error },
     #[snafu(display("Other error: {}", source))]
-    Other { source: Box<dyn std::error::Error> },
+    Other {
+        source: Box<dyn std::error::Error + Send + Sync>,
+    },
 }
 
 /// Result type alias for return values during serialization/deserialization process

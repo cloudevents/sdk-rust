@@ -196,7 +196,7 @@ impl crate::event::message::AttributesSerializer for EventBuilder {
             "subject" => self.subject = Some(value.to_string()),
             "time" => self.time = Some(value.try_into()?),
             _ => {
-                return Err(crate::message::Error::UnrecognizedAttributeName {
+                return Err(crate::message::Error::UnknownAttribute {
                     name: name.to_string(),
                 })
             }

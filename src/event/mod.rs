@@ -19,8 +19,8 @@ pub use event::Event;
 pub use extensions::ExtensionValue;
 pub(crate) use message::EventBinarySerializer;
 pub(crate) use message::EventStructuredSerializer;
-pub use spec_version::InvalidSpecVersion;
 pub use spec_version::SpecVersion;
+pub use spec_version::UnknownSpecVersion;
 pub use types::{TryIntoTime, TryIntoUrl};
 
 mod v03;

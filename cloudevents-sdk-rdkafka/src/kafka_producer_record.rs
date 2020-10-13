@@ -46,7 +46,7 @@ impl BinarySerializer<MessageRecord> for MessageRecord {
         self.headers = self.headers.add(
             &headers::ATTRIBUTES_TO_HEADERS
                 .get(name)
-                .ok_or(cloudevents::message::Error::UnrecognizedAttributeName {
+                .ok_or(cloudevents::message::Error::UnknownAttribute {
                     name: String::from(name),
                 })?
                 .clone()[..],

@@ -7,6 +7,7 @@ use serde::de::{Error, IntoDeserializer};
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use serde_json::{Map, Value};
 use std::collections::HashMap;
+use std::prelude::v1::*;
 
 macro_rules! parse_field {
     ($value:expr, $target_type:ty, $error:ty) => {

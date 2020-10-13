@@ -25,6 +25,7 @@ base64 = "^0.12"
 url = { version = "^2.1", features = ["serde"] }
 snafu = "^0.6"
 bitflags = "^1.2"
+no-std-compat = { version = "^0.4.1", features = ["alloc"] }
 
 [target."cfg(not(target_arch = \"wasm32\"))".dependencies]
 hostname = "^0.3"

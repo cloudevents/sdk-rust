@@ -2,6 +2,7 @@ use super::{v03, v10};
 use std::convert::TryFrom;
 use std::fmt;
 use std::fmt::Formatter;
+use std::prelude::v1::*;
 
 pub(crate) const SPEC_VERSIONS: [&str; 2] = ["0.3", "1.0"];
 

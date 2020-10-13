@@ -2,6 +2,7 @@ use serde_json::Value;
 use std::convert::TryFrom;
 use std::fmt;
 use std::fmt::Formatter;
+use std::prelude::v1::*;
 
 /// Event [data attribute](https://github.com/cloudevents/spec/blob/master/spec.md#event-data) representation
 #[derive(PartialEq, Eq, Debug, Clone)]

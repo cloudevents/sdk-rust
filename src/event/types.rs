@@ -1,4 +1,5 @@
 use chrono::{DateTime, Utc};
+use std::prelude::v1::*;
 use url::Url;
 
 /// Trait to define conversion to [`Url`]

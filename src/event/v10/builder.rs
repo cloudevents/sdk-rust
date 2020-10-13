@@ -6,6 +6,7 @@ use crate::message::MessageAttributeValue;
 use chrono::{DateTime, Utc};
 use std::collections::HashMap;
 use std::convert::TryInto;
+use std::prelude::v1::*;
 use url::Url;
 
 /// Builder to create a CloudEvent V1.0

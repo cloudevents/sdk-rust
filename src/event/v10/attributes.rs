@@ -3,6 +3,7 @@ use crate::event::{AttributesReader, AttributesV03, AttributesWriter, SpecVersio
 use crate::message::{BinarySerializer, MessageAttributeValue};
 use chrono::{DateTime, Utc};
 use core::fmt::Debug;
+use std::prelude::v1::*;
 use url::Url;
 use uuid::Uuid;
 

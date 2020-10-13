@@ -2,6 +2,7 @@ use crate::event::ExtensionValue;
 use chrono::{DateTime, Utc};
 use std::convert::TryInto;
 use std::fmt;
+use std::prelude::v1::*;
 use url::Url;
 
 /// Union type representing a [CloudEvent context attribute type](https://github.com/cloudevents/spec/blob/v1.0/spec.md#type-system).

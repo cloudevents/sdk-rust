@@ -7,6 +7,7 @@ use serde::ser::SerializeMap;
 use serde::{Deserialize, Serializer};
 use serde_json::{Map, Value};
 use std::collections::HashMap;
+use std::prelude::v1::*;
 use url::Url;
 
 pub(crate) struct EventFormatDeserializer {}

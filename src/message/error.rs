@@ -1,4 +1,5 @@
 use snafu::Snafu;
+use std::prelude::v1::*;
 
 /// Represents an error during serialization/deserialization process
 #[derive(Debug, Snafu)]

@@ -1,6 +1,7 @@
 use serde::{Deserialize, Serialize, Serializer};
 use std::convert::From;
 use std::fmt;
+use std::prelude::v1::*;
 
 #[derive(PartialEq, Eq, Debug, Clone, Serialize, Deserialize)]
 #[serde(untagged)]

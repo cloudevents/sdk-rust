@@ -5,6 +5,7 @@ use super::{
 use chrono::{DateTime, Utc};
 use serde::Serializer;
 use std::fmt;
+use std::prelude::v1::*;
 use url::Url;
 
 /// Enum representing a borrowed value of a CloudEvent attribute.

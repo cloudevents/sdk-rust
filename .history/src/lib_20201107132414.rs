@@ -37,8 +37,10 @@
 //! * [cloudevents-sdk-rdkafka](https://docs.rs/cloudevents-sdk-rdkafka): Integration with [rdkafka](https://fede1024.github.io/rust-rdkafka)
 //!
 
-#![doc(html_root_url = "https://docs.rs/cloudevents-sdk/0.3.1")]
+<<<<<<< master
+#![doc(html_root_url = "https://docs.rs/cloudevents-sdk/0.3.0")]
 #![deny(broken_intra_doc_links)]
+=======
 #![no_std]
 
 extern crate no_std_compat as std;
@@ -47,6 +49,7 @@ extern crate serde;
 extern crate serde_json;
 extern crate serde_value;
 extern crate snafu;
+>>>>>>> no_std #1
 
 pub mod event;
 pub mod message;

@@ -7,6 +7,7 @@ use crate::message::{
     StructuredSerializer,
 };
 use crate::{EventBuilder, EventBuilderV03, EventBuilderV10};
+use std::prelude::v1::*;
 
 impl StructuredDeserializer for Event {
     fn deserialize_structured<R, V: StructuredSerializer<R>>(self, visitor: V) -> Result<R> {

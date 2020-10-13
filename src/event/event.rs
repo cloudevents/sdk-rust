@@ -82,10 +82,7 @@ impl Event {
     /// Returns an [`Iterator`] for all the available [CloudEvents Context attributes](https://github.com/cloudevents/spec/blob/master/spec.md#context-attributes), excluding extensions.
     /// This iterator does not contain the `data` field.
     pub fn iter_attributes(&self) -> impl Iterator<Item = (&str, AttributeValue)> {
-        match &self.attributes {
-            Attributes::V03(a) => AttributesIter::IterV03(a.into_iter()),
-            Attributes::V10(a) => AttributesIter::IterV10(a.into_iter()),
-        }
+        self.attributes.iter()
     }
 
     /// Get all the [extensions](https://github.com/cloudevents/spec/blob/master/spec.md#extension-context-attributes)

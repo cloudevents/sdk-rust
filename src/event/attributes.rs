@@ -243,6 +243,13 @@ impl Attributes {
             _ => self,
         }
     }
+
+    pub fn iter(&self) -> impl Iterator<Item = (&str, AttributeValue)> {
+        match self {
+            Attributes::V03(a) => AttributesIter::IterV03(a.into_iter()),
+            Attributes::V10(a) => AttributesIter::IterV10(a.into_iter()),
+        }
+    }
 }
 
 #[cfg(not(target_arch = "wasm32"))]

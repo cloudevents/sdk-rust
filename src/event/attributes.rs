@@ -83,7 +83,7 @@ pub trait AttributesWriter {
     /// Set the [datacontenttype](https://github.com/cloudevents/spec/blob/master/spec.md#datacontenttype).
     /// Returns the previous value.
     fn set_datacontenttype(&mut self, datacontenttype: Option<impl Into<String>>)
-                           -> Option<String>;
+        -> Option<String>;
     /// Set the [dataschema](https://github.com/cloudevents/spec/blob/master/spec.md#dataschema).
     /// Returns the previous value.
     fn set_dataschema(&mut self, dataschema: Option<impl Into<Url>>) -> Option<Url>;

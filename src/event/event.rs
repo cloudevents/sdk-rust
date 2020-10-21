@@ -1,7 +1,6 @@
 use super::{
     AttributeValue, Attributes, AttributesReader, AttributesV10, AttributesWriter, Data,
-    ExtensionValue, SpecVersion, EventBuilder, EventBuilderV03, EventBuilderV10,
-    attributes::DataAttributesWriter
+    ExtensionValue, SpecVersion,
 };
 use chrono::{DateTime, Utc};
 use delegate_attr::delegate;
@@ -65,7 +64,8 @@ impl AttributesWriter for Event {
     fn set_type(&mut self, ty: impl Into<String>) -> String;
     fn set_subject(&mut self, subject: Option<impl Into<String>>) -> Option<String>;
     fn set_time(&mut self, time: Option<impl Into<DateTime<Utc>>>) -> Option<DateTime<Utc>>;
-    fn set_datacontenttype(&mut self, datacontenttype: Option<impl Into<String>>) -> Option<String>;
+    fn set_datacontenttype(&mut self, datacontenttype: Option<impl Into<String>>)
+        -> Option<String>;
     fn set_dataschema(&mut self, dataschema: Option<impl Into<Url>>) -> Option<Url>;
 }
 
@@ -134,7 +134,11 @@ impl Event {
     /// let mut e = Event::default();
     /// let (old_datacontenttype, old_data) = e.set_data("application/json", json!({}));
     /// ```
-    pub fn set_data(&mut self, datacontenttype: impl Into<String>, data: impl Into<Data>) -> (Option<String>, Option<Data>) {
+    pub fn set_data(
+        &mut self,
+        datacontenttype: impl Into<String>,
+        data: impl Into<Data>,
+    ) -> (Option<String>, Option<Data>) {
         (
             self.attributes.set_datacontenttype(Some(datacontenttype)),
             std::mem::replace(&mut self.data, Some(data.into())),

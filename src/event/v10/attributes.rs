@@ -1,6 +1,4 @@
-use crate::event::attributes::{
-    default_hostname, AttributeValue, AttributesConverter, DataAttributesWriter,
-};
+use crate::event::attributes::{default_hostname, AttributeValue, AttributesConverter};
 use crate::event::{AttributesReader, AttributesV03, AttributesWriter, SpecVersion};
 use crate::message::{BinarySerializer, MessageAttributeValue};
 use chrono::{DateTime, Utc};

@@ -10,7 +10,6 @@ mod spec_version;
 mod types;
 
 pub use attributes::Attributes;
-pub(crate) use attributes::AttributesIter;
 pub use attributes::{AttributeValue, AttributesReader, AttributesWriter};
 pub use builder::Error as EventBuilderError;
 pub use builder::EventBuilder;

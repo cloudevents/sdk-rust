@@ -8,7 +8,7 @@ use std::fmt;
 use url::Url;
 
 /// Value of a CloudEvent attribute
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Eq)]
 pub enum AttributeValue<'a> {
     SpecVersion(SpecVersion),
     String(&'a str),
@@ -110,7 +110,7 @@ impl<'a> Iterator for AttributesIter<'a> {
 }
 
 /// Union type representing one of the possible context attributes structs
-#[derive(PartialEq, Debug, Clone)]
+#[derive(PartialEq, Eq, Debug, Clone)]
 pub enum Attributes {
     V03(AttributesV03),
     V10(AttributesV10),

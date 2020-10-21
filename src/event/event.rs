@@ -7,6 +7,7 @@ use chrono::{DateTime, Utc};
 use delegate_attr::delegate;
 use std::collections::HashMap;
 use url::Url;
+use std::fmt;
 
 /// Data structure that represents a [CloudEvent](https://github.com/cloudevents/spec/blob/master/spec.md).
 /// It provides methods to get the attributes through [`AttributesReader`]
@@ -39,7 +40,7 @@ use url::Url;
 /// # Ok(())
 /// # }
 /// ```
-#[derive(PartialEq, Debug, Clone)]
+#[derive(PartialEq, Eq, Debug, Clone)]
 pub struct Event {
     pub(crate) attributes: Attributes,
     pub(crate) data: Option<Data>,
@@ -74,6 +75,20 @@ impl Default for Event {
             data: None,
             extensions: HashMap::default(),
         }
+    }
+}
+
+impl fmt::Display for Event {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "CloudEvent:\n")?;
+        self.iter()
+            .map(|(name, val)| write!(f, "  {}: '{}'\n", name, val))
+            .collect::<fmt::Result>()?;
+        match self.data() {
+            Some(data) => write!(f, "  {}", data)?,
+            None => write!(f, "  No data")?
+        }
+        write!(f, "\n")
     }
 }
 

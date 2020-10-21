@@ -1,7 +1,8 @@
-use serde::{Deserialize, Serialize};
+use serde::{Deserialize, Serialize, Serializer};
 use std::convert::From;
+use std::fmt;
 
-#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
+#[derive(PartialEq, Eq, Debug, Clone, Serialize, Deserialize)]
 #[serde(untagged)]
 /// Represents all the possible [CloudEvents extension](https://github.com/cloudevents/spec/blob/master/spec.md#extension-context-attributes) values
 pub enum ExtensionValue {
@@ -57,5 +58,15 @@ impl ExtensionValue {
         S: Into<bool>,
     {
         ExtensionValue::from(s.into())
+    }
+}
+
+impl fmt::Display for ExtensionValue {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            ExtensionValue::String(s) => f.write_str(s),
+            ExtensionValue::Boolean(b) => f.serialize_bool(*b),
+            ExtensionValue::Integer(i) => f.serialize_i64(*i),
+        }
     }
 }

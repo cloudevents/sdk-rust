@@ -46,21 +46,21 @@ impl fmt::Display for AttributeValue<'_> {
 /// Trait to get [CloudEvents Context attributes](https://github.com/cloudevents/spec/blob/master/spec.md#context-attributes).
 pub trait AttributesReader {
     /// Get the [id](https://github.com/cloudevents/spec/blob/master/spec.md#id).
-    fn get_id(&self) -> &str;
+    fn id(&self) -> &str;
     /// Get the [source](https://github.com/cloudevents/spec/blob/master/spec.md#source-1).
-    fn get_source(&self) -> &Url;
+    fn source(&self) -> &Url;
     /// Get the [specversion](https://github.com/cloudevents/spec/blob/master/spec.md#specversion).
-    fn get_specversion(&self) -> SpecVersion;
+    fn specversion(&self) -> SpecVersion;
     /// Get the [type](https://github.com/cloudevents/spec/blob/master/spec.md#type).
-    fn get_type(&self) -> &str;
+    fn ty(&self) -> &str;
     /// Get the [datacontenttype](https://github.com/cloudevents/spec/blob/master/spec.md#datacontenttype).
-    fn get_datacontenttype(&self) -> Option<&str>;
+    fn datacontenttype(&self) -> Option<&str>;
     /// Get the [dataschema](https://github.com/cloudevents/spec/blob/master/spec.md#dataschema).
-    fn get_dataschema(&self) -> Option<&Url>;
+    fn dataschema(&self) -> Option<&Url>;
     /// Get the [subject](https://github.com/cloudevents/spec/blob/master/spec.md#subject).
-    fn get_subject(&self) -> Option<&str>;
+    fn subject(&self) -> Option<&str>;
     /// Get the [time](https://github.com/cloudevents/spec/blob/master/spec.md#time).
-    fn get_time(&self) -> Option<&DateTime<Utc>>;
+    fn time(&self) -> Option<&DateTime<Utc>>;
 }
 
 /// Trait to set [CloudEvents Context attributes](https://github.com/cloudevents/spec/blob/master/spec.md#context-attributes).
@@ -117,59 +117,59 @@ pub enum Attributes {
 }
 
 impl AttributesReader for Attributes {
-    fn get_id(&self) -> &str {
+    fn id(&self) -> &str {
         match self {
-            Attributes::V03(a) => a.get_id(),
-            Attributes::V10(a) => a.get_id(),
+            Attributes::V03(a) => a.id(),
+            Attributes::V10(a) => a.id(),
         }
     }
 
-    fn get_source(&self) -> &Url {
+    fn source(&self) -> &Url {
         match self {
-            Attributes::V03(a) => a.get_source(),
-            Attributes::V10(a) => a.get_source(),
+            Attributes::V03(a) => a.source(),
+            Attributes::V10(a) => a.source(),
         }
     }
 
-    fn get_specversion(&self) -> SpecVersion {
+    fn specversion(&self) -> SpecVersion {
         match self {
-            Attributes::V03(a) => a.get_specversion(),
-            Attributes::V10(a) => a.get_specversion(),
+            Attributes::V03(a) => a.specversion(),
+            Attributes::V10(a) => a.specversion(),
         }
     }
 
-    fn get_type(&self) -> &str {
+    fn ty(&self) -> &str {
         match self {
-            Attributes::V03(a) => a.get_type(),
-            Attributes::V10(a) => a.get_type(),
+            Attributes::V03(a) => a.ty(),
+            Attributes::V10(a) => a.ty(),
         }
     }
 
-    fn get_datacontenttype(&self) -> Option<&str> {
+    fn datacontenttype(&self) -> Option<&str> {
         match self {
-            Attributes::V03(a) => a.get_datacontenttype(),
-            Attributes::V10(a) => a.get_datacontenttype(),
+            Attributes::V03(a) => a.datacontenttype(),
+            Attributes::V10(a) => a.datacontenttype(),
         }
     }
 
-    fn get_dataschema(&self) -> Option<&Url> {
+    fn dataschema(&self) -> Option<&Url> {
         match self {
-            Attributes::V03(a) => a.get_dataschema(),
-            Attributes::V10(a) => a.get_dataschema(),
+            Attributes::V03(a) => a.dataschema(),
+            Attributes::V10(a) => a.dataschema(),
         }
     }
 
-    fn get_subject(&self) -> Option<&str> {
+    fn subject(&self) -> Option<&str> {
         match self {
-            Attributes::V03(a) => a.get_subject(),
-            Attributes::V10(a) => a.get_subject(),
+            Attributes::V03(a) => a.subject(),
+            Attributes::V10(a) => a.subject(),
         }
     }
 
-    fn get_time(&self) -> Option<&DateTime<Utc>> {
+    fn time(&self) -> Option<&DateTime<Utc>> {
         match self {
-            Attributes::V03(a) => a.get_time(),
-            Attributes::V10(a) => a.get_time(),
+            Attributes::V03(a) => a.time(),
+            Attributes::V10(a) => a.time(),
         }
     }
 }

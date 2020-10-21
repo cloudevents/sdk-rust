@@ -1,4 +1,6 @@
+use serde::export::Formatter;
 use std::convert::{Into, TryFrom};
+use std::fmt;
 
 /// Event [data attribute](https://github.com/cloudevents/spec/blob/master/spec.md#event-data) representation
 #[derive(Debug, PartialEq, Clone)]
@@ -99,6 +101,16 @@ impl TryFrom<Data> for String {
             Data::Binary(v) => Ok(String::from_utf8(v)?),
             Data::Json(v) => Ok(v.to_string()),
             Data::String(s) => Ok(s),
+        }
+    }
+}
+
+impl fmt::Display for Data {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        match self {
+            Data::Binary(vec) => write!(f, "Binary data: {:?}", vec),
+            Data::String(s) => write!(f, "String data: {}", s),
+            Data::Json(j) => write!(f, "Json data: {}", j),
         }
     }
 }

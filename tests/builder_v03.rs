@@ -6,6 +6,7 @@ use cloudevents::event::{
     AttributesReader, EventBuilder, EventBuilderError, ExtensionValue, SpecVersion,
 };
 use cloudevents::EventBuilderV03;
+use std::convert::TryInto;
 use url::Url;
 
 #[test]
@@ -23,7 +24,7 @@ fn build_event() {
         "hello": "world"
     });
 
-    let event = EventBuilderV03::new()
+    let mut event = EventBuilderV03::new()
         .id(id)
         .source(source.clone())
         .ty(ty)
@@ -34,20 +35,20 @@ fn build_event() {
         .build()
         .unwrap();
 
-    assert_eq!(SpecVersion::V03, event.get_specversion());
-    assert_eq!(id, event.get_id());
-    assert_eq!(source, event.get_source().clone());
-    assert_eq!(ty, event.get_type());
-    assert_eq!(subject, event.get_subject().unwrap());
-    assert_eq!(time, event.get_time().unwrap().clone());
+    assert_eq!(SpecVersion::V03, event.specversion());
+    assert_eq!(id, event.id());
+    assert_eq!(source, event.source().clone());
+    assert_eq!(ty, event.ty());
+    assert_eq!(subject, event.subject().unwrap());
+    assert_eq!(time, event.time().unwrap().clone());
     assert_eq!(
         ExtensionValue::from(extension_value),
-        event.get_extension(extension_name).unwrap().clone()
+        event.extension(extension_name).unwrap().clone()
     );
-    assert_eq!(content_type, event.get_datacontenttype().unwrap());
-    assert_eq!(schema, event.get_dataschema().unwrap().clone());
+    assert_eq!(content_type, event.datacontenttype().unwrap());
+    assert_eq!(schema, event.dataschema().unwrap().clone());
 
-    let event_data: serde_json::Value = event.try_get_data().unwrap().unwrap();
+    let event_data: serde_json::Value = event.take_data().2.unwrap().try_into().unwrap();
     assert_eq!(data, event_data);
 }
 

@@ -17,7 +17,7 @@ impl StructuredDeserializer for Event {
 
 impl BinaryDeserializer for Event {
     fn deserialize_binary<R: Sized, V: BinarySerializer<R>>(self, mut visitor: V) -> Result<R> {
-        visitor = visitor.set_spec_version(self.get_specversion())?;
+        visitor = visitor.set_spec_version(self.specversion())?;
         visitor = self.attributes.deserialize_attributes(visitor)?;
         for (k, v) in self.extensions.into_iter() {
             visitor = visitor.set_extension(&k, v.into())?;

@@ -13,8 +13,8 @@
 //!     .build()
 //!     .unwrap();
 //!
-//! println!("CloudEvent Id: {}", event.get_id());
-//! println!("CloudEvent Time: {}", event.get_time().unwrap());
+//! println!("CloudEvent Id: {}", event.id());
+//! println!("CloudEvent Time: {}", event.time().unwrap());
 //! ```
 //!
 //! If you're looking for Protocol Binding implementations, look at crates:
@@ -33,6 +33,7 @@ pub mod event;
 /// Provides facilities to implement Protocol Bindings
 pub mod message;
 
+pub use event::Data;
 pub use event::Event;
 pub use event::{AttributesReader, AttributesWriter};
 pub use event::{EventBuilder, EventBuilderV03, EventBuilderV10};

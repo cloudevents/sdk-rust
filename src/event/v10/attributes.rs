@@ -141,9 +141,7 @@ impl AttributesWriter for Attributes {
     fn set_time(&mut self, time: Option<impl Into<DateTime<Utc>>>) -> Option<DateTime<Utc>> {
         std::mem::replace(&mut self.time, time.map(Into::into))
     }
-}
 
-impl DataAttributesWriter for Attributes {
     fn set_datacontenttype(
         &mut self,
         datacontenttype: Option<impl Into<String>>,

@@ -7,11 +7,11 @@ pub enum Error {
     WrongEncoding {},
     #[snafu(display("{}", source))]
     #[snafu(context(false))]
-    InvalidSpecVersion {
-        source: crate::event::InvalidSpecVersion,
+    UnknownSpecVersion {
+        source: crate::event::UnknownSpecVersion,
     },
-    #[snafu(display("Unrecognized attribute name: {}", name))]
-    UnrecognizedAttributeName { name: String },
+    #[snafu(display("Unknown attribute in this spec version: {}", name))]
+    UnknownAttribute { name: String },
     #[snafu(display("Error while building the final event: {}", source))]
     #[snafu(context(false))]
     EventBuilderError {
@@ -33,7 +33,9 @@ pub enum Error {
     #[snafu(context(false))]
     IOError { source: std::io::Error },
     #[snafu(display("Other error: {}", source))]
-    Other { source: Box<dyn std::error::Error> },
+    Other {
+        source: Box<dyn std::error::Error + Send + Sync>,
+    },
 }
 
 /// Result type alias for return values during serialization/deserialization process

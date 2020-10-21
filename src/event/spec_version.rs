@@ -43,28 +43,28 @@ impl fmt::Display for SpecVersion {
     }
 }
 
-/// Error representing an invalid [`SpecVersion`] string identifier
+/// Error representing an unknown [`SpecVersion`] string identifier
 #[derive(Debug)]
-pub struct InvalidSpecVersion {
+pub struct UnknownSpecVersion {
     spec_version_value: String,
 }
 
-impl fmt::Display for InvalidSpecVersion {
+impl fmt::Display for UnknownSpecVersion {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         write!(f, "Invalid specversion {}", self.spec_version_value)
     }
 }
 
-impl std::error::Error for InvalidSpecVersion {}
+impl std::error::Error for UnknownSpecVersion {}
 
 impl TryFrom<&str> for SpecVersion {
-    type Error = InvalidSpecVersion;
+    type Error = UnknownSpecVersion;
 
-    fn try_from(value: &str) -> Result<Self, InvalidSpecVersion> {
+    fn try_from(value: &str) -> Result<Self, UnknownSpecVersion> {
         match value {
             "0.3" => Ok(SpecVersion::V03),
             "1.0" => Ok(SpecVersion::V10),
-            _ => Err(InvalidSpecVersion {
+            _ => Err(UnknownSpecVersion {
                 spec_version_value: value.to_string(),
             }),
         }

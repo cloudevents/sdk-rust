@@ -122,7 +122,7 @@ mod tests {
     #[test]
     fn binary_deserializer_unrecognized_attribute_v03() {
         assert_eq!(
-            Error::UnrecognizedAttributeName {
+            Error::UnknownAttribute {
                 name: "dataschema".to_string()
             }
             .to_string(),
@@ -156,7 +156,7 @@ mod tests {
     #[test]
     fn binary_deserializer_unrecognized_attribute_v10() {
         assert_eq!(
-            Error::UnrecognizedAttributeName {
+            Error::UnknownAttribute {
                 name: "schemaurl".to_string()
             }
             .to_string(),

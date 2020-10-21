@@ -6,8 +6,8 @@ use crate::event::attributes::DataAttributesWriter;
 use chrono::{DateTime, Utc};
 use delegate_attr::delegate;
 use std::collections::HashMap;
-use url::Url;
 use std::fmt;
+use url::Url;
 
 /// Data structure that represents a [CloudEvent](https://github.com/cloudevents/spec/blob/master/spec.md).
 /// It provides methods to get the attributes through [`AttributesReader`]
@@ -86,7 +86,7 @@ impl fmt::Display for Event {
             .collect::<fmt::Result>()?;
         match self.data() {
             Some(data) => write!(f, "  {}", data)?,
-            None => write!(f, "  No data")?
+            None => write!(f, "  No data")?,
         }
         write!(f, "\n")
     }

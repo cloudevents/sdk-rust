@@ -1,6 +1,7 @@
 use serde::export::Formatter;
 use std::convert::{Into, TryFrom};
 use std::fmt;
+use serde_json::Value;
 
 /// Event [data attribute](https://github.com/cloudevents/spec/blob/master/spec.md#event-data) representation
 #[derive(Debug, PartialEq, Clone)]
@@ -51,21 +52,21 @@ pub(crate) fn is_json_content_type(ct: &str) -> bool {
     ct.starts_with("application/json") || ct.starts_with("text/json") || ct.ends_with("+json")
 }
 
-impl Into<Data> for serde_json::Value {
-    fn into(self) -> Data {
-        Data::Json(self)
+impl From<serde_json::Value> for Data {
+    fn from(value: Value) -> Self {
+        Data::Json(value)
     }
 }
 
-impl Into<Data> for Vec<u8> {
-    fn into(self) -> Data {
-        Data::Binary(self)
+impl From<Vec<u8>> for Data {
+    fn from(value: Vec<u8>) -> Self {
+        Data::Binary(value)
     }
 }
 
-impl Into<Data> for String {
-    fn into(self) -> Data {
-        Data::String(self)
+impl From<String> for Data {
+    fn from(value: String) -> Self {
+        Data::String(value)
     }
 }
 

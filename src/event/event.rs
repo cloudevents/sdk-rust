@@ -154,7 +154,7 @@ impl Event {
     /// use std::convert::Into;
     ///
     /// let mut e = Event::default();
-    /// let old_data = e.set_data_unchecked("application/json");
+    /// let old_data = e.set_data_unchecked(json!({}));
     /// ```
     pub fn set_data_unchecked(&mut self, data: impl Into<Data>) -> Option<Data> {
         std::mem::replace(&mut self.data, Some(data.into()))

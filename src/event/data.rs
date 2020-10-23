@@ -1,7 +1,7 @@
 use serde::export::Formatter;
+use serde_json::Value;
 use std::convert::{Into, TryFrom};
 use std::fmt;
-use serde_json::Value;
 
 /// Event [data attribute](https://github.com/cloudevents/spec/blob/master/spec.md#event-data) representation
 #[derive(Debug, PartialEq, Clone)]

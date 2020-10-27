@@ -25,8 +25,8 @@ where
     /// Create a new empty builder
     fn new() -> Self;
 
-    /// Build [`super::Event`]
-    fn build(self) -> Result<super::Event, Error>;
+    /// Build [`Event`]
+    fn build(self) -> Result<Event, Error>;
 }
 
 /// Represents an error during build process

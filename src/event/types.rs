@@ -24,6 +24,7 @@ impl TryIntoUrl for String {
     }
 }
 
+/// Trait to define conversion to [`DateTime`]
 pub trait TryIntoTime {
     fn into_time(self) -> Result<DateTime<Utc>, chrono::ParseError>;
 }
@@ -34,7 +35,6 @@ impl TryIntoTime for DateTime<Utc> {
     }
 }
 
-/// Trait to define conversion to [`DateTime`]
 impl TryIntoTime for &str {
     fn into_time(self) -> Result<DateTime<Utc>, chrono::ParseError> {
         Ok(DateTime::<Utc>::from(DateTime::parse_from_rfc3339(self)?))

@@ -2,7 +2,6 @@ use super::{
     AttributeValue, Attributes, AttributesReader, AttributesV10, AttributesWriter, Data,
     ExtensionValue, SpecVersion,
 };
-use crate::event::attributes::DataAttributesWriter;
 use chrono::{DateTime, Utc};
 use delegate_attr::delegate;
 use std::collections::HashMap;
@@ -22,7 +21,7 @@ use url::Url;
 /// # fn main() -> Result<(), Box<dyn Error>> {
 /// // Create an event using the Default trait
 /// let mut e = Event::default();
-/// e.write_data(
+/// e.set_data(
 ///     "application/json",
 ///     serde_json::json!({"hello": "world"})
 /// );
@@ -65,6 +64,9 @@ impl AttributesWriter for Event {
     fn set_type(&mut self, ty: impl Into<String>) -> String;
     fn set_subject(&mut self, subject: Option<impl Into<String>>) -> Option<String>;
     fn set_time(&mut self, time: Option<impl Into<DateTime<Utc>>>) -> Option<DateTime<Utc>>;
+    fn set_datacontenttype(&mut self, datacontenttype: Option<impl Into<String>>)
+        -> Option<String>;
+    fn set_dataschema(&mut self, dataschema: Option<impl Into<Url>>) -> Option<Url>;
 }
 
 impl Default for Event {
@@ -96,6 +98,11 @@ impl Event {
         self.extensions.iter().map(|(k, v)| (k.as_str(), v))
     }
 
+    /// Get `data` from this `Event`
+    pub fn data(&self) -> Option<&Data> {
+        self.data.as_ref()
+    }
+
     /// Take (`datacontenttype`, `dataschema`, `data`) from this event, leaving these fields empty
     ///
     /// ```
@@ -104,7 +111,7 @@ impl Event {
     /// use std::convert::Into;
     ///
     /// let mut e = Event::default();
-    /// e.write_data("application/json", json!({}));
+    /// e.set_data("application/json", json!({}));
     ///
     /// let (datacontenttype, dataschema, data) = e.take_data();
     /// ```
@@ -116,7 +123,8 @@ impl Event {
         )
     }
 
-    /// Write `data` into this `Event` with the specified `datacontenttype`.
+    /// Set `data` into this `Event` with the specified `datacontenttype`.
+    /// Returns the previous value of `datacontenttype` and `data`.
     ///
     /// ```
     /// use cloudevents::Event;
@@ -124,43 +132,32 @@ impl Event {
     /// use std::convert::Into;
     ///
     /// let mut e = Event::default();
-    /// e.write_data("application/json", json!({}))
+    /// let (old_datacontenttype, old_data) = e.set_data("application/json", json!({}));
     /// ```
-    pub fn write_data(&mut self, datacontenttype: impl Into<String>, data: impl Into<Data>) {
-        self.attributes.set_datacontenttype(Some(datacontenttype));
-        self.attributes.set_dataschema(None as Option<Url>);
-        self.data = Some(data.into());
-    }
-
-    /// Get `data` from this `Event`
-    pub fn data(&self) -> Option<&Data> {
-        self.data.as_ref()
-    }
-
-    /// Write `data` into this `Event` with the specified `datacontenttype` and `dataschema`.
-    ///
-    /// ```
-    /// use cloudevents::Event;
-    /// use serde_json::json;
-    /// use std::convert::Into;
-    /// use url::Url;
-    ///
-    /// let mut e = Event::default();
-    /// e.write_data_with_schema(
-    ///     "application/json",
-    ///     Url::parse("http://myapplication.com/schema").unwrap(),
-    ///     json!({})
-    /// )
-    /// ```
-    pub fn write_data_with_schema(
+    pub fn set_data(
         &mut self,
         datacontenttype: impl Into<String>,
-        dataschema: impl Into<Url>,
         data: impl Into<Data>,
-    ) {
-        self.attributes.set_datacontenttype(Some(datacontenttype));
-        self.attributes.set_dataschema(Some(dataschema));
-        self.data = Some(data.into());
+    ) -> (Option<String>, Option<Data>) {
+        (
+            self.attributes.set_datacontenttype(Some(datacontenttype)),
+            std::mem::replace(&mut self.data, Some(data.into())),
+        )
+    }
+
+    /// Set `data` into this `Event`, without checking if there is a `datacontenttype`.
+    /// Returns the previous value of `data`.
+    ///
+    /// ```
+    /// use cloudevents::Event;
+    /// use serde_json::json;
+    /// use std::convert::Into;
+    ///
+    /// let mut e = Event::default();
+    /// let old_data = e.set_data_unchecked(json!({}));
+    /// ```
+    pub fn set_data_unchecked(&mut self, data: impl Into<Data>) -> Option<Data> {
+        std::mem::replace(&mut self.data, Some(data.into()))
     }
 
     /// Get the [extension](https://github.com/cloudevents/spec/blob/master/spec.md#extension-context-attributes) named `extension_name`
@@ -194,7 +191,7 @@ mod tests {
     #[test]
     fn take_data() {
         let mut e = Event::default();
-        e.write_data(
+        e.set_data(
             "application/json",
             serde_json::json!({
                 "hello": "world"
@@ -225,7 +222,7 @@ mod tests {
     fn iter() {
         let mut e = Event::default();
         e.set_extension("aaa", "bbb");
-        e.write_data(
+        e.set_data(
             "application/json",
             serde_json::json!({
                 "hello": "world"

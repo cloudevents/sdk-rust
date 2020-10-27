@@ -80,17 +80,18 @@ pub trait AttributesWriter {
     /// Set the [time](https://github.com/cloudevents/spec/blob/master/spec.md#time).
     /// Returns the previous value.
     fn set_time(&mut self, time: Option<impl Into<DateTime<Utc>>>) -> Option<DateTime<Utc>>;
+    /// Set the [datacontenttype](https://github.com/cloudevents/spec/blob/master/spec.md#datacontenttype).
+    /// Returns the previous value.
+    fn set_datacontenttype(&mut self, datacontenttype: Option<impl Into<String>>)
+        -> Option<String>;
+    /// Set the [dataschema](https://github.com/cloudevents/spec/blob/master/spec.md#dataschema).
+    /// Returns the previous value.
+    fn set_dataschema(&mut self, dataschema: Option<impl Into<Url>>) -> Option<Url>;
 }
 
 pub(crate) trait AttributesConverter {
     fn into_v03(self) -> AttributesV03;
     fn into_v10(self) -> AttributesV10;
-}
-
-pub(crate) trait DataAttributesWriter {
-    fn set_datacontenttype(&mut self, datacontenttype: Option<impl Into<String>>)
-        -> Option<String>;
-    fn set_dataschema(&mut self, dataschema: Option<impl Into<Url>>) -> Option<Url>;
 }
 
 #[derive(PartialEq, Debug, Clone, Copy)]
@@ -209,9 +210,7 @@ impl AttributesWriter for Attributes {
             Attributes::V10(a) => a.set_time(time),
         }
     }
-}
 
-impl DataAttributesWriter for Attributes {
     fn set_datacontenttype(
         &mut self,
         datacontenttype: Option<impl Into<String>>,

@@ -23,11 +23,6 @@
 //! * [cloudevents-sdk-reqwest](https://docs.rs/cloudevents-sdk-reqwest): Integration with [reqwest](https://github.com/seanmonstar/reqwest)
 //!
 
-extern crate serde;
-extern crate serde_json;
-extern crate serde_value;
-extern crate snafu;
-
 /// Provides [`Event`] data structure, [`EventBuilder`] and other facilities to work with [`Event`]
 pub mod event;
 /// Provides facilities to implement Protocol Bindings

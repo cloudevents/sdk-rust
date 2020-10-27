@@ -1,38 +1,48 @@
-use snafu::Snafu;
+use thiserror::Error;
 
 /// Represents an error during serialization/deserialization process
-#[derive(Debug, Snafu)]
+#[derive(Debug, Error)]
 pub enum Error {
-    #[snafu(display("Wrong encoding"))]
+    #[error("Wrong encoding")]
     WrongEncoding {},
-    #[snafu(display("{}", source))]
-    #[snafu(context(false))]
+    #[error(transparent)]
     UnknownSpecVersion {
+        #[from]
         source: crate::event::UnknownSpecVersion,
     },
-    #[snafu(display("Unknown attribute in this spec version: {}", name))]
+    #[error("Unknown attribute in this spec version: {name}")]
     UnknownAttribute { name: String },
-    #[snafu(display("Error while building the final event: {}", source))]
-    #[snafu(context(false))]
+    #[error("Error while building the final event: {source}")]
     EventBuilderError {
+        #[from]
         source: crate::event::EventBuilderError,
     },
-    #[snafu(display("Error while parsing a time string: {}", source))]
-    #[snafu(context(false))]
-    ParseTimeError { source: chrono::ParseError },
-    #[snafu(display("Error while parsing a url: {}", source))]
-    #[snafu(context(false))]
-    ParseUrlError { source: url::ParseError },
-    #[snafu(display("Error while decoding base64: {}", source))]
-    #[snafu(context(false))]
-    Base64DecodingError { source: base64::DecodeError },
-    #[snafu(display("Error while serializing/deserializing to json: {}", source))]
-    #[snafu(context(false))]
-    SerdeJsonError { source: serde_json::Error },
-    #[snafu(display("IO Error: {}", source))]
-    #[snafu(context(false))]
-    IOError { source: std::io::Error },
-    #[snafu(display("Other error: {}", source))]
+    #[error("Error while parsing a time string: {source}")]
+    ParseTimeError {
+        #[from]
+        source: chrono::ParseError,
+    },
+    #[error("Error while parsing a url: {source}")]
+    ParseUrlError {
+        #[from]
+        source: url::ParseError,
+    },
+    #[error("Error while decoding base64: {source}")]
+    Base64DecodingError {
+        #[from]
+        source: base64::DecodeError,
+    },
+    #[error("Error while serializing/deserializing to json: {source}")]
+    SerdeJsonError {
+        #[from]
+        source: serde_json::Error,
+    },
+    #[error("IO Error: {source}")]
+    IOError {
+        #[from]
+        source: std::io::Error,
+    },
+    #[error("Other error: {}", source)]
     Other {
         source: Box<dyn std::error::Error + Send + Sync>,
     },

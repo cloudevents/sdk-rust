@@ -1,5 +1,5 @@
 use super::Event;
-use snafu::Snafu;
+use thiserror::Error;
 
 /// Trait to implement a builder for [`Event`]:
 /// ```
@@ -30,24 +30,16 @@ where
 }
 
 /// Represents an error during build process
-#[derive(Debug, Snafu, Clone)]
+#[derive(Debug, Error, Clone)]
 pub enum Error {
-    #[snafu(display("Missing required attribute {}", attribute_name))]
+    #[error("Missing required attribute {attribute_name}")]
     MissingRequiredAttribute { attribute_name: &'static str },
-    #[snafu(display(
-        "Error while setting attribute '{}' with timestamp type: {}",
-        attribute_name,
-        source
-    ))]
+    #[error("Error while setting attribute '{attribute_name}' with timestamp type: {source}")]
     ParseTimeError {
         attribute_name: &'static str,
         source: chrono::ParseError,
     },
-    #[snafu(display(
-        "Error while setting attribute '{}' with uri/uriref type: {}",
-        attribute_name,
-        source
-    ))]
+    #[error("Error while setting attribute '{attribute_name}' with uri/uriref type: {source}")]
     ParseUrlError {
         attribute_name: &'static str,
         source: url::ParseError,

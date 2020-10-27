@@ -1,9 +1,12 @@
 use crate::event::ExtensionValue;
 use chrono::{DateTime, Utc};
+use serde::export::Formatter;
 use std::convert::TryInto;
+use std::fmt;
 use url::Url;
 
 /// Union type representing a [CloudEvent context attribute type](https://github.com/cloudevents/spec/blob/v1.0/spec.md#type-system)
+#[derive(PartialEq, Eq, Debug, Clone)]
 pub enum MessageAttributeValue {
     Boolean(bool),
     Integer(i64),
@@ -39,16 +42,16 @@ impl TryInto<Url> for MessageAttributeValue {
     }
 }
 
-impl ToString for MessageAttributeValue {
-    fn to_string(&self) -> String {
+impl fmt::Display for MessageAttributeValue {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            MessageAttributeValue::Boolean(b) => b.to_string(),
-            MessageAttributeValue::Integer(i) => i.to_string(),
-            MessageAttributeValue::String(s) => s.clone(),
-            MessageAttributeValue::Binary(v) => base64::encode(v),
-            MessageAttributeValue::Uri(u) => u.to_string(),
-            MessageAttributeValue::UriRef(u) => u.to_string(),
-            MessageAttributeValue::DateTime(d) => d.to_rfc3339(),
+            MessageAttributeValue::Boolean(b) => write!(f, "{}", b),
+            MessageAttributeValue::Integer(i) => write!(f, "{}", i),
+            MessageAttributeValue::String(s) => write!(f, "{}", s),
+            MessageAttributeValue::Binary(v) => write!(f, "{}", base64::encode(v)),
+            MessageAttributeValue::Uri(u) => write!(f, "{}", u.to_string()),
+            MessageAttributeValue::UriRef(u) => write!(f, "{}", u.to_string()),
+            MessageAttributeValue::DateTime(d) => write!(f, "{}", d.to_rfc3339()),
         }
     }
 }

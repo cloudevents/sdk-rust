@@ -4,7 +4,7 @@ use std::convert::{Into, TryFrom};
 use std::fmt;
 
 /// Event [data attribute](https://github.com/cloudevents/spec/blob/master/spec.md#event-data) representation
-#[derive(Debug, PartialEq, Clone)]
+#[derive(PartialEq, Eq, Debug, Clone)]
 pub enum Data {
     /// Event has a binary payload
     Binary(Vec<u8>),

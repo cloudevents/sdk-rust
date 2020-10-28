@@ -44,6 +44,7 @@ pub enum Error {
     },
     #[error("Other error: {}", source)]
     Other {
+        #[from]
         source: Box<dyn std::error::Error + Send + Sync>,
     },
 }

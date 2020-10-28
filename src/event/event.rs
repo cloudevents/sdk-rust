@@ -6,7 +6,6 @@ use chrono::{DateTime, Utc};
 use delegate_attr::delegate;
 use std::collections::HashMap;
 use std::fmt;
-use std::convert::TryFrom;
 use std::prelude::v1::*;
 use url::Url;
 

@@ -42,8 +42,6 @@
 #![no_std]
 
 extern crate no_std_compat as std;
-extern crate no_error;
-extern crate core_io;
 
 extern crate serde;
 extern crate serde_json;

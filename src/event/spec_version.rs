@@ -60,12 +60,12 @@ impl fmt::Display for UnknownSpecVersion {
     }
 }
 
-impl std::error::Error for UnknownSpecVersion {}
+impl no_error::Error for InvalidSpecVersion {}
 
 impl TryFrom<&str> for SpecVersion {
     type Error = UnknownSpecVersion;
 
-    fn try_from(value: &str) -> Result<Self, UnknownSpecVersion> {
+    fn try_from(value: &str) -> core::result::Result<Self, InvalidSpecVersion> {
         match value {
             "0.3" => Ok(SpecVersion::V03),
             "1.0" => Ok(SpecVersion::V10),

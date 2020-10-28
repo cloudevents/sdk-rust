@@ -1,3 +1,5 @@
+use no_error::*;
+use core_io::Error;
 use snafu::Snafu;
 use std::prelude::v1::*;
 
@@ -32,11 +34,9 @@ pub enum Error {
     SerdeJsonError { source: serde_json::Error },
     #[snafu(display("IO Error: {}", source))]
     #[snafu(context(false))]
-    IOError { source: std::io::Error },
-    #[snafu(display("Other error: {}", source))]
-    Other {
-        source: Box<dyn std::error::Error + Send + Sync>,
-    },
+    IOError { source: core_io::Error },
+    #[snafu(display("Other error: {:#?}", source))]
+    Other { source: Box<dyn std::error::Error> },
 }
 
 /// Result type alias for return values during serialization/deserialization process

@@ -19,5 +19,7 @@ tokio = { version = "^0.2", features = ["full"] }
 clap = "2.33.1"
 
 [dependencies.rdkafka]
-version = "~0.23"
-features = ["ssl", "sasl"]
+version = "^0.24"
+features = ["cmake-build"]
+
+[workspace]

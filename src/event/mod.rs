@@ -1,3 +1,5 @@
+//! Provides [`Event`] data structure, [`EventBuilder`] and other facilities to work with [`Event`].
+
 mod attributes;
 mod builder;
 mod data;

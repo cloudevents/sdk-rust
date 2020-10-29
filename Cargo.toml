@@ -11,6 +11,7 @@ repository = "https://github.com/cloudevents/sdk-rust"
 exclude = [
     ".github/*"
 ]
+categories = ["web-programming", "encoding", "data-structures"]
 
 [lib]
 name = "cloudevents"

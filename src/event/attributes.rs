@@ -7,7 +7,8 @@ use serde::Serializer;
 use std::fmt;
 use url::Url;
 
-/// Value of a CloudEvent attribute
+/// Enum representing a borrowed value of a CloudEvent attribute.
+/// This represents the types defined in the [CloudEvent spec type system](https://github.com/cloudevents/spec/blob/v1.0/spec.md#type-system)
 #[derive(Debug, PartialEq, Eq)]
 pub enum AttributeValue<'a> {
     SpecVersion(SpecVersion),
@@ -230,20 +231,20 @@ impl AttributesWriter for Attributes {
 }
 
 impl Attributes {
-    pub fn into_v10(self) -> Self {
+    pub(crate) fn into_v10(self) -> Self {
         match self {
             Attributes::V03(v03) => Attributes::V10(v03.into_v10()),
             _ => self,
         }
     }
-    pub fn into_v03(self) -> Self {
+    pub(crate) fn into_v03(self) -> Self {
         match self {
             Attributes::V10(v10) => Attributes::V03(v10.into_v03()),
             _ => self,
         }
     }
 
-    pub fn iter(&self) -> impl Iterator<Item = (&str, AttributeValue)> {
+    pub(crate) fn iter(&self) -> impl Iterator<Item = (&str, AttributeValue)> {
         match self {
             Attributes::V03(a) => AttributesIter::IterV03(a.into_iter()),
             Attributes::V10(a) => AttributesIter::IterV10(a.into_iter()),

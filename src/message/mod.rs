@@ -1,3 +1,7 @@
+//! Provides facilities to implement Protocol Bindings.
+//!
+//! Note: these APIs should be considered unstable and subject to changes.
+
 mod deserializer;
 mod encoding;
 mod error;

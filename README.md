@@ -43,8 +43,7 @@ let event = EventBuilderV10::new()
     .id("aaa")
     .source(Url::parse("http://localhost").unwrap())
     .ty("example.demo")
-    .build()
-    .unwrap();
+    .build()?;
 ```
 
 Checkout the examples using our integrations to learn how to send and receive events:

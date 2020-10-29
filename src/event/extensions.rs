@@ -6,11 +6,11 @@ use std::fmt;
 #[serde(untagged)]
 /// Represents all the possible [CloudEvents extension](https://github.com/cloudevents/spec/blob/master/spec.md#extension-context-attributes) values
 pub enum ExtensionValue {
-    /// Represents a [`String`](std::string::String) value.
+    /// Represents a [`String`] value.
     String(String),
-    /// Represents a [`bool`](bool) value.
+    /// Represents a [`bool`] value.
     Boolean(bool),
-    /// Represents an integer [`i64`](i64) value.
+    /// Represents an integer [`i64`] value.
     Integer(i64),
 }
 

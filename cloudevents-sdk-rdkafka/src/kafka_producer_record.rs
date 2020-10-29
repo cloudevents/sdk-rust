@@ -88,7 +88,9 @@ impl StructuredSerializer<MessageRecord> for MessageRecord {
 }
 
 /// Extension Trait for [`BaseRecord`] that fills the record with a [`MessageRecord`].
-pub trait BaseRecordExt<'a, K: ToBytes + ?Sized> {
+///
+/// This trait is sealed and cannot be implemented for types outside of this crate.
+pub trait BaseRecordExt<'a, K: ToBytes + ?Sized>: private::Sealed {
     /// Fill this [`BaseRecord`] with a [`MessageRecord`].
     fn message_record(
         self,
@@ -112,7 +114,9 @@ impl<'a, K: ToBytes + ?Sized> BaseRecordExt<'a, K> for BaseRecord<'a, K, Vec<u8>
 }
 
 /// Extension Trait for [`FutureRecord`] that fills the record with a [`MessageRecord`].
-pub trait FutureRecordExt<'a, K: ToBytes + ?Sized> {
+///
+/// This trait is sealed and cannot be implemented for types outside of this crate.
+pub trait FutureRecordExt<'a, K: ToBytes + ?Sized>: private::Sealed {
     /// Fill this [`FutureRecord`] with a [`MessageRecord`].
     fn message_record(self, message_record: &'a MessageRecord) -> FutureRecord<'a, K, Vec<u8>>;
 }
@@ -127,4 +131,11 @@ impl<'a, K: ToBytes + ?Sized> FutureRecordExt<'a, K> for FutureRecord<'a, K, Vec
 
         self
     }
+}
+
+mod private {
+    // Sealing the FutureRecordExt and BaseRecordExt
+    pub trait Sealed {}
+    impl <K: rdkafka::message::ToBytes + ?Sized, V: rdkafka::message::ToBytes> Sealed for rdkafka::producer::FutureRecord<'_, K, V> {}
+    impl <K: rdkafka::message::ToBytes + ?Sized, V: rdkafka::message::ToBytes> Sealed for rdkafka::producer::BaseRecord<'_, K, V> {}
 }

@@ -136,6 +136,12 @@ impl<'a, K: ToBytes + ?Sized> FutureRecordExt<'a, K> for FutureRecord<'a, K, Vec
 mod private {
     // Sealing the FutureRecordExt and BaseRecordExt
     pub trait Sealed {}
-    impl <K: rdkafka::message::ToBytes + ?Sized, V: rdkafka::message::ToBytes> Sealed for rdkafka::producer::FutureRecord<'_, K, V> {}
-    impl <K: rdkafka::message::ToBytes + ?Sized, V: rdkafka::message::ToBytes> Sealed for rdkafka::producer::BaseRecord<'_, K, V> {}
+    impl<K: rdkafka::message::ToBytes + ?Sized, V: rdkafka::message::ToBytes> Sealed
+        for rdkafka::producer::FutureRecord<'_, K, V>
+    {
+    }
+    impl<K: rdkafka::message::ToBytes + ?Sized, V: rdkafka::message::ToBytes> Sealed
+        for rdkafka::producer::BaseRecord<'_, K, V>
+    {
+    }
 }

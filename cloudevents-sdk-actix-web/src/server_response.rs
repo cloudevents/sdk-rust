@@ -76,9 +76,12 @@ pub async fn event_to_response(
         .map_err(actix_web::error::ErrorBadRequest)
 }
 
-/// Extention Trait for [`HttpResponseBuilder`] which acts as a wrapper for the function [`event_to_response()`].
+/// Extension Trait for [`HttpResponseBuilder`] which acts as a wrapper for the function [`event_to_response()`].
+///
+/// This trait is sealed and cannot be implemented for types outside of this crate.
 #[async_trait(?Send)]
-pub trait HttpResponseBuilderExt {
+pub trait HttpResponseBuilderExt: private::Sealed {
+    /// Fill this [`HttpResponseBuilder`] with an [`Event`].
     async fn event(
         self,
         event: Event,
@@ -93,6 +96,12 @@ impl HttpResponseBuilderExt for HttpResponseBuilder {
     ) -> std::result::Result<HttpResponse, actix_web::error::Error> {
         event_to_response(event, self).await
     }
+}
+
+// Sealing the HttpResponseBuilderExt
+mod private {
+    pub trait Sealed {}
+    impl Sealed for actix_web::dev::HttpResponseBuilder {}
 }
 
 #[cfg(test)]

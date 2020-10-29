@@ -3,7 +3,7 @@
 //! To deserialize an HTTP request as CloudEvent:
 //!
 //! ```
-//! use cloudevents_sdk_actix_web::RequestExt;
+//! use cloudevents_sdk_actix_web::HttpRequestExt;
 //! use actix_web::{HttpRequest, web, post};
 //!
 //! #[post("/")]
@@ -41,6 +41,8 @@
 //!
 //! Check out the [cloudevents-sdk](https://docs.rs/cloudevents-sdk) docs for more details on how to use [`cloudevents::Event`]
 
+#![deny(broken_intra_doc_links)]
+
 #[macro_use]
 mod headers;
 mod server_request;
@@ -48,7 +50,7 @@ mod server_response;
 
 pub use server_request::request_to_event;
 pub use server_request::HttpRequestDeserializer;
-pub use server_request::RequestExt;
+pub use server_request::HttpRequestExt;
 pub use server_response::event_to_response;
 pub use server_response::HttpResponseBuilderExt;
 pub use server_response::HttpResponseSerializer;

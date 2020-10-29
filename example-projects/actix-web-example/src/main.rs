@@ -1,6 +1,6 @@
 use actix_web::{get, post, web, App, HttpRequest, HttpResponse, HttpServer};
 use cloudevents::{EventBuilder, EventBuilderV10};
-use cloudevents_sdk_actix_web::{HttpResponseBuilderExt, RequestExt};
+use cloudevents_sdk_actix_web::{HttpResponseBuilderExt, HttpRequestExt};
 use serde_json::json;
 
 #[post("/")]
@@ -36,7 +36,7 @@ async fn main() -> std::io::Result<()> {
     HttpServer::new(|| {
         App::new()
             .wrap(actix_web::middleware::Logger::default())
-            .wrap(actix_cors::Cors::new().finish())
+            .wrap(actix_cors::Cors::permissive())
             .service(post_event)
             .service(get_event)
     })

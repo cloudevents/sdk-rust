@@ -62,13 +62,16 @@ impl StructuredSerializer<RequestBuilder> for RequestSerializer {
     }
 }
 
-/// Method to fill a [`RequestBuilder`] with an [`Event`]
+/// Method to fill a [`RequestBuilder`] with an [`Event`].
 pub fn event_to_request(event: Event, request_builder: RequestBuilder) -> Result<RequestBuilder> {
     BinaryDeserializer::deserialize_binary(event, RequestSerializer::new(request_builder))
 }
 
-/// Extention Trait for [`RequestBuilder`] which acts as a wrapper for the function [`event_to_request()`]
-pub trait RequestBuilderExt {
+/// Extension Trait for [`RequestBuilder`] which acts as a wrapper for the function [`event_to_request()`].
+///
+/// This trait is sealed and cannot be implemented for types outside of this crate.
+pub trait RequestBuilderExt: private::Sealed {
+    /// Write in this [`RequestBuilder`] the provided [`Event`]. Similar to invoking [`Event`].
     fn event(self, event: Event) -> Result<RequestBuilder>;
 }
 
@@ -76,6 +79,12 @@ impl RequestBuilderExt for RequestBuilder {
     fn event(self, event: Event) -> Result<RequestBuilder> {
         event_to_request(event, self)
     }
+}
+
+// Sealing the RequestBuilderExt
+mod private {
+    pub trait Sealed {}
+    impl Sealed for reqwest::RequestBuilder {}
 }
 
 #[cfg(test)]

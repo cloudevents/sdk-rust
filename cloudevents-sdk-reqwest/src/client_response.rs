@@ -109,8 +109,11 @@ pub async fn response_to_event(res: Response) -> Result<Event> {
 }
 
 /// Extension Trait for [`Response`] which acts as a wrapper for the function [`response_to_event()`].
+///
+/// This trait is sealed and cannot be implemented for types outside of this crate.
 #[async_trait(?Send)]
-pub trait ResponseExt {
+pub trait ResponseExt: private::Sealed {
+    /// Convert this [`Response`] to [`Event`].
     async fn into_event(self) -> Result<Event>;
 }
 
@@ -119,6 +122,12 @@ impl ResponseExt for Response {
     async fn into_event(self) -> Result<Event> {
         response_to_event(self).await
     }
+}
+
+// Sealing the ResponseExt
+mod private {
+    pub trait Sealed {}
+    impl Sealed for reqwest::Response {}
 }
 
 #[cfg(test)]

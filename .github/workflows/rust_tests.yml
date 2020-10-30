@@ -107,7 +107,7 @@ jobs:
       with:
         command: build
         toolchain: ${{ matrix.toolchain }}
-        args: --target ${{ matrix.target }} --manifest-path ${GITHUB_WORKSPACE}/example-projects/reqwest-wasm-example/Cargo.toml
+        args: --target ${{ matrix.target }} --manifest-path ./example-projects/reqwest-wasm-example/Cargo.toml
 
     - uses: actions-rs/cargo@v1
       name: "Build rdkafka-example"
@@ -115,7 +115,7 @@ jobs:
       with:
         command: build
         toolchain: ${{ matrix.toolchain }}
-        args: --target ${{ matrix.target }} --manifest-path ${GITHUB_WORKSPACE}/example-projects/rdkafka-example/Cargo.toml
+        args: --target ${{ matrix.target }} --manifest-path ./example-projects/rdkafka-example/Cargo.toml
 
     - uses: actions-rs/cargo@v1
       name: "Build actix-web-example"
@@ -123,4 +123,4 @@ jobs:
       with:
         command: build
         toolchain: ${{ matrix.toolchain }}
-        args: --target ${{ matrix.target }} --manifest-path ${GITHUB_WORKSPACE}/example-projects/actix-web-example/Cargo.toml
+        args: --target ${{ matrix.target }} --manifest-path ./example-projects/actix-web-example/Cargo.toml

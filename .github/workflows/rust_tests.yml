@@ -122,18 +122,17 @@ jobs:
           target: ${{ matrix.target }}
           override: true
 
-    # Build examples
-    - name: "Build reqwest-wasm-example"
-      if: matrix.target == 'wasm32-unknown-unknown'
-      working-directory: ${GITHUB_WORKSPACE}/example-projects/reqwest-wasm-example
-      run: cargo build --target ${{ matrix.target }}
+      - name: "Build reqwest-wasm-example"
+        if: matrix.target == 'wasm32-unknown-unknown'
+        working-directory: ${GITHUB_WORKSPACE}/example-projects/reqwest-wasm-example
+        run: cargo build --target ${{ matrix.target }}
 
-    - name: "Build rdkafka-example"
-      if: matrix.target == 'x86_64-unknown-linux-gnu'
-      working-directory: ${GITHUB_WORKSPACE}/example-projects/rdkafka-example
-      run: cargo build --target ${{ matrix.target }}
+      - name: "Build rdkafka-example"
+        if: matrix.target == 'x86_64-unknown-linux-gnu'
+        working-directory: ${GITHUB_WORKSPACE}/example-projects/rdkafka-example
+        run: cargo build --target ${{ matrix.target }}
 
-    - name: "Build actix-web-example"
-      if: matrix.target == 'x86_64-unknown-linux-gnu'
-      working-directory: ${GITHUB_WORKSPACE}/example-projects/actix-web-example
-      run: cargo build --target ${{ matrix.target }}
+      - name: "Build actix-web-example"
+        if: matrix.target == 'x86_64-unknown-linux-gnu'
+        working-directory: ${GITHUB_WORKSPACE}/example-projects/actix-web-example
+        run: cargo build --target ${{ matrix.target }}

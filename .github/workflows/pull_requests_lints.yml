@@ -1,4 +1,4 @@
-name: Pull Request checks
+name: Pull Request lints
 
 on:
   pull_request:
@@ -6,8 +6,8 @@ on:
       - master
 
 jobs:
-  fmt:
-    name: Format check
+  lint:
+    name: Rust lints
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -18,10 +18,12 @@ jobs:
           override: true
           components: clippy, rustfmt
       - uses: actions-rs/cargo@v1
+        name: "Cargo fmt"
         with:
           command: fmt
           args: --all -- --check
       - uses: actions-rs/cargo@v1
+        name: "Cargo clippy"
         with:
           command: clippy
           args: -- -D warnings

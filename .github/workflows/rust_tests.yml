@@ -1,4 +1,4 @@
-name: Rust tests
+name: Rust Tests
 
 on:
   pull_request:
@@ -10,7 +10,7 @@ on:
 
 jobs:
   build:
-    name: ${{ matrix.toolchain }}/${{ matrix.target }}
+    name: ${{ matrix.toolchain }} / ${{ matrix.target }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -92,7 +92,7 @@ jobs:
         args: --target wasm32-unknown-unknown --package cloudevents-sdk --package cloudevents-sdk-reqwest
 
   build-examples:
-    name: Build examples
+    name: Examples ${{ matrix.toolchain }} / ${{ matrix.target }}
     runs-on: ubuntu-latest
     needs: build
     strategy:

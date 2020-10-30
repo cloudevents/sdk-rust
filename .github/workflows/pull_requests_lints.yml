@@ -1,4 +1,4 @@
-name: Pull Request lints
+name: Lints
 
 on:
   pull_request:
@@ -7,7 +7,7 @@ on:
 
 jobs:
   lint:
-    name: Rust lints
+    name: Rust
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2

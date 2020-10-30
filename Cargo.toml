@@ -37,6 +37,7 @@ uuid = { version = "^0.8", features = ["v4", "wasm-bindgen"] }
 [dev-dependencies]
 rstest = "0.6"
 claim = "0.3.1"
+version-sync = "^0.9"
 
 [workspace]
 members = [

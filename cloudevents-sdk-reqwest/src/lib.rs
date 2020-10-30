@@ -29,6 +29,7 @@
 //!
 //! Check out the [cloudevents-sdk](https://docs.rs/cloudevents-sdk) docs for more details on how to use [`cloudevents::Event`].
 
+#![doc(html_root_url = "https://docs.rs/cloudevents-sdk-reqwest/0.2.0")]
 #![deny(broken_intra_doc_links)]
 
 #[macro_use]

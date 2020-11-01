@@ -134,8 +134,10 @@ pub fn record_to_event(msg: &impl Message) -> Result<Event> {
     MessageDeserializer::into_event(ConsumerRecordDeserializer::new(msg)?)
 }
 
-/// Extension Trait for [`Message`] which acts as a wrapper for the function [`record_to_event()`]
-pub trait MessageExt {
+/// Extension Trait for [`Message`] which acts as a wrapper for the function [`record_to_event()`].
+///
+/// This trait is sealed and cannot be implemented for types outside of this crate.
+pub trait MessageExt: private::Sealed {
     /// Generates [`Event`] from [`BorrowedMessage`].
     fn to_event(&self) -> Result<Event>;
 }
@@ -150,6 +152,13 @@ impl MessageExt for OwnedMessage {
     fn to_event(&self) -> Result<Event> {
         record_to_event(self)
     }
+}
+
+mod private {
+    // Sealing the MessageExt
+    pub trait Sealed {}
+    impl Sealed for rdkafka::message::OwnedMessage {}
+    impl Sealed for rdkafka::message::BorrowedMessage<'_> {}
 }
 
 #[cfg(test)]

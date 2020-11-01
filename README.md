@@ -30,6 +30,7 @@ Note: This project is WIP under active development, hence all APIs are considere
 To get started, add the dependency to `Cargo.toml`:
 
 ```toml
+[dependencies]
 cloudevents-sdk = "0.2.0"
 ```
 
@@ -43,8 +44,7 @@ let event = EventBuilderV10::new()
     .id("aaa")
     .source(Url::parse("http://localhost").unwrap())
     .ty("example.demo")
-    .build()
-    .unwrap();
+    .build()?;
 ```
 
 Checkout the examples using our integrations to learn how to send and receive events:

@@ -1,8 +1,10 @@
 //! This crate implements the [CloudEvents](https://cloudevents.io/) Spec for Rust.
 //!
 //! ```
+//! # use std::error::Error;
+//! # fn main() -> Result<(), Box<dyn Error>> {
 //! use cloudevents::{EventBuilder, AttributesReader, EventBuilderV10};
-//! use chrono::Utc;
+//! use chrono::{Utc, DateTime};
 //! use url::Url;
 //!
 //! let event = EventBuilderV10::new()
@@ -10,27 +12,35 @@
 //!     .source("http://localhost:8080")
 //!     .ty("example.demo")
 //!     .time(Utc::now())
-//!     .build()
-//!     .unwrap();
+//!     .build()?;
 //!
 //! println!("CloudEvent Id: {}", event.id());
-//! println!("CloudEvent Time: {}", event.time().unwrap());
+//! match event.time() {
+//!     Some(t) => println!("CloudEvent Time: {}", t),
+//!     None => println!("CloudEvent Time: None")
+//! }
+//! # Ok(())
+//! # }
 //! ```
+//!
+//! This crate includes:
+//!
+//! * The [`Event`] data structure, to represent CloudEvent (version 1.0 and 0.3)
+//! * The [`EventBuilder`] trait and implementations, to create [`Event`] instances
+//! * The implementation of [`serde::Serialize`] and [`serde::Deserialize`] for [`Event`] to serialize/deserialize CloudEvents to/from JSON
+//! * Traits and utilities in [`message`] to implement Protocol Bindings
 //!
 //! If you're looking for Protocol Binding implementations, look at crates:
 //!
 //! * [cloudevents-sdk-actix-web](https://docs.rs/cloudevents-sdk-actix-web): Integration with [Actix Web](https://github.com/actix/actix-web)
 //! * [cloudevents-sdk-reqwest](https://docs.rs/cloudevents-sdk-reqwest): Integration with [reqwest](https://github.com/seanmonstar/reqwest)
+//! * [cloudevents-sdk-rdkafka](https://docs.rs/cloudevents-sdk-rdkafka): Integration with [rdkafka](https://fede1024.github.io/rust-rdkafka)
 //!
 
-extern crate serde;
-extern crate serde_json;
-extern crate serde_value;
-extern crate snafu;
+#![doc(html_root_url = "https://docs.rs/cloudevents-sdk/0.2.0")]
+#![deny(broken_intra_doc_links)]
 
-/// Provides [`Event`] data structure, [`EventBuilder`] and other facilities to work with [`Event`]
 pub mod event;
-/// Provides facilities to implement Protocol Bindings
 pub mod message;
 
 pub use event::Data;

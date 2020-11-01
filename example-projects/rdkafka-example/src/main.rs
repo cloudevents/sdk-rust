@@ -9,6 +9,7 @@ use rdkafka::config::{ClientConfig, RDKafkaLogLevel};
 use rdkafka::consumer::stream_consumer::StreamConsumer;
 use rdkafka::consumer::{CommitMode, Consumer, DefaultConsumerContext};
 use rdkafka::producer::{FutureProducer, FutureRecord};
+use std::time::Duration;
 
 // You need a running Kafka cluster to try out this example. 
 // With docker: docker run --rm --net=host -e ADV_HOST=localhost -e SAMPLEDATA=0 lensesio/fast-data-dev
@@ -78,7 +79,7 @@ async fn produce(brokers: &str, topic_name: &str) {
                     FutureRecord::to(topic_name)
                         .message_record(&message_record)
                         .key(&format!("Key {}", i)),
-                    0,
+                    Duration::from_secs(10),
                 )
                 .await;
 

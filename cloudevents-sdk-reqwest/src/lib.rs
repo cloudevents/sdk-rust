@@ -5,7 +5,7 @@
 //! use cloudevents::{EventBuilderV10, EventBuilder};
 //! use serde_json::json;
 //!
-//! # async fn example() {
+//! # async fn example() -> Result<(), Box<dyn std::error::Error>> {
 //! let client = reqwest::Client::new();
 //!
 //! // Prepare the event to send
@@ -14,23 +14,23 @@
 //!     .ty("example.test")
 //!     .source("http://localhost/")
 //!     .data("application/json", json!({"hello": "world"}))
-//!     .build()
-//!     .expect("No error while building the event");
+//!     .build()?;
 //!
 //! // Send request
 //! let response = client.post("http://localhost")
-//!   .event(event_to_send)
-//!   .expect("Error while serializing the event")
-//!   .send().await
-//!   .expect("Error while sending the request");
+//!   .event(event_to_send)?
+//!   .send().await?;
 //! // Parse response as event
 //! let received_event = response
-//!   .into_event().await
-//!   .expect("Error while deserializing the response");
+//!   .into_event().await?;
+//! # Ok(())
 //! # }
 //! ```
 //!
-//! Check out the [cloudevents-sdk](https://docs.rs/cloudevents-sdk) docs for more details on how to use [`cloudevents::Event`]
+//! Check out the [cloudevents-sdk](https://docs.rs/cloudevents-sdk) docs for more details on how to use [`cloudevents::Event`].
+
+#![doc(html_root_url = "https://docs.rs/cloudevents-sdk-reqwest/0.2.0")]
+#![deny(broken_intra_doc_links)]
 
 #[macro_use]
 mod headers;

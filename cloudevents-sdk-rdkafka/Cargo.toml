@@ -8,6 +8,7 @@ description = "CloudEvents official Rust SDK - Kafka integration"
 documentation = "https://docs.rs/cloudevents-sdk-rdkafka"
 repository = "https://github.com/cloudevents/sdk-rust"
 readme = "README.md"
+categories = ["web-programming", "encoding"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -15,11 +16,12 @@ readme = "README.md"
 bytes = "^0.5"
 cloudevents-sdk = { version = "0.2.0", path = ".." }
 lazy_static = "1.4.0"
-rdkafka = { version = "^0.24", features = ["cmake-build"] }
-
+rdkafka = { version = "^0.24", default-features = false }
 
 [dev-dependencies]
 url = { version = "^2.1" }
 serde_json = "^1.0"
 chrono = { version = "^0.4", features = ["serde"] }
 futures = "0.3.5"
+rdkafka = { version = "^0.24" }
+version-sync = "^0.9"

@@ -113,8 +113,11 @@ pub async fn request_to_event(
 }
 
 /// Extention Trait for [`HttpRequest`] which acts as a wrapper for the function [`request_to_event()`].
+///
+/// This trait is sealed and cannot be implemented for types outside of this crate.
 #[async_trait(?Send)]
-pub trait RequestExt {
+pub trait HttpRequestExt: private::Sealed {
+    /// Convert this [`HttpRequest`] into an [`Event`].
     async fn to_event(
         &self,
         mut payload: web::Payload,
@@ -122,13 +125,19 @@ pub trait RequestExt {
 }
 
 #[async_trait(?Send)]
-impl RequestExt for HttpRequest {
+impl HttpRequestExt for HttpRequest {
     async fn to_event(
         &self,
         payload: web::Payload,
     ) -> std::result::Result<Event, actix_web::error::Error> {
         request_to_event(self, payload).await
     }
+}
+
+mod private {
+    // Sealing the RequestExt
+    pub trait Sealed {}
+    impl Sealed for actix_web::HttpRequest {}
 }
 
 #[cfg(test)]

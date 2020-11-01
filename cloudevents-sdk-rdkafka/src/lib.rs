@@ -10,9 +10,8 @@
 //! use rdkafka::util::Timeout;
 //! use cloudevents_sdk_rdkafka::{MessageRecord, FutureRecordExt};
 //!
-//! # async fn produce(producer: &FutureProducer, event: Event) {
-//! let message_record = MessageRecord::from_event(event)
-//!   .expect("error while serializing the event");
+//! # async fn produce(producer: &FutureProducer, event: Event) -> Result<(), Box<dyn std::error::Error>> {
+//! let message_record = MessageRecord::from_event(event)?;
 //!
 //! producer.send(
 //!     FutureRecord::to("topic")
@@ -20,7 +19,7 @@
 //!         .message_record(&message_record),
 //!     Timeout::Never
 //! ).await;
-//!
+//! # Ok(())
 //! # }
 //!
 //! ```
@@ -32,21 +31,25 @@
 //! use cloudevents_sdk_rdkafka::MessageExt;
 //! use futures::StreamExt;
 //!
-//! # async fn consume(consumer: StreamConsumer<DefaultConsumerContext>) {
+//! # async fn consume(consumer: StreamConsumer<DefaultConsumerContext>) -> Result<(), Box<dyn std::error::Error>> {
 //! let mut message_stream = consumer.start();
 //!
 //! while let Some(message) = message_stream.next().await {
 //!     match message {
 //!         Err(e) => println!("Kafka error: {}", e),
 //!         Ok(m) => {
-//!             let event = m.to_event().expect("error while deserializing record to CloudEvent");
-//!             println!("Received Event: {:#?}", event);
-//!             consumer.commit_message(&m, CommitMode::Async).unwrap();
+//!             let event = m.to_event()?;
+//!             println!("Received Event: {}", event);
+//!             consumer.commit_message(&m, CommitMode::Async)?;
 //!         }
 //!     };
 //! }
+//! # Ok(())
 //! # }
 //! ```
+
+#![doc(html_root_url = "https://docs.rs/cloudevents-sdk-rdkafka/0.2.0")]
+#![deny(broken_intra_doc_links)]
 
 #[macro_use]
 mod headers;

@@ -8,6 +8,7 @@ description = "CloudEvents official Rust SDK - Actix-Web integration"
 documentation = "https://docs.rs/cloudevents-sdk-actix-web"
 repository = "https://github.com/cloudevents/sdk-rust"
 readme = "README.md"
+categories = ["web-programming", "encoding", "web-programming::http-server"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -24,3 +25,4 @@ futures = "^0.3"
 url = { version = "^2.1", features = ["serde"] }
 serde_json = "^1.0"
 chrono = { version = "^0.4", features = ["serde"] }
+version-sync = "^0.9"

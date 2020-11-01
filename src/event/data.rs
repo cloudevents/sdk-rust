@@ -1,6 +1,6 @@
 use serde::export::Formatter;
 use serde_json::Value;
-use std::convert::{Into, TryFrom};
+use std::convert::TryFrom;
 use std::fmt;
 
 /// Event [data attribute](https://github.com/cloudevents/spec/blob/master/spec.md#event-data) representation
@@ -12,40 +12,6 @@ pub enum Data {
     String(String),
     /// Event has a json payload
     Json(serde_json::Value),
-}
-
-impl Data {
-    /// Create a [`Data`] from a [`Into<Vec<u8>>`].
-    ///
-    /// # Example
-    ///
-    /// ```
-    /// use cloudevents::event::Data;
-    ///
-    /// let value = Data::from_base64(b"dmFsdWU=").unwrap();
-    /// assert_eq!(value, Data::Binary(base64::decode("dmFsdWU=").unwrap()));
-    /// ```
-    ///
-    /// [`AsRef<[u8]>`]: https://doc.rust-lang.org/std/convert/trait.AsRef.html
-    /// [`Data`]: enum.Data.html
-    pub fn from_base64<I>(i: I) -> Result<Self, base64::DecodeError>
-    where
-        I: AsRef<[u8]>,
-    {
-        Ok(base64::decode(&i)?.into())
-    }
-
-    pub fn from_binary<I>(content_type: Option<&str>, i: I) -> Result<Self, serde_json::Error>
-    where
-        I: AsRef<[u8]>,
-    {
-        let is_json = is_json_content_type(content_type.unwrap_or("application/json"));
-        if is_json {
-            serde_json::from_slice::<serde_json::Value>(i.as_ref()).map(Data::Json)
-        } else {
-            Ok(Data::Binary(i.as_ref().to_vec()))
-        }
-    }
 }
 
 pub(crate) fn is_json_content_type(ct: &str) -> bool {

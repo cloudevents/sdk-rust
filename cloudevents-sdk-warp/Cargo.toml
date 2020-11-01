@@ -1,0 +1,23 @@
+[package]
+name = "cloudevents-sdk-warp"
+version = "0.3.0"
+authors = ["Marko Milenković <milenkovicm@users.noreply.github.com>"]
+edition = "2018"
+categories = ["web-programming", "encoding"]
+license-file = "../LICENSE"
+
+[dependencies]
+cloudevents-sdk = { path = ".." }
+lazy_static = "1.4.0"
+bytes = "^0.5"
+warp = "0.2"
+http = "0.2"
+hyper = "0.13"
+
+[dev-dependencies]
+tokio = { version = "^0.2", features = ["full"] }
+url = { version = "^2.1" }
+serde_json = "^1.0"
+chrono = { version = "^0.4", features = ["serde"] }
+mime = "0.3"
+version-sync = "^0.9"

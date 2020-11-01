@@ -1,0 +1,16 @@
+[package]
+name = "warp-example"
+version = "0.3.0"
+authors = ["Marko Milenković <milenkovicm@users.noreply.github.com>"]
+edition = "2018"
+categories = ["web-programming", "encoding"]
+license-file = "../LICENSE"
+
+[dependencies]
+cloudevents-sdk = { path = "../.." }
+cloudevents-sdk-warp = { path = "../../cloudevents-sdk-warp"}
+warp = "0.2"
+tokio = { version = "^0.2", features = ["full"] }
+
+[workspace]
+

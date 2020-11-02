@@ -261,7 +261,7 @@ pub(crate) fn default_hostname() -> Url {
                 .ok()
                 .map(|s| s.into_string().ok())
                 .flatten()
-                .unwrap_or(String::from("localhost".to_string()))
+                .unwrap_or_else(|| "localhost".to_string())
         )
         .as_ref(),
     )

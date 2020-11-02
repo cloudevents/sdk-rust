@@ -43,7 +43,7 @@ impl crate::event::format::EventFormatDeserializer for EventFormatDeserializer {
             (Some(d), None, false) => Some(Data::String(parse_data_string!(d, E)?)),
             (None, Some(d), true) => Some(Data::Json(parse_json_data_base64!(d, E)?)),
             (None, Some(d), false) => Some(Data::Binary(parse_data_base64!(d, E)?)),
-            (Some(_), Some(_), _) => Err(E::custom("Cannot have both data and data_base64 field"))?,
+            (Some(_), Some(_), _) => return Err(E::custom("Cannot have both data and data_base64 field")),
             (None, None, _) => None,
         })
     }

@@ -24,6 +24,6 @@ lazy_static! {
         attributes_to_headers(SpecVersion::all_attribute_names());
 }
 
-pub(crate) static SPEC_VERSION_HEADER: &'static str = "ce_specversion";
-pub(crate) static CLOUDEVENTS_JSON_HEADER: &'static str = "application/cloudevents+json";
-pub(crate) static CONTENT_TYPE: &'static str = "content-type";
+pub(crate) static SPEC_VERSION_HEADER: &str = "ce_specversion";
+pub(crate) static CLOUDEVENTS_JSON_HEADER: &str = "application/cloudevents+json";
+pub(crate) static CONTENT_TYPE: &str = "content-type";

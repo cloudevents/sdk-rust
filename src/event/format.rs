@@ -53,8 +53,8 @@ macro_rules! parse_field {
 
 macro_rules! parse_data_json {
     ($in:ident, $error:ty) => {
-        Ok(serde_json::Value::deserialize($in.into_deserializer())
-            .map_err(|e| <$error>::custom(e))?)
+        serde_json::Value::deserialize($in.into_deserializer())
+            .map_err(<$error>::custom)
     };
 }
 
@@ -73,7 +73,7 @@ macro_rules! parse_data_string {
 macro_rules! parse_json_data_base64 {
     ($in:ident, $error:ty) => {{
         let data = parse_data_base64!($in, $error)?;
-        serde_json::from_slice(&data).map_err(|e| <$error>::custom(e))
+        serde_json::from_slice(&data).map_err(<$error>::custom)
     }};
 }
 
@@ -113,7 +113,7 @@ pub(crate) trait EventFormatDeserializer {
             .into_iter()
             .map(|(k, v)| Ok((k, ExtensionValue::deserialize(v.into_deserializer())?)))
             .collect::<Result<HashMap<String, ExtensionValue>, serde_value::DeserializerError>>()
-            .map_err(|e| E::custom(e))?;
+            .map_err(E::custom)?;
 
         Ok(Event {
             attributes,

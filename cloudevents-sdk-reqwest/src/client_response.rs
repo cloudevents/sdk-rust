@@ -64,7 +64,7 @@ impl BinaryDeserializer for ResponseDeserializer {
             )?
         }
 
-        if self.body.len() != 0 {
+        if !self.body.is_empty() {
             visitor.end_with_data(self.body.to_vec())
         } else {
             visitor.end()
@@ -84,6 +84,7 @@ impl StructuredDeserializer for ResponseDeserializer {
 impl MessageDeserializer for ResponseDeserializer {
     fn encoding(&self) -> Encoding {
         match (
+            #[allow(clippy::borrow_interior_mutable_const)]
             unwrap_optional_header!(self.headers, reqwest::header::CONTENT_TYPE)
                 .map(|r| r.ok())
                 .flatten()

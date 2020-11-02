@@ -6,7 +6,7 @@ use chrono::{DateTime, Utc};
 use url::Url;
 use uuid::Uuid;
 
-pub(crate) const ATTRIBUTE_NAMES: [&'static str; 8] = [
+pub(crate) const ATTRIBUTE_NAMES: [&str; 8] = [
     "specversion",
     "id",
     "type",

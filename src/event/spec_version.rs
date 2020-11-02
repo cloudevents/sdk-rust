@@ -3,7 +3,7 @@ use serde::export::Formatter;
 use std::convert::TryFrom;
 use std::fmt;
 
-pub(crate) const SPEC_VERSIONS: [&'static str; 2] = ["0.3", "1.0"];
+pub(crate) const SPEC_VERSIONS: [&str; 2] = ["0.3", "1.0"];
 
 /// CloudEvent specification version.
 #[derive(PartialEq, Eq, Hash, Debug, Clone)]

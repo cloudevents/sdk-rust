@@ -33,7 +33,7 @@ impl ConsumerRecordDeserializer {
     pub fn new(message: &impl Message) -> Result<ConsumerRecordDeserializer> {
         Ok(ConsumerRecordDeserializer {
             headers: Self::get_kafka_headers(message)?,
-            payload: message.payload().map(|s| Vec::from(s)),
+            payload: message.payload().map(Vec::from),
         })
     }
 }

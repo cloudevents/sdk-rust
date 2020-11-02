@@ -1,0 +1,29 @@
+name: Lints
+
+on:
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  lint:
+    name: Rust
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          override: true
+          components: clippy, rustfmt
+      - uses: actions-rs/cargo@v1
+        name: "Cargo fmt"
+        with:
+          command: fmt
+          args: --all -- --check
+      - uses: actions-rs/clippy-check@v1
+        name: "Cargo clippy"
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          args: --all-features

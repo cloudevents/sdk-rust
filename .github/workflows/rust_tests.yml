@@ -1,15 +1,19 @@
-name: Master
+name: Rust Tests
 
 on:
+  pull_request:
+    branches:
+      - master
   push:
     branches:
       - master
 
 jobs:
   build:
-    name: Run tests on ${{ matrix.toolchain }} ${{ matrix.target }}
+    name: ${{ matrix.toolchain }} / ${{ matrix.target }}
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         toolchain:
           - stable
@@ -20,10 +24,14 @@ jobs:
           - wasm32-unknown-unknown
     steps:
     - uses: actions/checkout@v2
+
+    # Setup musl if needed
     - run: sudo apt-get update
       if: matrix.target == 'x86_64-unknown-linux-musl'
     - run: sudo apt-get install -y musl musl-dev musl-tools cmake
       if: matrix.target == 'x86_64-unknown-linux-musl'
+
+    # Caching stuff
     - name: Cache cargo registry
       uses: actions/cache@v1
       with:
@@ -47,12 +55,14 @@ jobs:
 
     # If glibc, compile and test all
     - uses: actions-rs/cargo@v1
+      name: "Build"
       if: matrix.target == 'x86_64-unknown-linux-gnu'
       with:
         command: build
         toolchain: ${{ matrix.toolchain }}
         args: --target ${{ matrix.target }} --workspace
     - uses: actions-rs/cargo@v1
+      name: "Test"
       if: matrix.target == 'x86_64-unknown-linux-gnu'
       with:
         command: test
@@ -61,6 +71,7 @@ jobs:
 
     # If musl, compile and test all
     - uses: actions-rs/cargo@v1
+      name: "Build"
       if: matrix.target == 'x86_64-unknown-linux-musl'
       with:
         command: build
@@ -70,6 +81,7 @@ jobs:
         CC: musl-gcc
         CXX: g++
     - uses: actions-rs/cargo@v1
+      name: "Test"
       if: matrix.target == 'x86_64-unknown-linux-musl'
       with:
         command: test
@@ -78,10 +90,37 @@ jobs:
       env:
         CC: musl-gcc
         CXX: g++
+
     # If wasm, then we test only the main module and cloudevents-sdk-reqwest
     - uses: actions-rs/cargo@v1
+      name: "Build"
       if: matrix.target == 'wasm32-unknown-unknown'
       with:
         command: build
         toolchain: ${{ matrix.toolchain }}
         args: --target wasm32-unknown-unknown --package cloudevents-sdk --package cloudevents-sdk-reqwest
+
+    # Build examples
+    - uses: actions-rs/cargo@v1
+      name: "Build reqwest-wasm-example"
+      if: matrix.target == 'wasm32-unknown-unknown' && matrix.toolchain == 'stable'
+      with:
+        command: build
+        toolchain: ${{ matrix.toolchain }}
+        args: --target ${{ matrix.target }} --manifest-path ./example-projects/reqwest-wasm-example/Cargo.toml
+
+    - uses: actions-rs/cargo@v1
+      name: "Build rdkafka-example"
+      if: matrix.target == 'x86_64-unknown-linux-gnu' && matrix.toolchain == 'stable'
+      with:
+        command: build
+        toolchain: ${{ matrix.toolchain }}
+        args: --target ${{ matrix.target }} --manifest-path ./example-projects/rdkafka-example/Cargo.toml
+
+    - uses: actions-rs/cargo@v1
+      name: "Build actix-web-example"
+      if: matrix.target == 'x86_64-unknown-linux-gnu' && matrix.toolchain == 'stable'
+      with:
+        command: build
+        toolchain: ${{ matrix.toolchain }}
+        args: --target ${{ matrix.target }} --manifest-path ./example-projects/actix-web-example/Cargo.toml

@@ -31,7 +31,7 @@ To get started, add the dependency to `Cargo.toml`:
 
 ```toml
 [dependencies]
-cloudevents-sdk = "0.2.0"
+cloudevents-sdk = "0.3.0"
 ```
 
 Now you can start creating events:

@@ -1,6 +1,6 @@
 [package]
 name = "cloudevents-sdk-actix-web"
-version = "0.2.0"
+version = "0.3.0"
 authors = ["Francesco Guardiani <francescoguard@gmail.com>"]
 license-file = "../LICENSE"
 edition = "2018"
@@ -13,7 +13,7 @@ categories = ["web-programming", "encoding", "web-programming::http-server"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-cloudevents-sdk = { version = "0.2.0", path = ".." }
+cloudevents-sdk = { version = "0.3.0", path = ".." }
 actix-web = { version = "^3", default-features = false }
 actix-rt = "^1"
 async-trait = "^0.1.33"

@@ -1,6 +1,6 @@
 [package]
 name = "cloudevents-sdk-reqwest"
-version = "0.2.0"
+version = "0.3.0"
 authors = ["Francesco Guardiani <francescoguard@gmail.com>"]
 license-file = "../LICENSE"
 edition = "2018"
@@ -14,7 +14,7 @@ categories = ["web-programming", "encoding", "web-programming::http-client"]
 
 [dependencies]
 async-trait = "^0.1.33"
-cloudevents-sdk = { version = "0.2.0", path = ".." }
+cloudevents-sdk = { version = "0.3.0", path = ".." }
 lazy_static = "1.4.0"
 bytes = "^0.5"
 

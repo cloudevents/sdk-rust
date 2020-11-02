@@ -48,7 +48,7 @@
 //! # }
 //! ```
 
-#![doc(html_root_url = "https://docs.rs/cloudevents-sdk-rdkafka/0.2.0")]
+#![doc(html_root_url = "https://docs.rs/cloudevents-sdk-rdkafka/0.3.0")]
 #![deny(broken_intra_doc_links)]
 
 #[macro_use]

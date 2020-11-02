@@ -1,6 +1,6 @@
 [package]
 name = "cloudevents-sdk-rdkafka"
-version = "0.2.0"
+version = "0.3.0"
 authors = ["Pranav Bhatt <adpranavb2000@gmail.com>"]
 edition = "2018"
 license-file = "../LICENSE"
@@ -14,7 +14,7 @@ categories = ["web-programming", "encoding"]
 
 [dependencies]
 bytes = "^0.5"
-cloudevents-sdk = { version = "0.2.0", path = ".." }
+cloudevents-sdk = { version = "0.3.0", path = ".." }
 lazy_static = "1.4.0"
 rdkafka = { version = "^0.24", features = ["cmake-build"] }
 

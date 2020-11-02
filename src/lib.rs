@@ -37,7 +37,7 @@
 //! * [cloudevents-sdk-rdkafka](https://docs.rs/cloudevents-sdk-rdkafka): Integration with [rdkafka](https://fede1024.github.io/rust-rdkafka)
 //!
 
-#![doc(html_root_url = "https://docs.rs/cloudevents-sdk/0.2.0")]
+#![doc(html_root_url = "https://docs.rs/cloudevents-sdk/0.3.0")]
 #![deny(broken_intra_doc_links)]
 
 pub mod event;

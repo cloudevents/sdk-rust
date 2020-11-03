@@ -102,7 +102,7 @@ impl AttributesWriter for Event {
     fn set_subject(&mut self, subject: Option<impl Into<String>>) -> Option<String>;
     fn set_time(&mut self, time: Option<impl Into<DateTime<Utc>>>) -> Option<DateTime<Utc>>;
     fn set_datacontenttype(&mut self, datacontenttype: Option<impl Into<String>>)
-                           -> Option<String>;
+        -> Option<String>;
     fn set_dataschema(&mut self, dataschema: Option<impl Into<Url>>) -> Option<Url>;
 }
 
@@ -289,4 +289,3 @@ mod tests {
         assert_eq!(v.remove("aaa"), Some(AttributeValue::String("bbb")))
     }
 }
-

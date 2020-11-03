@@ -53,8 +53,7 @@ macro_rules! parse_field {
 
 macro_rules! parse_data_json {
     ($in:ident, $error:ty) => {
-        serde_json::Value::deserialize($in.into_deserializer())
-            .map_err(<$error>::custom)
+        serde_json::Value::deserialize($in.into_deserializer()).map_err(<$error>::custom)
     };
 }
 

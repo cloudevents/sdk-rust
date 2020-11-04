@@ -24,6 +24,7 @@ Note: This project is WIP under active development, hence all APIs are considere
 * `cloudevents-sdk-actix-web`: Integration with [Actix Web](https://github.com/actix/actix-web).
 * `cloudevents-sdk-reqwest`: Integration with [reqwest](https://github.com/seanmonstar/reqwest).
 * `cloudevents-sdk-rdkafka`: Integration with [rust-rdkafka](https://fede1024.github.io/rust-rdkafka).
+* `cloudevents-sdk-warp`: Integration with [rust-rdkafka](https://github.com/seanmonstar/warp/).
 
 ## Get Started
 
@@ -52,6 +53,7 @@ Checkout the examples using our integrations to learn how to send and receive ev
 * [Actix Web Example](example-projects/actix-web-example)
 * [Reqwest/WASM Example](example-projects/reqwest-wasm-example)
 * [Kafka Example](example-projects/rdkafka-example)
+* [Warp Example](example-projects/warp-example)
 
 ## Development & Contributing
 

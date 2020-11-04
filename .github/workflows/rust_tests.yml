@@ -124,3 +124,11 @@ jobs:
         command: build
         toolchain: ${{ matrix.toolchain }}
         args: --target ${{ matrix.target }} --manifest-path ./example-projects/actix-web-example/Cargo.toml
+
+    - uses: actions-rs/cargo@v1
+      name: "Build warp-example"
+      if: matrix.target == 'x86_64-unknown-linux-gnu' && matrix.toolchain == 'stable'
+      with:
+        command: build
+        toolchain: ${{ matrix.toolchain }}
+        args: --target ${{ matrix.target }} --manifest-path ./example-projects/warp-example/Cargo.toml

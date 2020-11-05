@@ -24,7 +24,7 @@ Note: This project is WIP under active development, hence all APIs are considere
 * `cloudevents-sdk-actix-web`: Integration with [Actix Web](https://github.com/actix/actix-web).
 * `cloudevents-sdk-reqwest`: Integration with [reqwest](https://github.com/seanmonstar/reqwest).
 * `cloudevents-sdk-rdkafka`: Integration with [rust-rdkafka](https://fede1024.github.io/rust-rdkafka).
-* `cloudevents-sdk-warp`: Integration with [rust-rdkafka](https://github.com/seanmonstar/warp/).
+* `cloudevents-sdk-warp`: Integration with [warp](https://github.com/seanmonstar/warp/).
 
 ## Get Started
 

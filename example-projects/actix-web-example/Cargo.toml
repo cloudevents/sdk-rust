@@ -8,7 +8,6 @@ edition = "2018"
 cloudevents-sdk = { path = "../.." }
 cloudevents-sdk-actix-web = { path = "../../cloudevents-sdk-actix-web" }
 actix-web = "^3"
-actix-rt = "1"
 actix-cors = "^0.5"
 lazy_static = "1.4.0"
 bytes = "^0.5"

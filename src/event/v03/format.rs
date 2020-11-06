@@ -38,7 +38,7 @@ impl crate::event::format::EventFormatDeserializer for EventFormatDeserializer {
             .remove("datacontentencoding")
             .map(String::deserialize)
             .transpose()
-            .map_err(|e| E::custom(e))?
+            .map_err(E::custom)?
             .map(|dce| dce.to_lowercase() == "base64")
             .unwrap_or(false);
         let is_json = is_json_content_type(content_type);

@@ -33,6 +33,12 @@ impl MessageRecord {
     }
 }
 
+impl Default for MessageRecord {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl BinarySerializer<MessageRecord> for MessageRecord {
     fn set_spec_version(mut self, spec_version: SpecVersion) -> Result<Self> {
         self.headers = self

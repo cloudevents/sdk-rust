@@ -56,7 +56,7 @@ where
             return self.deserialize_binary(serializer);
         }
 
-        return MessageDeserializer::into_event(self)?.deserialize_binary(serializer);
+        MessageDeserializer::into_event(self)?.deserialize_binary(serializer)
     }
 
     /// Deserialize the message to [`StructuredSerializer`].
@@ -68,7 +68,7 @@ where
             return self.deserialize_structured(serializer);
         }
 
-        return MessageDeserializer::into_event(self)?.deserialize_structured(serializer);
+        MessageDeserializer::into_event(self)?.deserialize_structured(serializer)
     }
 
     /// Deserialize the message to a serializer, depending on the message encoding.

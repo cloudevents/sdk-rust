@@ -98,12 +98,18 @@
 #[cfg(all(feature = "alloc", not(feature = "std")))]
 extern crate alloc;
 
+pub type Result<T> = core::result::Result<T, IoError>;
+
 #[derive(Debug)]
-pub struct Error {
+pub struct IoError {
     _private: (),
 }
 
-pub type Result<T> = core::result::Result<T, Error>;
+impl core::fmt::Display for IoError {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        write!(f, "()")
+    }
+}
 
 pub trait Read {
     fn read(&mut self, buf: &mut [u8]) -> Result<usize>;

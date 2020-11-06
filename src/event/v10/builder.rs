@@ -1,6 +1,7 @@
 use super::Attributes as AttributesV10;
 use crate::event::{
-    Attributes, Data, Event, EventBuilderError, ExtensionValue, TryIntoTime, TryIntoUrl,
+    Attributes, Data, DisplayError, Event, EventBuilderError, ExtensionValue, TryIntoTime,
+    TryIntoUrl,
 };
 use crate::message::MessageAttributeValue;
 use chrono::{DateTime, Utc};
@@ -36,7 +37,7 @@ impl EventBuilder {
             Err(e) => {
                 self.error = Some(EventBuilderError::ParseUrlError {
                     attribute_name: "source",
-                    source: e,
+                    source: DisplayError(e),
                 })
             }
         };
@@ -59,7 +60,7 @@ impl EventBuilder {
             Err(e) => {
                 self.error = Some(EventBuilderError::ParseTimeError {
                     attribute_name: "time",
-                    source: e,
+                    source: DisplayError(e),
                 })
             }
         };
@@ -99,7 +100,7 @@ impl EventBuilder {
             Err(e) => {
                 self.error = Some(EventBuilderError::ParseUrlError {
                     attribute_name: "dataschema",
-                    source: e,
+                    source: DisplayError(e),
                 })
             }
         };

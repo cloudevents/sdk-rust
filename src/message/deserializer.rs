@@ -1,4 +1,4 @@
-use super::{BinarySerializer, Encoding, Error, Result, StructuredSerializer};
+use super::{BinarySerializer, Encoding, Result, StructuredSerializer};
 use crate::event::{EventBinarySerializer, EventStructuredSerializer};
 use crate::Event;
 
@@ -46,7 +46,7 @@ where
         match self.encoding() {
             Encoding::BINARY => BinaryDeserializer::into_event(self),
             Encoding::STRUCTURED => StructuredDeserializer::into_event(self),
-            _ => Err(Error::WrongEncoding {}),
+            _ => Err(super::error::Error::WrongEncoding {}),
         }
     }
 

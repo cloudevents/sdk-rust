@@ -3,6 +3,8 @@
 mod attributes;
 mod builder;
 mod data;
+mod displayerr;
+mod event;
 mod extensions;
 #[macro_use]
 mod format;
@@ -15,6 +17,8 @@ pub use attributes::{AttributeValue, AttributesReader, AttributesWriter};
 pub use builder::Error as EventBuilderError;
 pub use builder::EventBuilder;
 pub use data::Data;
+pub use displayerr::DisplayError;
+pub use event::Event;
 pub use extensions::ExtensionValue;
 pub(crate) use message::EventBinarySerializer;
 pub(crate) use message::EventStructuredSerializer;

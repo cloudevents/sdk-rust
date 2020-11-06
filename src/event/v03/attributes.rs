@@ -162,7 +162,7 @@ impl Default for Attributes {
             datacontenttype: None,
             schemaurl: None,
             subject: None,
-            time: Some(Utc::now()),
+            time: Some(chrono::offset::Utc::now()),
         }
     }
 }

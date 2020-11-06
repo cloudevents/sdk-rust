@@ -1,4 +1,6 @@
 use super::{v03, v10};
+use serde::export::Formatter; // double check
+use snafu::Snafu;
 use std::convert::TryFrom;
 use std::fmt;
 use std::fmt::Formatter;
@@ -60,7 +62,7 @@ impl fmt::Display for UnknownSpecVersion {
     }
 }
 
-impl std::error::Error for UnknownSpecVersion {}
+impl snafu::Error for UnknownSpecVersion {}
 
 impl TryFrom<&str> for SpecVersion {
     type Error = UnknownSpecVersion;

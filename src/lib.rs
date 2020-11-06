@@ -41,6 +41,7 @@
 #![deny(broken_intra_doc_links)]
 #![no_std]
 
+extern crate core_error;
 extern crate no_std_compat as std;
 
 extern crate serde;

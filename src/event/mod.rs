@@ -3,8 +3,6 @@
 mod attributes;
 mod builder;
 mod data;
-mod displayerr;
-mod event;
 mod extensions;
 #[macro_use]
 mod format;
@@ -17,8 +15,6 @@ pub use attributes::{AttributeValue, AttributesReader, AttributesWriter};
 pub use builder::Error as EventBuilderError;
 pub use builder::EventBuilder;
 pub use data::Data;
-pub use displayerr::DisplayError;
-pub use event::Event;
 pub use extensions::ExtensionValue;
 pub(crate) use message::EventBinarySerializer;
 pub(crate) use message::EventStructuredSerializer;
@@ -45,9 +41,11 @@ pub(crate) use v10::EventFormatSerializer as EventFormatSerializerV10;
 use chrono::{DateTime, Utc};
 use delegate_attr::delegate;
 use std::collections::HashMap;
-use std::fmt;
+//use std::fmt;
+use std::prelude::v1::*;
 use url::Url;
 
+use core::fmt::{self,Debug, Display};
 /// Data structure that represents a [CloudEvent](https://github.com/cloudevents/spec/blob/master/spec.md).
 /// It provides methods to get the attributes through [`AttributesReader`]
 /// and write them through [`AttributesWriter`].
@@ -238,6 +236,32 @@ impl Event {
         self.extensions.remove(extension_name)
     }
 }
+
+// Facilitates compatibility with snafu::Error for external objects 
+
+#[derive(PartialEq, Eq, Clone)]
+pub struct DisplayError<T>(pub T);
+
+impl<T> Debug for DisplayError<T>
+where
+    T: Debug,
+{
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        self.0.fmt(f)
+    }
+}
+
+impl<T> Display for DisplayError<T>
+where
+    T: Display,
+{
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        self.0.fmt(f)
+    }
+}
+
+impl<T> snafu::Error for DisplayError<T> where T: Display + Debug {}
+
 
 #[cfg(test)]
 mod tests {

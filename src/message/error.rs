@@ -2,7 +2,7 @@ use core::fmt::{self, Debug, Display};
 use snafu::Snafu;
 use std::prelude::v1::*;
 
-struct DisplayError<T>(pub T);
+pub struct DisplayError<T>(pub T);
 
 impl<T> Debug for DisplayError<T>
 where

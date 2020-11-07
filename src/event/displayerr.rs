@@ -1,5 +1,4 @@
 use core::fmt::{self, Debug, Display};
-use snafu::Snafu;
 
 #[derive(Clone)]
 pub struct DisplayError<T>(pub T);

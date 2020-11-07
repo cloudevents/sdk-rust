@@ -1,5 +1,4 @@
 use chrono::{DateTime, Utc};
-use snafu;
 use std::prelude::v1::*;
 use url::Url;
 

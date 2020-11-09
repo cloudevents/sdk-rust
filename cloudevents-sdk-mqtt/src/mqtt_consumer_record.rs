@@ -1,7 +1,9 @@
 use crate::headers;
 use cloudevents::event::SpecVersion;
-use cloudevents::message::{Result, BinarySerializer, BinaryDeserializer, MessageAttributeValue,
-                           MessageDeserializer, Encoding, StructuredSerializer, StructuredDeserializer};
+use cloudevents::message::{
+    BinaryDeserializer, BinarySerializer, Encoding, MessageAttributeValue, MessageDeserializer,
+    Result, StructuredDeserializer, StructuredSerializer,
+};
 use cloudevents::{message, Event};
 use paho_mqtt::{Message, PropertyCode};
 use std::collections::HashMap;
@@ -37,7 +39,7 @@ impl ConsumerMessageDeserializer {
 impl BinaryDeserializer for ConsumerMessageDeserializer {
     fn deserialize_binary<R: Sized, V: BinarySerializer<R>>(mut self, mut visitor: V) -> Result<R> {
         if self.encoding() != Encoding::BINARY {
-            return Err(message::Error::WrongEncoding {})
+            return Err(message::Error::WrongEncoding {});
         }
 
         let spec_version = SpecVersion::try_from(
@@ -124,9 +126,15 @@ impl MessageDeserializer for ConsumerMessageDeserializer {
 
 pub fn record_to_event(msg: &Message, version: headers::MqttVersion) -> Result<Event> {
     match version {
-        headers::MqttVersion::V5 => BinaryDeserializer::into_event(ConsumerMessageDeserializer::new(msg)?),
-        headers::MqttVersion::V3_1 => StructuredDeserializer::into_event(ConsumerMessageDeserializer::new(msg)?),
-        headers::MqttVersion::V3_1_1 => StructuredDeserializer::into_event(ConsumerMessageDeserializer::new(msg)?),
+        headers::MqttVersion::V5 => {
+            BinaryDeserializer::into_event(ConsumerMessageDeserializer::new(msg)?)
+        }
+        headers::MqttVersion::V3_1 => {
+            StructuredDeserializer::into_event(ConsumerMessageDeserializer::new(msg)?)
+        }
+        headers::MqttVersion::V3_1_1 => {
+            StructuredDeserializer::into_event(ConsumerMessageDeserializer::new(msg)?)
+        }
     }
 }
 
@@ -145,11 +153,12 @@ mod tests {
     use super::*;
     use crate::mqtt_producer_record::MessageRecord;
 
-    use chrono::Utc;
-    use cloudevents::{EventBuilder, EventBuilderV10};
     use crate::MessageBuilderExt;
-    use serde_json::json;
+    use chrono::Utc;
     use cloudevents::event::Data;
+    use cloudevents::{EventBuilder, EventBuilderV10};
+    use paho_mqtt::MessageBuilder;
+    use serde_json::json;
 
     #[test]
     fn test_binary_record() {
@@ -160,8 +169,10 @@ mod tests {
             .ty("example.test")
             .time(time)
             .source("http://localhost")
-            .data("application/json",
-                  Data::Binary(String::from("{\"hello\":\"world\"}").into_bytes()))
+            .data(
+                "application/json",
+                Data::Binary(String::from("{\"hello\":\"world\"}").into_bytes()),
+            )
             .extension("someint", "10")
             .build()
             .unwrap();
@@ -178,7 +189,7 @@ mod tests {
                 .unwrap(),
             headers::MqttVersion::V5,
         )
-            .unwrap();
+        .unwrap();
 
         let msg = MessageBuilder::new()
             .topic("test")
@@ -220,6 +231,9 @@ mod tests {
             .qos(1)
             .finalize();
 
-        assert_eq!(msg.to_event(headers::MqttVersion::V3_1_1).unwrap(), expected)
+        assert_eq!(
+            msg.to_event(headers::MqttVersion::V3_1_1).unwrap(),
+            expected
+        )
     }
 }

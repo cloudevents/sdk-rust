@@ -16,7 +16,7 @@ fn attributes_to_headers(it: impl Iterator<Item = &'static str>) -> HashMap<&'st
             (s, attribute_name_to_header!(s))
         }
     })
-        .collect()
+    .collect()
 }
 
 lazy_static! {

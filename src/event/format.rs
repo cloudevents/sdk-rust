@@ -3,7 +3,7 @@ use super::{
     EventFormatSerializerV03, EventFormatSerializerV10,
 };
 use crate::event::{AttributesReader, ExtensionValue};
-use serde::de::{Error, IntoDeserializer, Unexpected};
+use serde::de::{Error, IntoDeserializer};
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use serde_json::{Value, Map};
 use std::collections::HashMap;

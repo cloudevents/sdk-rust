@@ -5,7 +5,7 @@ use chrono::{DateTime, Utc};
 use serde::de::IntoDeserializer;
 use serde::ser::SerializeMap;
 use serde::{Deserialize, Serializer};
-use serde_json::{Value, Map};
+use serde_json::{Map, Value};
 use std::collections::HashMap;
 use url::Url;
 
@@ -20,11 +20,13 @@ impl crate::event::format::EventFormatDeserializer for EventFormatDeserializer {
             ty: extract_field!(map, "type", String, E)?,
             source: extract_field!(map, "source", String, E, |s: String| Url::parse(&s))?,
             datacontenttype: extract_optional_field!(map, "datacontenttype", String, E)?,
-            schemaurl: extract_optional_field!(map, "schemaurl", String, E, |s: String| Url::parse(&s))?,
+            schemaurl: extract_optional_field!(map, "schemaurl", String, E, |s: String| {
+                Url::parse(&s)
+            })?,
             subject: extract_optional_field!(map, "subject", String, E)?,
-            time: extract_optional_field!(map, "time", String, E,
-                |s: String| DateTime::parse_from_rfc3339(&s).map(DateTime::<Utc>::from)
-            )?,
+            time: extract_optional_field!(map, "time", String, E, |s: String| {
+                DateTime::parse_from_rfc3339(&s).map(DateTime::<Utc>::from)
+            })?,
         }))
     }
 

@@ -5,13 +5,12 @@ use super::{
 use crate::event::{AttributesReader, ExtensionValue};
 use serde::de::{Error, IntoDeserializer};
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
-use serde_json::{Value, Map};
+use serde_json::{Map, Value};
 use std::collections::HashMap;
 
 macro_rules! parse_field {
     ($value:expr, $target_type:ty, $error:ty) => {
-        <$target_type>::deserialize($value.into_deserializer())
-            .map_err(<$error>::custom)
+        <$target_type>::deserialize($value.into_deserializer()).map_err(<$error>::custom)
     };
 
     ($value:expr, $target_type:ty, $error:ty, $mapper:expr) => {
@@ -49,8 +48,7 @@ macro_rules! extract_field {
 
 macro_rules! parse_data_json {
     ($in:ident, $error:ty) => {
-        serde_json::Value::deserialize($in.into_deserializer())
-            .map_err(<$error>::custom)
+        serde_json::Value::deserialize($in.into_deserializer()).map_err(<$error>::custom)
     };
 }
 
@@ -69,10 +67,11 @@ macro_rules! parse_json_data_base64 {
 
 macro_rules! parse_data_base64 {
     ($in:ident, $error:ty) => {
-        parse_field!($in, String, $error)
-            .and_then(|s| base64::decode(&s).map_err(|e| {
+        parse_field!($in, String, $error).and_then(|s| {
+            base64::decode(&s).map_err(|e| {
                 <$error>::invalid_value(serde::de::Unexpected::Str(&s), &e.to_string().as_str())
-            }))
+            })
+        })
     };
 }
 
@@ -86,19 +85,20 @@ pub(crate) trait EventFormatDeserializer {
         map: &mut Map<String, Value>,
     ) -> Result<Option<Data>, E>;
 
-    fn deserialize_event<E: serde::de::Error>(
-        mut map: Map<String, Value>,
-    ) -> Result<Event, E> {
+    fn deserialize_event<E: serde::de::Error>(mut map: Map<String, Value>) -> Result<Event, E> {
         let attributes = Self::deserialize_attributes(&mut map)?;
         let data = Self::deserialize_data(
-            attributes
-                .datacontenttype()
-                .unwrap_or("application/json"),
+            attributes.datacontenttype().unwrap_or("application/json"),
             &mut map,
         )?;
         let extensions = map
             .into_iter()
-            .map(|(k, v)| Ok((k, ExtensionValue::deserialize(v.into_deserializer()).map_err(E::custom)?)))
+            .map(|(k, v)| {
+                Ok((
+                    k,
+                    ExtensionValue::deserialize(v.into_deserializer()).map_err(E::custom)?,
+                ))
+            })
             .collect::<Result<HashMap<String, ExtensionValue>, E>>()?;
 
         Ok(Event {
@@ -124,10 +124,11 @@ impl<'de> Deserialize<'de> for Event {
         D: Deserializer<'de>,
     {
         let root_value = Value::deserialize(deserializer)?;
-        let mut map: Map<String, Value> = Map::deserialize(root_value.into_deserializer())
-            .map_err(D::Error::custom)?;
+        let mut map: Map<String, Value> =
+            Map::deserialize(root_value.into_deserializer()).map_err(D::Error::custom)?;
 
-        match extract_field!(map, "specversion", String, <D as Deserializer<'de>>::Error)?.as_str() {
+        match extract_field!(map, "specversion", String, <D as Deserializer<'de>>::Error)?.as_str()
+        {
             "0.3" => EventFormatDeserializerV03::deserialize_event(map),
             "1.0" => EventFormatDeserializerV10::deserialize_event(map),
             s => Err(D::Error::unknown_variant(

@@ -5,33 +5,32 @@ use chrono::{DateTime, Utc};
 use serde::de::IntoDeserializer;
 use serde::ser::SerializeMap;
 use serde::{Deserialize, Serializer};
-use serde_value::Value;
-use std::collections::{BTreeMap, HashMap};
+use std::collections::HashMap;
 use url::Url;
+use serde_json::{Map, Value};
 
 pub(crate) struct EventFormatDeserializer {}
 
 impl crate::event::format::EventFormatDeserializer for EventFormatDeserializer {
     fn deserialize_attributes<E: serde::de::Error>(
-        map: &mut BTreeMap<String, Value>,
+        map: &mut Map<String, Value>,
     ) -> Result<crate::event::Attributes, E> {
         Ok(crate::event::Attributes::V10(Attributes {
-            id: parse_field!(map, "id", String, E)?,
-            ty: parse_field!(map, "type", String, E)?,
-            source: parse_field!(map, "source", String, E, Url::parse)?,
-            datacontenttype: parse_optional_field!(map, "datacontenttype", String, E)?,
-            dataschema: parse_optional_field!(map, "dataschema", String, E, Url::parse)?,
-            subject: parse_optional_field!(map, "subject", String, E)?,
-            time: parse_optional_field!(map, "time", String, E, |s| DateTime::parse_from_rfc3339(
-                s
-            )
-            .map(DateTime::<Utc>::from))?,
+            id: extract_field!(map, "id", String, E)?,
+            ty: extract_field!(map, "type", String, E)?,
+            source: extract_field!(map, "source", String, E, |s: String| Url::parse(&s))?,
+            datacontenttype: extract_optional_field!(map, "datacontenttype", String, E)?,
+            dataschema: extract_optional_field!(map, "dataschema", String, E, |s: String| Url::parse(&s))?,
+            subject: extract_optional_field!(map, "subject", String, E)?,
+            time: extract_optional_field!(map, "time", String, E,
+                |s: String| DateTime::parse_from_rfc3339(&s).map(DateTime::<Utc>::from)
+            )?,
         }))
     }
 
     fn deserialize_data<E: serde::de::Error>(
         content_type: &str,
-        map: &mut BTreeMap<String, Value>,
+        map: &mut Map<String, Value>,
     ) -> Result<Option<Data>, E> {
         let data = map.remove("data");
         let data_base64 = map.remove("data_base64");

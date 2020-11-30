@@ -1,5 +1,5 @@
 [package]
-name = "cloudevents-sdk-mqtt"
+name = "cloudevents-sdk-paho-mqtt"
 version = "0.3.0"
 authors = ["Francesco Guardiani <francescoguard@gmail.com>"]
 license-file = "../LICENSE"
@@ -11,7 +11,7 @@ description = "CloudEvents official Rust SDK - Mqtt integration"
 [dependencies]
 cloudevents-sdk = { version = "0.3.0", path = ".." }
 lazy_static = "1.4.0"
-paho-mqtt = { git = "https://github.com/eclipse/paho.mqtt.rust.git" }
+paho-mqtt = "0.8"
 chrono = { version = "^0.4", features = ["serde"] }
 
 [dev-dependencies]

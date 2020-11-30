@@ -46,12 +46,12 @@ members = [
   "cloudevents-sdk-reqwest",
   "cloudevents-sdk-rdkafka",
   "cloudevents-sdk-warp",
-  "cloudevents-sdk-mqtt"
+  "cloudevents-sdk-paho-mqtt"
 ]
 exclude = [
   "example-projects/actix-web-example",
   "example-projects/reqwest-wasm-example",
   "example-projects/rdkafka-example",
   "example-projects/warp-example",
-  "example-projects/mqtt-example"
+  "example-projects/paho-mqtt-example"
 ]

@@ -3,50 +3,45 @@ use super::{
     EventFormatSerializerV03, EventFormatSerializerV10,
 };
 use crate::event::{AttributesReader, ExtensionValue};
-use serde::de::{Error, IntoDeserializer, Unexpected};
+use serde::de::{Error, IntoDeserializer};
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
-use serde_value::Value;
-use std::collections::{BTreeMap, HashMap};
+use serde_json::{Map, Value};
+use std::collections::HashMap;
 
-macro_rules! parse_optional_field {
-    ($map:ident, $name:literal, $value_variant:ident, $error:ty) => {
+macro_rules! parse_field {
+    ($value:expr, $target_type:ty, $error:ty) => {
+        <$target_type>::deserialize($value.into_deserializer()).map_err(<$error>::custom)
+    };
+
+    ($value:expr, $target_type:ty, $error:ty, $mapper:expr) => {
+        <$target_type>::deserialize($value.into_deserializer())
+            .map_err(<$error>::custom)
+            .and_then(|v| $mapper(v).map_err(<$error>::custom))
+    };
+}
+
+macro_rules! extract_optional_field {
+    ($map:ident, $name:literal, $target_type:ty, $error:ty) => {
         $map.remove($name)
-            .map(|val| match val {
-                Value::$value_variant(v) => Ok(v),
-                other => Err(<$error>::invalid_type(
-                    crate::event::format::value_to_unexpected(&other),
-                    &stringify!($value_variant),
-                )),
-            })
+            .map(|v| parse_field!(v, $target_type, $error))
             .transpose()
     };
 
-    ($map:ident, $name:literal, $value_variant:ident, $error:ty, $mapper:expr) => {
+    ($map:ident, $name:literal, $target_type:ty, $error:ty, $mapper:expr) => {
         $map.remove($name)
-            .map(|val| match val {
-                Value::$value_variant(v) => $mapper(&v).map_err(|e| {
-                    <$error>::invalid_value(
-                        crate::event::format::value_to_unexpected(&Value::$value_variant(v)),
-                        &e.to_string().as_str(),
-                    )
-                }),
-                other => Err(<$error>::invalid_type(
-                    crate::event::format::value_to_unexpected(&other),
-                    &stringify!($value_variant),
-                )),
-            })
+            .map(|v| parse_field!(v, $target_type, $error, $mapper))
             .transpose()
     };
 }
 
-macro_rules! parse_field {
-    ($map:ident, $name:literal, $value_variant:ident, $error:ty) => {
-        parse_optional_field!($map, $name, $value_variant, $error)?
+macro_rules! extract_field {
+    ($map:ident, $name:literal, $target_type:ty, $error:ty) => {
+        extract_optional_field!($map, $name, $target_type, $error)?
             .ok_or_else(|| <$error>::missing_field($name))
     };
 
-    ($map:ident, $name:literal, $value_variant:ident, $error:ty, $mapper:expr) => {
-        parse_optional_field!($map, $name, $value_variant, $error, $mapper)?
+    ($map:ident, $name:literal, $target_type:ty, $error:ty, $mapper:expr) => {
+        extract_optional_field!($map, $name, $target_type, $error, $mapper)?
             .ok_or_else(|| <$error>::missing_field($name))
     };
 }
@@ -59,13 +54,7 @@ macro_rules! parse_data_json {
 
 macro_rules! parse_data_string {
     ($in:ident, $error:ty) => {
-        match $in {
-            Value::String(s) => Ok(s),
-            other => Err(E::invalid_type(
-                crate::event::format::value_to_unexpected(&other),
-                &"a string",
-            )),
-        }
+        parse_field!($in, String, $error)
     };
 }
 
@@ -78,31 +67,25 @@ macro_rules! parse_json_data_base64 {
 
 macro_rules! parse_data_base64 {
     ($in:ident, $error:ty) => {
-        match $in {
-            Value::String(s) => base64::decode(&s).map_err(|e| {
+        parse_field!($in, String, $error).and_then(|s| {
+            base64::decode(&s).map_err(|e| {
                 <$error>::invalid_value(serde::de::Unexpected::Str(&s), &e.to_string().as_str())
-            }),
-            other => Err(E::invalid_type(
-                crate::event::format::value_to_unexpected(&other),
-                &"a string",
-            )),
-        }
+            })
+        })
     };
 }
 
 pub(crate) trait EventFormatDeserializer {
     fn deserialize_attributes<E: serde::de::Error>(
-        map: &mut BTreeMap<String, Value>,
+        map: &mut Map<String, Value>,
     ) -> Result<Attributes, E>;
 
     fn deserialize_data<E: serde::de::Error>(
         content_type: &str,
-        map: &mut BTreeMap<String, Value>,
+        map: &mut Map<String, Value>,
     ) -> Result<Option<Data>, E>;
 
-    fn deserialize_event<E: serde::de::Error>(
-        mut map: BTreeMap<String, Value>,
-    ) -> Result<Event, E> {
+    fn deserialize_event<E: serde::de::Error>(mut map: Map<String, Value>) -> Result<Event, E> {
         let attributes = Self::deserialize_attributes(&mut map)?;
         let data = Self::deserialize_data(
             attributes.datacontenttype().unwrap_or("application/json"),
@@ -110,9 +93,13 @@ pub(crate) trait EventFormatDeserializer {
         )?;
         let extensions = map
             .into_iter()
-            .map(|(k, v)| Ok((k, ExtensionValue::deserialize(v.into_deserializer())?)))
-            .collect::<Result<HashMap<String, ExtensionValue>, serde_value::DeserializerError>>()
-            .map_err(E::custom)?;
+            .map(|(k, v)| {
+                Ok((
+                    k,
+                    ExtensionValue::deserialize(v.into_deserializer()).map_err(E::custom)?,
+                ))
+            })
+            .collect::<Result<HashMap<String, ExtensionValue>, E>>()?;
 
         Ok(Event {
             attributes,
@@ -136,20 +123,12 @@ impl<'de> Deserialize<'de> for Event {
     where
         D: Deserializer<'de>,
     {
-        let map = match Value::deserialize(deserializer)? {
-            Value::Map(m) => Ok(m),
-            v => Err(Error::invalid_type(value_to_unexpected(&v), &"a map")),
-        }?;
+        let root_value = Value::deserialize(deserializer)?;
+        let mut map: Map<String, Value> =
+            Map::deserialize(root_value.into_deserializer()).map_err(D::Error::custom)?;
 
-        let mut map: BTreeMap<String, Value> = map
-            .into_iter()
-            .map(|(k, v)| match k {
-                Value::String(s) => Ok((s, v)),
-                k => Err(Error::invalid_type(value_to_unexpected(&k), &"a string")),
-            })
-            .collect::<Result<BTreeMap<String, Value>, <D as Deserializer<'de>>::Error>>()?;
-
-        match parse_field!(map, "specversion", String, <D as Deserializer<'de>>::Error)?.as_str() {
+        match extract_field!(map, "specversion", String, <D as Deserializer<'de>>::Error)?.as_str()
+        {
             "0.3" => EventFormatDeserializerV03::deserialize_event(map),
             "1.0" => EventFormatDeserializerV10::deserialize_event(map),
             s => Err(D::Error::unknown_variant(
@@ -173,30 +152,5 @@ impl Serialize for Event {
                 EventFormatSerializerV10::serialize(a, &self.data, &self.extensions, serializer)
             }
         }
-    }
-}
-
-// This should be provided by the Value package itself
-pub(crate) fn value_to_unexpected(v: &Value) -> Unexpected {
-    match v {
-        Value::Bool(b) => serde::de::Unexpected::Bool(*b),
-        Value::U8(n) => serde::de::Unexpected::Unsigned(*n as u64),
-        Value::U16(n) => serde::de::Unexpected::Unsigned(*n as u64),
-        Value::U32(n) => serde::de::Unexpected::Unsigned(*n as u64),
-        Value::U64(n) => serde::de::Unexpected::Unsigned(*n),
-        Value::I8(n) => serde::de::Unexpected::Signed(*n as i64),
-        Value::I16(n) => serde::de::Unexpected::Signed(*n as i64),
-        Value::I32(n) => serde::de::Unexpected::Signed(*n as i64),
-        Value::I64(n) => serde::de::Unexpected::Signed(*n),
-        Value::F32(n) => serde::de::Unexpected::Float(*n as f64),
-        Value::F64(n) => serde::de::Unexpected::Float(*n),
-        Value::Char(c) => serde::de::Unexpected::Char(*c),
-        Value::String(s) => serde::de::Unexpected::Str(s),
-        Value::Unit => serde::de::Unexpected::Unit,
-        Value::Option(_) => serde::de::Unexpected::Option,
-        Value::Newtype(_) => serde::de::Unexpected::NewtypeStruct,
-        Value::Seq(_) => serde::de::Unexpected::Seq,
-        Value::Map(_) => serde::de::Unexpected::Map,
-        Value::Bytes(b) => serde::de::Unexpected::Bytes(b),
     }
 }

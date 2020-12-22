@@ -24,13 +24,10 @@ impl MessageRecord {
 
     pub fn from_event(event: Event, version: headers::MqttVersion) -> Result<Self> {
         match version {
-            headers::MqttVersion::V5 => {
+            headers::MqttVersion::MQTT_5 => {
                 BinaryDeserializer::deserialize_binary(event, MessageRecord::new())
             }
-            headers::MqttVersion::V3_1 => {
-                StructuredDeserializer::deserialize_structured(event, MessageRecord::new())
-            }
-            headers::MqttVersion::V3_1_1 => {
+            headers::MqttVersion::MQTT_3 => {
                 StructuredDeserializer::deserialize_structured(event, MessageRecord::new())
             }
         }
@@ -127,11 +124,14 @@ impl StructuredSerializer<MessageRecord> for MessageRecord {
 }
 
 pub trait MessageBuilderExt {
-    fn message_record(self, message_record: &MessageRecord) -> MessageBuilder;
+    fn event(self, event: Event, version: headers::MqttVersion) -> MessageBuilder;
 }
 
 impl MessageBuilderExt for MessageBuilder {
-    fn message_record(mut self, message_record: &MessageRecord) -> MessageBuilder {
+    fn event(mut self, event: Event, version: headers::MqttVersion) -> MessageBuilder {
+        let message_record =
+            MessageRecord::from_event(event, version).expect("error while serializing the event");
+
         self = self.properties(message_record.headers.clone());
 
         if let Some(s) = message_record.payload.as_ref() {

@@ -29,7 +29,6 @@ pub(crate) static CLOUDEVENTS_JSON_HEADER: &'static str = "application/cloudeven
 pub(crate) static CONTENT_TYPE: &'static str = "content-type";
 
 pub enum MqttVersion {
-    V3_1,
-    V3_1_1,
-    V5,
+    MQTT_3,
+    MQTT_5,
 }

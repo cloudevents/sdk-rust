@@ -1,4 +1,5 @@
 use super::headers;
+use crate::headers::MqttVersion::MQTT_5;
 use cloudevents::event::SpecVersion;
 use cloudevents::message::{
     BinaryDeserializer, BinarySerializer, Error, MessageAttributeValue, Result,
@@ -22,7 +23,7 @@ impl MessageRecord {
         }
     }
 
-    pub fn from_event(event: Event, version: headers::MqttVersion) -> Result<Self> {
+    pub fn from_event(event: Event, version: &headers::MqttVersion) -> Result<Self> {
         match version {
             headers::MqttVersion::MQTT_5 => {
                 BinaryDeserializer::deserialize_binary(event, MessageRecord::new())
@@ -130,9 +131,14 @@ pub trait MessageBuilderExt {
 impl MessageBuilderExt for MessageBuilder {
     fn event(mut self, event: Event, version: headers::MqttVersion) -> MessageBuilder {
         let message_record =
-            MessageRecord::from_event(event, version).expect("error while serializing the event");
+            MessageRecord::from_event(event, &version).expect("error while serializing the event");
 
-        self = self.properties(message_record.headers.clone());
+        match version {
+            MQTT_5 => {
+                self = self.properties(message_record.headers.clone());
+            }
+            _ => (),
+        }
 
         if let Some(s) = message_record.payload.as_ref() {
             self = self.payload(s.to_vec());

@@ -101,8 +101,8 @@ impl MessageExt for Message {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::mqtt_producer_record::MessageRecord;
 
+    use crate::headers::MqttVersion::{MQTT_3, MQTT_5};
     use crate::MessageBuilderExt;
     use chrono::Utc;
     use cloudevents::event::Data;
@@ -127,27 +127,23 @@ mod tests {
             .build()
             .unwrap();
 
-        let message_record = MessageRecord::from_event(
-            EventBuilderV10::new()
-                .id("0001")
-                .ty("example.test")
-                .time(time)
-                .source("http://localhost")
-                .extension("someint", "10")
-                .data("application/json", json!({"hello": "world"}))
-                .build()
-                .unwrap(),
-            headers::MqttVersion::V5,
-        )
-        .unwrap();
+        let event = EventBuilderV10::new()
+            .id("0001")
+            .ty("example.test")
+            .time(time)
+            .source("http://localhost")
+            .extension("someint", "10")
+            .data("application/json", json!({"hello": "world"}))
+            .build()
+            .unwrap();
 
         let msg = MessageBuilder::new()
             .topic("test")
-            .message_record(&message_record)
+            .event(event, MQTT_5)
             .qos(1)
             .finalize();
 
-        assert_eq!(msg.to_event(headers::MqttVersion::V5).unwrap(), expected)
+        assert_eq!(msg.to_event().unwrap(), expected)
     }
 
     #[test]
@@ -172,18 +168,12 @@ mod tests {
             .build()
             .unwrap();
 
-        let serialized_event =
-            StructuredDeserializer::deserialize_structured(input, MessageRecord::new()).unwrap();
-
         let msg = MessageBuilder::new()
             .topic("test")
-            .message_record(&serialized_event)
+            .event(input, MQTT_3)
             .qos(1)
             .finalize();
 
-        assert_eq!(
-            msg.to_event(headers::MqttVersion::V3_1_1).unwrap(),
-            expected
-        )
+        assert_eq!(msg.to_event().unwrap(), expected)
     }
 }

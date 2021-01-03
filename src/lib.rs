@@ -41,8 +41,10 @@
 #![deny(broken_intra_doc_links)]
 #![no_std]
 
-extern crate core_error;
+#[cfg(not(feature = "std"))]
 extern crate no_std_compat as std;
+#[cfg(feature = "std")]
+extern crate std;
 
 extern crate serde;
 extern crate serde_json;

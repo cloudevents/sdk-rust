@@ -65,16 +65,17 @@ pub enum Error {
         #[snafu(source(from(serde_json::Error, DisplayError)))]
         source: DisplayError<serde_json::Error>,
     },
+
+    #[cfg(feature = "std")]
     #[snafu(display("IO Error: {}", source))]
     #[snafu(context(false))]
-    IOError {
-        #[snafu(source(from(super::no_std_io::IoError, DisplayError)))]
-        source: DisplayError<super::no_std_io::IoError>,
-    },
+    IOError { source: std::io::Error },
+
+    #[cfg(feature = "std")]
     #[snafu(display("Other error: {}", source))]
     Other {
-        #[snafu(source(from(Box<dyn core_error::Error>, DisplayError)))]
-        source: DisplayError<Box<dyn core_error::Error>>,
+        //#[snafu(source(from(Box<dyn core_error::Error>, DisplayError)))]
+        source: Box<dyn std::error::Error + Send + Sync>,
     },
 }
 

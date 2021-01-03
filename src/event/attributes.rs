@@ -6,7 +6,11 @@ use chrono::{DateTime, Utc};
 use serde::Serializer;
 use std::fmt;
 use std::prelude::v1::*;
+
+#[cfg(feature = "std")]
 use url::Url;
+#[cfg(not(feature = "std"))]
+use String as Url;
 
 /// Enum representing a borrowed value of a CloudEvent attribute.
 /// This represents the types defined in the [CloudEvent spec type system](https://github.com/cloudevents/spec/blob/v1.0/spec.md#type-system)
@@ -253,6 +257,7 @@ impl Attributes {
     }
 }
 
+#[cfg(feature = "std")]
 #[cfg(not(target_arch = "wasm32"))]
 pub(crate) fn default_hostname() -> Url {
     Url::parse(
@@ -269,6 +274,7 @@ pub(crate) fn default_hostname() -> Url {
     .unwrap()
 }
 
+#[cfg(feature = "std")]
 #[cfg(target_arch = "wasm32")]
 pub(crate) fn default_hostname() -> Url {
     use std::str::FromStr;
@@ -281,4 +287,9 @@ pub(crate) fn default_hostname() -> Url {
             .as_str(),
     )
     .unwrap()
+}
+
+#[cfg(not(feature = "std"))]
+pub(crate) fn default_hostname() -> Url {
+    String::from("http://localhost")
 }

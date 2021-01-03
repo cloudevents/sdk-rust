@@ -4,8 +4,12 @@ use crate::message::{BinarySerializer, MessageAttributeValue};
 use chrono::{DateTime, Utc};
 use core::fmt::Debug;
 use std::prelude::v1::*;
-use url::Url;
 use uuid::Uuid;
+
+#[cfg(feature = "std")]
+use url::Url;
+#[cfg(not(feature = "std"))]
+use String as Url;
 
 pub(crate) const ATTRIBUTE_NAMES: [&str; 8] = [
     "specversion",
@@ -206,6 +210,20 @@ impl AttributesConverter for Attributes {
         self
     }
 
+    #[cfg(feature = "std")]
+    fn into_v03(self) -> AttributesV03 {
+        AttributesV03 {
+            id: self.id,
+            ty: self.ty,
+            source: self.source,
+            datacontenttype: self.datacontenttype,
+            schemaurl: self.dataschema,
+            subject: self.subject,
+            time: self.time,
+        }
+    }
+
+    #[cfg(not(feature = "std"))]
     fn into_v03(self) -> AttributesV03 {
         AttributesV03 {
             id: self.id,

@@ -3,7 +3,11 @@ use chrono::{DateTime, Utc};
 use std::convert::TryInto;
 use std::fmt;
 use std::prelude::v1::*;
+
+#[cfg(feature = "std")]
 use url::Url;
+#[cfg(not(feature = "std"))]
+use String as Url;
 
 /// Union type representing a [CloudEvent context attribute type](https://github.com/cloudevents/spec/blob/v1.0/spec.md#type-system).
 #[derive(PartialEq, Eq, Debug, Clone)]
@@ -33,11 +37,20 @@ impl TryInto<DateTime<Utc>> for MessageAttributeValue {
 impl TryInto<Url> for MessageAttributeValue {
     type Error = super::Error;
 
+    #[cfg(feature = "std")]
     fn try_into(self) -> Result<Url, Self::Error> {
         match self {
             MessageAttributeValue::Uri(u) => Ok(u),
             MessageAttributeValue::UriRef(u) => Ok(u),
             v => Ok(Url::parse(v.to_string().as_ref())?),
+        }
+    }
+    #[cfg(not(feature = "std"))]
+    fn try_into(self) -> Result<Url, Self::Error> {
+        match self {
+            MessageAttributeValue::Uri(u) => Ok(u),
+            MessageAttributeValue::UriRef(u) => Ok(u),
+            v => Ok(v.to_string()),
         }
     }
 }

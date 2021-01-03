@@ -45,7 +45,7 @@ use std::collections::HashMap;
 use std::prelude::v1::*;
 use url::Url;
 
-use core::fmt::{self,Debug, Display};
+use core::fmt::{self, Debug, Display};
 /// Data structure that represents a [CloudEvent](https://github.com/cloudevents/spec/blob/master/spec.md).
 /// It provides methods to get the attributes through [`AttributesReader`]
 /// and write them through [`AttributesWriter`].
@@ -237,7 +237,7 @@ impl Event {
     }
 }
 
-// Facilitates compatibility with snafu::Error for external objects 
+// Facilitates compatibility with snafu::Error for external objects
 
 #[derive(PartialEq, Eq, Clone)]
 pub struct DisplayError<T>(pub T);
@@ -261,7 +261,6 @@ where
 }
 
 impl<T> snafu::Error for DisplayError<T> where T: Display + Debug {}
-
 
 #[cfg(test)]
 mod tests {

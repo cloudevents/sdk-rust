@@ -7,6 +7,7 @@ mod test_data;
 use test_data::*;
 
 /// This test is a parametrized test that uses data from tests/test_data
+#[cfg(feature="std")]
 #[rstest(
     in_event,
     out_json,
@@ -53,6 +54,7 @@ fn serialize_should_succeed(in_event: Event, out_json: Value) {
 }
 
 /// This test is a parametrized test that uses data from tests/test_data
+#[cfg(feature="std")]
 #[rstest(
     in_json,
     out_event,

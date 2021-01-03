@@ -1,4 +1,4 @@
-use super::{DisplayError, Event};
+use super::{url, DisplayError, Event};
 use snafu::Snafu;
 
 /// Trait to implement a builder for [`Event`]:

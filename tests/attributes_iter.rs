@@ -3,6 +3,7 @@ use cloudevents::event::AttributeValue;
 use cloudevents::event::SpecVersion;
 use test_data::*;
 
+#[cfg(feature="std")]
 #[test]
 fn iter_v10_test() {
     let in_event = v10::full_no_data();
@@ -14,6 +15,7 @@ fn iter_v10_test() {
     );
 }
 
+#[cfg(feature="std")]
 #[test]
 fn iter_v03_test() {
     let in_event = v03::full_json_data();

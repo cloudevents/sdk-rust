@@ -1,8 +1,14 @@
 use super::*;
 use cloudevents::{Event, EventBuilder, EventBuilderV10};
 use serde_json::{json, Value};
-use url::Url;
 
+#[cfg(feature="std")]
+use url::Url;
+#[cfg(not(feature="std"))]
+use String as Url;
+use cloudevents::event::UrlExtend;
+
+#[cfg(feature="std")]
 pub fn minimal() -> Event {
     EventBuilderV10::new()
         .id(id())
@@ -21,6 +27,7 @@ pub fn minimal_json() -> Value {
     })
 }
 
+#[cfg(feature="std")]
 pub fn full_no_data() -> Event {
     let (string_ext_name, string_ext_value) = string_extension();
     let (bool_ext_name, bool_ext_value) = bool_extension();
@@ -57,6 +64,7 @@ pub fn full_no_data_json() -> Value {
     })
 }
 
+#[cfg(feature="std")]
 pub fn full_json_data() -> Event {
     let (string_ext_name, string_ext_value) = string_extension();
     let (bool_ext_name, bool_ext_value) = bool_extension();
@@ -122,6 +130,7 @@ pub fn full_json_base64_data_json() -> Value {
     })
 }
 
+#[cfg(feature="std")]
 pub fn full_xml_string_data() -> Event {
     let (string_ext_name, string_ext_value) = string_extension();
     let (bool_ext_name, bool_ext_value) = bool_extension();
@@ -141,6 +150,7 @@ pub fn full_xml_string_data() -> Event {
         .unwrap()
 }
 
+#[cfg(feature="std")]
 pub fn full_xml_binary_data() -> Event {
     let (string_ext_name, string_ext_value) = string_extension();
     let (bool_ext_name, bool_ext_value) = bool_extension();

@@ -17,26 +17,25 @@ categories = ["web-programming", "encoding", "data-structures"]
 name = "cloudevents"
 
 [features]
-default = ["std"]
+default = ["no_std"]
+std = ["no_std_compat_bypass","snafu/std", "snafu/guide", "serde/std", "serde_json/std", "chrono/std", "base64/std", "url"]
+no_std = ["no_std_compat_bypass", "serde_no_std", "chrono_no_std", "base64/alloc"]
+
+no_std_compat_bypass=["no-std-compat/std"]
+no_std_compat_layer=["no-std-compat/alloc", "no-std-compat/compat_hash", "no-std-compat/compat_sync"]
 chrono_no_std = ["chrono/serde", "chrono/alloc", "chrono/clock"]
-no_std = ["no-std-compat", "serde_no_std", "chrono_no_std", "base64/alloc"]
 serde_no_std = ["serde/derive", "serde/alloc", "serde_json/alloc"]
-std = ["snafu/std", "snafu/guide", "serde/std", "serde_json/std", "chrono/std", "base64/std", "url"]
 
 [dependencies]
 base64 = { version = "^0.12", default-features = false }
-chrono = { version = "^0.4", default-features = false }
+chrono = { version = "^0.4", default-features = false , features = ["serde", "clock"]}
 delegate-attr = "^0.2"
 serde = { version = "^1.0", default-features=false }
 serde_json = { version = "^1.0", default-features = false, features = ["alloc"] }
-serde-value = "^0.7"
-snafu = { version = "^0.6",default-features = false }
+snafu = { version = "^0.6", default-features = false }
 url = { version = "^2.1", features = ["serde"], optional=true }
 
-[dependencies.no-std-compat]
-version = "^0.4.1"
-features = ["alloc", "compat_hash", "compat_sync", "compat_macros"]
-optional=true
+no-std-compat = { version = "^0.4.1", features = ["alloc", "compat_hash", "compat_sync"], optional=true }
 
 [target."cfg(not(target_arch = \"wasm32\"))".dependencies]
 hostname = "^0.3"

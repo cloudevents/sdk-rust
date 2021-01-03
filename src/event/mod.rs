@@ -41,9 +41,39 @@ pub(crate) use v10::EventFormatSerializer as EventFormatSerializerV10;
 use chrono::{DateTime, Utc};
 use delegate_attr::delegate;
 use std::collections::HashMap;
-//use std::fmt;
 use std::prelude::v1::*;
+
+#[cfg(feature = "std")]
 use url::Url;
+#[cfg(not(feature = "std"))]
+use String as Url;
+
+pub trait UrlExtend {
+    fn parse(&self) -> Result<Url, url::ParseError>;
+}
+
+impl UrlExtend for Url {
+    fn parse(&self) -> Result<Url, url::ParseError> {
+        Ok(self.to_string())
+    }
+}
+
+pub mod url {
+    use super::{fmt, String};
+
+    #[derive(Debug, Clone)]
+    pub enum ParseError {
+        Error(String),
+    }
+
+    impl snafu::Error for ParseError {}
+
+    impl fmt::Display for ParseError {
+        fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+            self.fmt(f)
+        }
+    }
+}
 
 use core::fmt::{self, Debug, Display};
 /// Data structure that represents a [CloudEvent](https://github.com/cloudevents/spec/blob/master/spec.md).

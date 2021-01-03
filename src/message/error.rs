@@ -2,6 +2,11 @@ use core::fmt::{self, Debug, Display};
 use snafu::Snafu;
 use std::prelude::v1::*;
 
+#[cfg(feature = "std")]
+use url;
+#[cfg(not(feature = "std"))]
+use String as url;
+
 pub struct DisplayError<T>(pub T);
 
 impl<T> Debug for DisplayError<T>
@@ -47,12 +52,19 @@ pub enum Error {
         #[snafu(source(from(chrono::ParseError, DisplayError)))]
         source: DisplayError<chrono::ParseError>,
     },
+
     #[snafu(display("Error while parsing a url: {}", source))]
     #[snafu(context(false))]
     ParseUrlError {
+        #[cfg(not(feature = "std"))]
+        #[snafu(source(from(String, DisplayError)))]
+        source: DisplayError<String>,
+
+        #[cfg(feature = "std")]
         #[snafu(source(from(url::ParseError, DisplayError)))]
         source: DisplayError<url::ParseError>,
     },
+
     #[snafu(display("Error while decoding base64: {}", source))]
     #[snafu(context(false))]
     Base64DecodingError {

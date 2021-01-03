@@ -5,6 +5,7 @@ use cloudevents::{AttributesReader, EventBuilder, EventBuilderV03, EventBuilderV
 use std::convert::TryInto;
 use test_data::*;
 
+#[cfg(feature="std")]
 #[test]
 fn message_v03_roundtrip_structured() -> Result<()> {
     assert_eq!(
@@ -14,6 +15,7 @@ fn message_v03_roundtrip_structured() -> Result<()> {
     Ok(())
 }
 
+#[cfg(feature="std")]
 #[test]
 fn message_v03_roundtrip_binary() -> Result<()> {
     //TODO this code smells because we're missing a proper way in the public APIs
@@ -33,6 +35,7 @@ fn message_v03_roundtrip_binary() -> Result<()> {
     Ok(())
 }
 
+#[cfg(feature="std")]
 #[test]
 fn message_v10_roundtrip_structured() -> Result<()> {
     assert_eq!(
@@ -42,6 +45,7 @@ fn message_v10_roundtrip_structured() -> Result<()> {
     Ok(())
 }
 
+#[cfg(feature="std")]
 #[test]
 fn message_v10_roundtrip_binary() -> Result<()> {
     //TODO this code smells because we're missing a proper way in the public APIs

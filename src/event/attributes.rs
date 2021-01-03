@@ -7,10 +7,10 @@ use serde::Serializer;
 use std::fmt;
 use std::prelude::v1::*;
 
+#[cfg(not(feature = "std"))]
+use std::string::String as Url;
 #[cfg(feature = "std")]
 use url::Url;
-#[cfg(not(feature = "std"))]
-use String as Url;
 
 /// Enum representing a borrowed value of a CloudEvent attribute.
 /// This represents the types defined in the [CloudEvent spec type system](https://github.com/cloudevents/spec/blob/v1.0/spec.md#type-system)

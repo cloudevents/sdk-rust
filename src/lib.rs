@@ -48,7 +48,6 @@ extern crate std;
 
 extern crate serde;
 extern crate serde_json;
-extern crate serde_value;
 extern crate snafu;
 
 pub mod event;

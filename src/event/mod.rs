@@ -70,7 +70,12 @@ pub mod url {
 
     impl fmt::Display for ParseError {
         fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-            self.fmt(f)
+            if let ParseError::Error(v) = self {
+                Ok(())
+            }
+            else{
+                Err(fmt::Error{})
+            }
         }
     }
 }

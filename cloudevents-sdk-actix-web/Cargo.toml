@@ -1,6 +1,6 @@
 [package]
 name = "cloudevents-sdk-actix-web"
-version = "0.3.0"
+version = "0.3.1"
 authors = ["Francesco Guardiani <francescoguard@gmail.com>"]
 license-file = "../LICENSE"
 edition = "2018"

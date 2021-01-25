@@ -141,9 +141,8 @@ impl MessageBuilderExt for MessageBuilder {
         }
 
         match message_record.payload {
-            Some(s) =>
-                self = self.payload(s),
-            None => ()
+            Some(s) => self = self.payload(s),
+            None => (),
         }
 
         self

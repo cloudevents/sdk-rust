@@ -1,5 +1,4 @@
-//! This library provides Mqtt protocol bindings for CloudEvents
-//! using the [paho.mqtt.rust](https://github.com/eclipse/paho.mqtt.rust) library.\\
+//! This library provides Mqtt protocol bindings for CloudEvents using the [paho.mqtt.rust](https://github.com/eclipse/paho.mqtt.rust) library.\\
 #[macro_use]
 mod headers;
 mod mqtt_consumer_record;

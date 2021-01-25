@@ -135,13 +135,15 @@ impl MessageBuilderExt for MessageBuilder {
 
         match version {
             MQTT_5 => {
-                self = self.properties(message_record.headers.clone());
+                self = self.properties(message_record.headers);
             }
             _ => (),
         }
 
-        if let Some(s) = message_record.payload.as_ref() {
-            self = self.payload(s.to_vec());
+        match message_record.payload {
+            Some(s) =>
+                self = self.payload(s),
+            None => ()
         }
 
         self

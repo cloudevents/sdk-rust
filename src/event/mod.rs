@@ -72,9 +72,8 @@ pub mod url {
         fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
             if let ParseError::Error(v) = self {
                 Ok(())
-            }
-            else{
-                Err(fmt::Error{})
+            } else {
+                Err(fmt::Error {})
             }
         }
     }

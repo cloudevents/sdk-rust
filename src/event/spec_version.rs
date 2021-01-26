@@ -1,6 +1,4 @@
 use super::{v03, v10};
-use serde::export::Formatter;
-use snafu::Snafu;
 use std::convert::TryFrom;
 use std::fmt;
 use std::fmt::Formatter;

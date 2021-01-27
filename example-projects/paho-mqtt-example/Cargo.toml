@@ -9,7 +9,7 @@ edition = "2018"
 [dependencies]
 async-trait = "^0.1.33"
 cloudevents-sdk = { path = "../.." }
-cloudevents-sdk-mqtt = { path = "../../cloudevents-sdk-paho-mqtt"}
+cloudevents-sdk-paho-mqtt = { path = "../../cloudevents-sdk-paho-mqtt"}
 env_logger = "0.7.1"
 paho-mqtt = "0.8"
 serde_json = "^1.0"

@@ -98,7 +98,7 @@ jobs:
       with:
         command: build
         toolchain: ${{ matrix.toolchain }}
-        args: --target wasm32-unknown-unknown --package cloudevents-sdk --package cloudevents-sdk-reqwest
+        args: --target wasm32-unknown-unknown --features vendored --package cloudevents-sdk --package cloudevents-sdk-reqwest
 
     # Build examples
     - uses: actions-rs/cargo@v1
@@ -107,7 +107,7 @@ jobs:
       with:
         command: build
         toolchain: ${{ matrix.toolchain }}
-        args: --target ${{ matrix.target }} --manifest-path ./example-projects/reqwest-wasm-example/Cargo.toml
+        args: --target ${{ matrix.target }} --features vendored --manifest-path ./example-projects/reqwest-wasm-example/Cargo.toml
 
     - uses: actions-rs/cargo@v1
       name: "Build rdkafka-example"

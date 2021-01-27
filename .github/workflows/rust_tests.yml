@@ -76,7 +76,7 @@ jobs:
       with:
         command: build
         toolchain: ${{ matrix.toolchain }}
-        args: --target ${{ matrix.target }} --workspace
+        args: --target ${{ matrix.target }} --features vendored --workspace
       env:
         CC: musl-gcc
         CXX: g++

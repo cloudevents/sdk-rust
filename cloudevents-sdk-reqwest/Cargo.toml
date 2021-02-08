@@ -16,16 +16,16 @@ categories = ["web-programming", "encoding", "web-programming::http-client"]
 async-trait = "^0.1.33"
 cloudevents-sdk = { version = "0.3.0", path = ".." }
 lazy_static = "1.4.0"
-bytes = "^0.5"
+bytes = "^1.0"
 
 [dependencies.reqwest]
-version = "0.10.4"
+version = "^0.11"
 default-features = false
 features = ["rustls-tls"]
 
 [dev-dependencies]
 mockito = "0.25.1"
-tokio = { version = "^0.2", features = ["full"] }
+tokio = { version = "^1.0", features = ["full"] }
 url = { version = "^2.1" }
 serde_json = "^1.0"
 chrono = { version = "^0.4", features = ["serde"] }

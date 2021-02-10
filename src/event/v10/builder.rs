@@ -1,11 +1,17 @@
 use super::Attributes as AttributesV10;
 use crate::event::{
-    Attributes, Data, Event, EventBuilderError, ExtensionValue, TryIntoTime, TryIntoUrl,
+    Attributes, Data, DisplayError, Event, EventBuilderError, ExtensionValue, TryIntoTime,
+    TryIntoUrl,
 };
 use crate::message::MessageAttributeValue;
 use chrono::{DateTime, Utc};
 use std::collections::HashMap;
 use std::convert::TryInto;
+use std::prelude::v1::*;
+
+#[cfg(not(feature = "std"))]
+use super::super::Url;
+#[cfg(feature = "std")]
 use url::Url;
 
 /// Builder to create a CloudEvent V1.0
@@ -35,7 +41,7 @@ impl EventBuilder {
             Err(e) => {
                 self.error = Some(EventBuilderError::ParseUrlError {
                     attribute_name: "source",
-                    source: e,
+                    source: DisplayError(e),
                 })
             }
         };
@@ -58,7 +64,7 @@ impl EventBuilder {
             Err(e) => {
                 self.error = Some(EventBuilderError::ParseTimeError {
                     attribute_name: "time",
-                    source: e,
+                    source: DisplayError(e),
                 })
             }
         };
@@ -98,7 +104,7 @@ impl EventBuilder {
             Err(e) => {
                 self.error = Some(EventBuilderError::ParseUrlError {
                     attribute_name: "dataschema",
-                    source: e,
+                    source: DisplayError(e),
                 })
             }
         };

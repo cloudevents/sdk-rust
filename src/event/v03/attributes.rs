@@ -3,8 +3,13 @@ use crate::event::AttributesV10;
 use crate::event::{AttributesReader, AttributesWriter, SpecVersion};
 use crate::message::{BinarySerializer, MessageAttributeValue};
 use chrono::{DateTime, Utc};
-use url::Url;
+use std::prelude::v1::*;
 use uuid::Uuid;
+
+#[cfg(not(feature = "std"))]
+use super::super::Url;
+#[cfg(feature = "std")]
+use url::Url;
 
 pub(crate) const ATTRIBUTE_NAMES: [&str; 8] = [
     "specversion",
@@ -161,7 +166,7 @@ impl Default for Attributes {
             datacontenttype: None,
             schemaurl: None,
             subject: None,
-            time: Some(Utc::now()),
+            time: Some(chrono::offset::Utc::now()),
         }
     }
 }
@@ -221,8 +226,10 @@ impl crate::event::message::AttributesDeserializer for super::Attributes {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::event::UrlExtend;
     use chrono::NaiveDateTime;
 
+    #[cfg(feature = "std")]
     #[test]
     fn iterator_test_v03() {
         let a = Attributes {
@@ -253,6 +260,43 @@ mod tests {
             (
                 "source",
                 AttributeValue::URIRef(&Url::parse("https://example.net").unwrap())
+            ),
+            b.next().unwrap()
+        );
+        assert_eq!(("time", AttributeValue::Time(&time)), b.next().unwrap());
+    }
+
+    #[cfg(not(feature = "std"))]
+    #[test]
+    fn iterator_test_v03() {
+        let a = Attributes {
+            id: String::from("1"),
+            ty: String::from("someType"),
+            source: Url::parse(&"https://example.net".to_string()).unwrap(),
+            datacontenttype: None,
+            schemaurl: None,
+            subject: None,
+            time: Some(DateTime::<Utc>::from_utc(
+                NaiveDateTime::from_timestamp(61, 0),
+                Utc,
+            )),
+        };
+        let b = &mut a.into_iter();
+        let time = DateTime::<Utc>::from_utc(NaiveDateTime::from_timestamp(61, 0), Utc);
+
+        assert_eq!(
+            ("specversion", AttributeValue::SpecVersion(SpecVersion::V03)),
+            b.next().unwrap()
+        );
+        assert_eq!(("id", AttributeValue::String("1")), b.next().unwrap());
+        assert_eq!(
+            ("type", AttributeValue::String("someType")),
+            b.next().unwrap()
+        );
+        assert_eq!(
+            (
+                "source",
+                AttributeValue::URIRef(&Url::parse(&"https://example.net".to_string()).unwrap())
             ),
             b.next().unwrap()
         );

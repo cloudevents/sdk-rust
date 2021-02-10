@@ -1,5 +1,11 @@
 use chrono::{DateTime, Utc};
-use url::Url;
+use std::prelude::v1::*;
+
+use super::url;
+#[cfg(not(feature = "std"))]
+use super::{Url, UrlExtend};
+#[cfg(feature = "std")]
+use url::{self, ParseError, Url};
 
 /// Trait to define conversion to [`Url`]
 pub trait TryIntoUrl {
@@ -12,12 +18,21 @@ impl TryIntoUrl for Url {
     }
 }
 
+#[cfg(not(feature = "std"))]
+impl TryIntoUrl for &str {
+    fn into_url(self) -> Result<Url, url::ParseError> {
+        Url::parse(&self.to_string())
+    }
+}
+
+#[cfg(feature = "std")]
 impl TryIntoUrl for &str {
     fn into_url(self) -> Result<Url, url::ParseError> {
         Url::parse(self)
     }
 }
 
+#[cfg(feature = "std")]
 impl TryIntoUrl for String {
     fn into_url(self) -> Result<Url, url::ParseError> {
         self.as_str().into_url()

@@ -16,22 +16,33 @@ categories = ["web-programming", "encoding", "data-structures"]
 [lib]
 name = "cloudevents"
 
+[features]
+default = ["no_std"]
+std = ["no_std_compat_bypass","snafu/std", "snafu/guide", "serde/std", "serde_json/std", "chrono/std", "base64/std", "url"]
+no_std = ["no_std_compat_bypass", "serde_no_std", "chrono_no_std", "base64/alloc"]
+
+no_std_compat_bypass=["no-std-compat/std"]
+no_std_compat_layer=["no-std-compat/alloc", "no-std-compat/compat_hash", "no-std-compat/compat_sync"]
+chrono_no_std = ["chrono/serde", "chrono/alloc", "chrono/clock"]
+serde_no_std = ["serde/derive", "serde/alloc", "serde_json/alloc"]
+
 [dependencies]
-serde = { version = "^1.0", features = ["derive"] }
-serde_json = "^1.0"
-chrono = { version = "^0.4", features = ["serde"] }
+base64 = { version = "^0.12", default-features = false }
+chrono = { version = "^0.4", default-features = false , features = ["serde", "clock"]}
 delegate-attr = "^0.2"
-base64 = "^0.12"
-url = { version = "^2.1", features = ["serde"] }
-snafu = "^0.6"
-bitflags = "^1.2"
+serde = { version = "^1.0", default-features=false }
+serde_json = { version = "^1.0", default-features = false, features = ["alloc"] }
+snafu = { version = "^0.6", default-features = false }
+url = { version = "^2.1", features = ["serde"], optional=true }
+
+no-std-compat = { version = "^0.4.1", features = ["alloc", "compat_hash", "compat_sync"], optional=true }
 
 [target."cfg(not(target_arch = \"wasm32\"))".dependencies]
 hostname = "^0.3"
 uuid = { version = "^0.8", features = ["v4"] }
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
-web-sys = { version = "^0.3", features = ["Window", "Location"] }
+web-sys = { version = "^0.3", default-features = false,features = ["Window", "Location"] }
 uuid = { version = "^0.8", features = ["v4", "wasm-bindgen"] }
 
 [dev-dependencies]

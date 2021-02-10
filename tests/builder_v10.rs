@@ -7,8 +7,14 @@ use cloudevents::event::{
 };
 use cloudevents::EventBuilderV10;
 use std::convert::TryInto;
-use url::Url;
 
+use cloudevents::event::UrlExtend;
+#[cfg(feature = "std")]
+use url::Url;
+#[cfg(not(feature = "std"))]
+use String as Url;
+
+#[cfg(feature = "std")]
 #[test]
 fn build_event() {
     let id = "aaa";

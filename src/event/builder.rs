@@ -1,4 +1,4 @@
-use super::Event;
+use super::{url, DisplayError, Event};
 use snafu::Snafu;
 
 /// Trait to implement a builder for [`Event`]:
@@ -41,7 +41,8 @@ pub enum Error {
     ))]
     ParseTimeError {
         attribute_name: &'static str,
-        source: chrono::ParseError,
+        #[snafu(source(from(chrono::ParseError, DisplayError)))]
+        source: DisplayError<chrono::ParseError>,
     },
     #[snafu(display(
         "Error while setting attribute '{}' with uri/uriref type: {}",
@@ -50,6 +51,7 @@ pub enum Error {
     ))]
     ParseUrlError {
         attribute_name: &'static str,
-        source: url::ParseError,
+        #[snafu(source(from(url::ParseError, DisplayError)))]
+        source: DisplayError<url::ParseError>,
     },
 }

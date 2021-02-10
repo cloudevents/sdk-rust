@@ -1,85 +1,14 @@
-//! Provides [`Event`] data structure, [`EventBuilder`] and other facilities to work with [`Event`].
-
-mod attributes;
-mod builder;
-mod data;
-mod extensions;
-#[macro_use]
-mod format;
-mod message;
-mod spec_version;
-mod types;
-
-pub use attributes::Attributes;
-pub use attributes::{AttributeValue, AttributesReader, AttributesWriter};
-pub use builder::Error as EventBuilderError;
-pub use builder::EventBuilder;
-pub use data::Data;
-pub use extensions::ExtensionValue;
-pub(crate) use message::EventBinarySerializer;
-pub(crate) use message::EventStructuredSerializer;
-pub use spec_version::SpecVersion;
-pub use spec_version::UnknownSpecVersion;
-pub use types::{TryIntoTime, TryIntoUrl};
-
-mod v03;
-
-pub use v03::Attributes as AttributesV03;
-pub(crate) use v03::AttributesIntoIterator as AttributesIntoIteratorV03;
-pub use v03::EventBuilder as EventBuilderV03;
-pub(crate) use v03::EventFormatDeserializer as EventFormatDeserializerV03;
-pub(crate) use v03::EventFormatSerializer as EventFormatSerializerV03;
-
-mod v10;
-
-pub use v10::Attributes as AttributesV10;
-pub(crate) use v10::AttributesIntoIterator as AttributesIntoIteratorV10;
-pub use v10::EventBuilder as EventBuilderV10;
-pub(crate) use v10::EventFormatDeserializer as EventFormatDeserializerV10;
-pub(crate) use v10::EventFormatSerializer as EventFormatSerializerV10;
-
+use super::{
+    AttributeValue, Attributes, AttributesReader, AttributesV10, AttributesWriter, Data,
+    ExtensionValue, SpecVersion,
+};
 use chrono::{DateTime, Utc};
 use delegate_attr::delegate;
 use std::collections::HashMap;
+use std::fmt;
 use std::prelude::v1::*;
-
-#[cfg(feature = "std")]
 use url::Url;
-#[cfg(not(feature = "std"))]
-use String as Url;
 
-pub trait UrlExtend {
-    fn parse(&self) -> Result<Url, url::ParseError>;
-}
-
-impl UrlExtend for Url {
-    fn parse(&self) -> Result<Url, url::ParseError> {
-        Ok(self.to_string())
-    }
-}
-
-pub mod url {
-    use super::{fmt, String};
-
-    #[derive(Debug, Clone)]
-    pub enum ParseError {
-        Error(String),
-    }
-
-    impl snafu::Error for ParseError {}
-
-    impl fmt::Display for ParseError {
-        fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-            if let ParseError::Error(v) = self {
-                Ok(())
-            } else {
-                Err(fmt::Error {})
-            }
-        }
-    }
-}
-
-use core::fmt::{self, Debug, Display};
 /// Data structure that represents a [CloudEvent](https://github.com/cloudevents/spec/blob/master/spec.md).
 /// It provides methods to get the attributes through [`AttributesReader`]
 /// and write them through [`AttributesWriter`].
@@ -154,15 +83,15 @@ impl Default for Event {
 
 impl fmt::Display for Event {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        writeln!(f, "CloudEvent:")?;
+        write!(f, "CloudEvent:\n")?;
         self.iter()
-            .map(|(name, val)| writeln!(f, "  {}: '{}'", name, val))
+            .map(|(name, val)| write!(f, "  {}: '{}'\n", name, val))
             .collect::<fmt::Result>()?;
         match self.data() {
             Some(data) => write!(f, "  {}", data)?,
             None => write!(f, "  No data")?,
         }
-        writeln!(f)
+        write!(f, "\n")
     }
 }
 
@@ -270,31 +199,6 @@ impl Event {
         self.extensions.remove(extension_name)
     }
 }
-
-// Facilitates compatibility with snafu::Error for external objects
-
-#[derive(PartialEq, Eq, Clone)]
-pub struct DisplayError<T>(pub T);
-
-impl<T> Debug for DisplayError<T>
-where
-    T: Debug,
-{
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        self.0.fmt(f)
-    }
-}
-
-impl<T> Display for DisplayError<T>
-where
-    T: Display,
-{
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        self.0.fmt(f)
-    }
-}
-
-impl<T> snafu::Error for DisplayError<T> where T: Display + Debug {}
 
 #[cfg(test)]
 mod tests {

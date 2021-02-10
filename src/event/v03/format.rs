@@ -7,6 +7,11 @@ use serde::ser::SerializeMap;
 use serde::{Deserialize, Serializer};
 use serde_json::{Map, Value};
 use std::collections::HashMap;
+use std::prelude::v1::*;
+
+#[cfg(not(feature = "std"))]
+use super::super::{Url, UrlExtend};
+#[cfg(feature = "std")]
 use url::Url;
 
 pub(crate) struct EventFormatDeserializer {}

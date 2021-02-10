@@ -2,6 +2,7 @@ use super::{v03, v10};
 use std::convert::TryFrom;
 use std::fmt;
 use std::fmt::Formatter;
+use std::prelude::v1::*;
 
 pub(crate) const SPEC_VERSIONS: [&str; 2] = ["0.3", "1.0"];
 
@@ -59,12 +60,12 @@ impl fmt::Display for UnknownSpecVersion {
     }
 }
 
-impl std::error::Error for UnknownSpecVersion {}
+impl snafu::Error for UnknownSpecVersion {}
 
 impl TryFrom<&str> for SpecVersion {
     type Error = UnknownSpecVersion;
 
-    fn try_from(value: &str) -> Result<Self, UnknownSpecVersion> {
+    fn try_from(value: &str) -> core::result::Result<Self, UnknownSpecVersion> {
         match value {
             "0.3" => Ok(SpecVersion::V03),
             "1.0" => Ok(SpecVersion::V10),

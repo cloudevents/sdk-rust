@@ -1,5 +1,6 @@
 use super::{MessageAttributeValue, Result};
 use crate::event::SpecVersion;
+use std::prelude::v1::*;
 
 /// Serializer for structured mode messages.
 pub trait StructuredSerializer<RETURN: Sized> {

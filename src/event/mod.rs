@@ -20,7 +20,7 @@ pub(crate) use message::EventBinarySerializer;
 pub(crate) use message::EventStructuredSerializer;
 pub use spec_version::SpecVersion;
 pub use spec_version::UnknownSpecVersion;
-pub use types::{TryIntoTime, TryIntoUrl};
+pub use types::{TryIntoTime, TryIntoUrl, UriReference};
 
 mod v03;
 
@@ -85,7 +85,7 @@ pub struct Event {
 #[delegate(self.attributes)]
 impl AttributesReader for Event {
     fn id(&self) -> &str;
-    fn source(&self) -> &Url;
+    fn source(&self) -> &UriReference;
     fn specversion(&self) -> SpecVersion;
     fn ty(&self) -> &str;
     fn datacontenttype(&self) -> Option<&str>;
@@ -97,7 +97,7 @@ impl AttributesReader for Event {
 #[delegate(self.attributes)]
 impl AttributesWriter for Event {
     fn set_id(&mut self, id: impl Into<String>) -> String;
-    fn set_source(&mut self, source: impl Into<Url>) -> Url;
+    fn set_source(&mut self, source: impl Into<UriReference>) -> UriReference;
     fn set_type(&mut self, ty: impl Into<String>) -> String;
     fn set_subject(&mut self, subject: Option<impl Into<String>>) -> Option<String>;
     fn set_time(&mut self, time: Option<impl Into<DateTime<Utc>>>) -> Option<DateTime<Utc>>;

@@ -1,5 +1,5 @@
 use crate::event::attributes::{default_hostname, AttributeValue, AttributesConverter};
-use crate::event::{AttributesReader, AttributesV03, AttributesWriter, SpecVersion};
+use crate::event::{AttributesReader, AttributesV03, AttributesWriter, SpecVersion, UriReference};
 use crate::message::{BinarySerializer, MessageAttributeValue};
 use chrono::{DateTime, Utc};
 use core::fmt::Debug;
@@ -22,7 +22,7 @@ pub(crate) const ATTRIBUTE_NAMES: [&str; 8] = [
 pub struct Attributes {
     pub(crate) id: String,
     pub(crate) ty: String,
-    pub(crate) source: Url,
+    pub(crate) source: UriReference,
     pub(crate) datacontenttype: Option<String>,
     pub(crate) dataschema: Option<Url>,
     pub(crate) subject: Option<String>,
@@ -90,7 +90,7 @@ impl AttributesReader for Attributes {
         &self.id
     }
 
-    fn source(&self) -> &Url {
+    fn source(&self) -> &UriReference {
         &self.source
     }
 
@@ -124,7 +124,7 @@ impl AttributesWriter for Attributes {
         std::mem::replace(&mut self.id, id.into())
     }
 
-    fn set_source(&mut self, source: impl Into<Url>) -> Url {
+    fn set_source(&mut self, source: impl Into<UriReference>) -> UriReference {
         std::mem::replace(&mut self.source, source.into())
     }
 
@@ -157,7 +157,7 @@ impl Default for Attributes {
         Attributes {
             id: Uuid::new_v4().to_string(),
             ty: "type".to_string(),
-            source: default_hostname(),
+            source: default_hostname().to_string(),
             datacontenttype: None,
             dataschema: None,
             subject: None,

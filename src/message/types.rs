@@ -1,4 +1,4 @@
-use crate::event::ExtensionValue;
+use crate::event::{ExtensionValue, UriReference};
 use chrono::{DateTime, Utc};
 use std::convert::TryInto;
 use std::fmt;
@@ -12,7 +12,7 @@ pub enum MessageAttributeValue {
     String(String),
     Binary(Vec<u8>),
     Uri(Url),
-    UriRef(Url),
+    UriRef(UriReference),
     DateTime(DateTime<Utc>),
 }
 
@@ -35,7 +35,6 @@ impl TryInto<Url> for MessageAttributeValue {
     fn try_into(self) -> Result<Url, Self::Error> {
         match self {
             MessageAttributeValue::Uri(u) => Ok(u),
-            MessageAttributeValue::UriRef(u) => Ok(u),
             v => Ok(Url::parse(v.to_string().as_ref())?),
         }
     }

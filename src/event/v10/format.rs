@@ -18,7 +18,7 @@ impl crate::event::format::EventFormatDeserializer for EventFormatDeserializer {
         Ok(crate::event::Attributes::V10(Attributes {
             id: extract_field!(map, "id", String, E)?,
             ty: extract_field!(map, "type", String, E)?,
-            source: extract_field!(map, "source", String, E, |s: String| Url::parse(&s))?,
+            source: extract_field!(map, "source", String, E)?,
             datacontenttype: extract_optional_field!(map, "datacontenttype", String, E)?,
             dataschema: extract_optional_field!(map, "dataschema", String, E, |s: String| {
                 Url::parse(&s)

@@ -1,6 +1,7 @@
 use super::Attributes as AttributesV10;
 use crate::event::{
     Attributes, Data, Event, EventBuilderError, ExtensionValue, TryIntoTime, TryIntoUrl,
+    UriReference,
 };
 use crate::message::MessageAttributeValue;
 use chrono::{DateTime, Utc};
@@ -13,7 +14,7 @@ use url::Url;
 pub struct EventBuilder {
     id: Option<String>,
     ty: Option<String>,
-    source: Option<Url>,
+    source: Option<UriReference>,
     datacontenttype: Option<String>,
     dataschema: Option<Url>,
     subject: Option<String>,
@@ -29,16 +30,8 @@ impl EventBuilder {
         self
     }
 
-    pub fn source(mut self, source: impl TryIntoUrl) -> Self {
-        match source.into_url() {
-            Ok(u) => self.source = Some(u),
-            Err(e) => {
-                self.error = Some(EventBuilderError::ParseUrlError {
-                    attribute_name: "source",
-                    source: e,
-                })
-            }
-        };
+    pub fn source(mut self, source: impl Into<String>) -> Self {
+        self.source = Some(source.into());
         self
     }
 
@@ -190,7 +183,7 @@ impl crate::event::message::AttributesSerializer for EventBuilder {
         match name {
             "id" => self.id = Some(value.to_string()),
             "type" => self.ty = Some(value.to_string()),
-            "source" => self.source = Some(value.try_into()?),
+            "source" => self.source = Some(value.to_string()),
             "datacontenttype" => self.datacontenttype = Some(value.to_string()),
             "dataschema" => self.dataschema = Some(value.try_into()?),
             "subject" => self.subject = Some(value.to_string()),

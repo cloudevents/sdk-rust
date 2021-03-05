@@ -46,3 +46,15 @@ impl TryIntoTime for String {
         self.as_str().into_time()
     }
 }
+
+/// The URI-reference type.
+///
+/// The URI reference can be a URI, or just a relative path.
+///
+/// As the [`url::Url`] type can only represent an absolute URL, we are falling back to a string
+/// here.
+///
+/// Also see:
+/// * https://github.com/cloudevents/spec/blob/v1.0.1/spec.md#type-system
+/// * https://tools.ietf.org/html/rfc3986#section-4.1
+pub type UriReference = String;

@@ -1,6 +1,6 @@
 use super::{
     AttributesIntoIteratorV03, AttributesIntoIteratorV10, AttributesV03, AttributesV10,
-    ExtensionValue, SpecVersion,
+    ExtensionValue, SpecVersion, UriReference,
 };
 use chrono::{DateTime, Utc};
 use serde::Serializer;
@@ -14,7 +14,7 @@ pub enum AttributeValue<'a> {
     SpecVersion(SpecVersion),
     String(&'a str),
     URI(&'a Url),
-    URIRef(&'a Url),
+    URIRef(&'a UriReference),
     Boolean(&'a bool),
     Integer(&'a i64),
     Time(&'a DateTime<Utc>),
@@ -49,7 +49,7 @@ pub trait AttributesReader {
     /// Get the [id](https://github.com/cloudevents/spec/blob/master/spec.md#id).
     fn id(&self) -> &str;
     /// Get the [source](https://github.com/cloudevents/spec/blob/master/spec.md#source-1).
-    fn source(&self) -> &Url;
+    fn source(&self) -> &UriReference;
     /// Get the [specversion](https://github.com/cloudevents/spec/blob/master/spec.md#specversion).
     fn specversion(&self) -> SpecVersion;
     /// Get the [type](https://github.com/cloudevents/spec/blob/master/spec.md#type).
@@ -71,7 +71,7 @@ pub trait AttributesWriter {
     fn set_id(&mut self, id: impl Into<String>) -> String;
     /// Set the [source](https://github.com/cloudevents/spec/blob/master/spec.md#source-1).
     /// Returns the previous value.
-    fn set_source(&mut self, source: impl Into<Url>) -> Url;
+    fn set_source(&mut self, source: impl Into<UriReference>) -> UriReference;
     /// Set the [type](https://github.com/cloudevents/spec/blob/master/spec.md#type).
     /// Returns the previous value.
     fn set_type(&mut self, ty: impl Into<String>) -> String;
@@ -126,7 +126,7 @@ impl AttributesReader for Attributes {
         }
     }
 
-    fn source(&self) -> &Url {
+    fn source(&self) -> &UriReference {
         match self {
             Attributes::V03(a) => a.source(),
             Attributes::V10(a) => a.source(),
@@ -184,7 +184,7 @@ impl AttributesWriter for Attributes {
         }
     }
 
-    fn set_source(&mut self, source: impl Into<Url>) -> Url {
+    fn set_source(&mut self, source: impl Into<UriReference>) -> UriReference {
         match self {
             Attributes::V03(a) => a.set_source(source),
             Attributes::V10(a) => a.set_source(source),

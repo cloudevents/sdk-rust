@@ -6,7 +6,7 @@ use url::Url;
 pub fn minimal() -> Event {
     EventBuilderV10::new()
         .id(id())
-        .source(Url::parse(source().as_ref()).unwrap())
+        .source(source())
         .ty(ty())
         .build()
         .unwrap()
@@ -28,7 +28,7 @@ pub fn full_no_data() -> Event {
 
     EventBuilderV10::new()
         .id(id())
-        .source(Url::parse(source().as_ref()).unwrap())
+        .source(source())
         .ty(ty())
         .subject(subject())
         .time(time())
@@ -64,7 +64,7 @@ pub fn full_json_data() -> Event {
 
     EventBuilderV10::new()
         .id(id())
-        .source(Url::parse(source().as_ref()).unwrap())
+        .source(source())
         .ty(ty())
         .subject(subject())
         .time(time())
@@ -129,7 +129,7 @@ pub fn full_xml_string_data() -> Event {
 
     EventBuilderV10::new()
         .id(id())
-        .source(Url::parse(source().as_ref()).unwrap())
+        .source(source())
         .ty(ty())
         .subject(subject())
         .time(time())
@@ -148,7 +148,7 @@ pub fn full_xml_binary_data() -> Event {
 
     EventBuilderV10::new()
         .id(id())
-        .source(Url::parse(source().as_ref()).unwrap())
+        .source(source())
         .ty(ty())
         .subject(subject())
         .time(time())

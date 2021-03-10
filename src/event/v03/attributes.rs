@@ -251,7 +251,7 @@ mod tests {
         assert_eq!(
             (
                 "source",
-                AttributeValue::URIRef(&Url::parse("https://example.net").unwrap())
+                AttributeValue::URIRef(&"https://example.net".to_string())
             ),
             b.next().unwrap()
         );

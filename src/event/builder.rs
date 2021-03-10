@@ -44,7 +44,7 @@ pub enum Error {
         source: chrono::ParseError,
     },
     #[snafu(display(
-        "Error while setting attribute '{}' with uri/uriref type: {}",
+        "Error while setting attribute '{}' with uri type: {}",
         attribute_name,
         source
     ))]
@@ -52,4 +52,9 @@ pub enum Error {
         attribute_name: &'static str,
         source: url::ParseError,
     },
+    #[snafu(display(
+        "Invalid value setting attribute '{}' with uriref type",
+        attribute_name,
+    ))]
+    InvalidUriRefError { attribute_name: &'static str },
 }

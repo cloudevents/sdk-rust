@@ -46,11 +46,13 @@ members = [
   "cloudevents-sdk-actix-web",
   "cloudevents-sdk-reqwest",
   "cloudevents-sdk-rdkafka",
-  "cloudevents-sdk-warp"
+  "cloudevents-sdk-warp",
+  "cloudevents-sdk-tide"
 ]
 exclude = [
   "example-projects/actix-web-example",
   "example-projects/reqwest-wasm-example",
   "example-projects/rdkafka-example",
   "example-projects/warp-example",
+  "example-projects/tide-example",
 ]

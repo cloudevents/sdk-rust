@@ -1,0 +1,30 @@
+[package]
+name = "cloudevents-sdk-tide"
+version = "0.0.1"
+authors = ["Anton Whalley <anton@venshare.com>"]
+license-file = "../LICENSE"
+edition = "2018"
+description = "CloudEvents official Rust SDK - Tide integration"
+documentation = "https://docs.rs/cloudevents-sdk-tide"
+repository = "https://github.com/cloudevents/sdk-rust"
+readme = "README.md"
+categories = ["web-programming", "encoding", "web-programming::http-server"]
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+cloudevents-sdk = { version = "0.3.1", path = ".." }
+tide = { version = "0.16" }
+lazy_static = "1.4.0"
+http-types = "2.10.0"
+bytes = "^0.5"
+
+[dev-dependencies]
+serde = { version = "1.0.117", features = ["derive"] }
+serde_json = "^1.0"
+chrono = { version = "^0.4", features = ["serde"] }
+version-sync = "^0.9"
+async-std = { version = "1", features = ["attributes"] }
+tide-testing = "0.1.3"
+
+

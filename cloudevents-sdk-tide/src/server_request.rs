@@ -10,7 +10,7 @@ use std::collections::HashMap;
 use std::convert::TryFrom;
 use tide::{Error, Request};
 
-/// Wrapper for [`HttpRequest`] that implements [`MessageDeserializer`] trait.
+/// Wrapper for [`Request`] that implements [`MessageDeserializer`] trait.
 pub struct RequestDeserializer {
     headers: HashMap<String, String>,
     body: Bytes,
@@ -104,7 +104,7 @@ impl<'a> MessageDeserializer for RequestDeserializer {
     }
 }
 
-/// Method to transform an incoming [`HttpRequest`] to [`Event`].
+/// Method to transform an incoming [`Request`] to [`Event`].
 pub fn request_to_event(
     headers: HashMap<String, String>,
     body: Vec<u8>,
@@ -120,7 +120,7 @@ pub fn request_to_event(
 /// This trait is sealed and cannot be implemented for types outside of this crate.
 #[allow(patterns_in_fns_without_body)]
 pub trait RequestExt: private::Sealed {
-    /// Convert this [`HttpRequest`] into an [`Event`].
+    /// Convert this [`Request`] into an [`Event`].
     fn to_event(&self, mut body: Vec<u8>) -> std::result::Result<Event, tide::Error>;
 }
 

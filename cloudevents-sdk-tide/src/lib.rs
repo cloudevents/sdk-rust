@@ -59,3 +59,4 @@ pub use server_request::RequestExt;
 pub use server_response::event_to_response;
 pub use server_response::ResponseBuilderExt;
 pub use server_response::ResponseSerializer;
+pub use cloudevents::Event;

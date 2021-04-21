@@ -228,7 +228,7 @@ mod tests {
         let a = Attributes {
             id: String::from("1"),
             ty: String::from("someType"),
-            source: Url::parse("https://example.net").unwrap(),
+            source: "https://example.net".into(),
             datacontenttype: None,
             dataschema: None,
             subject: None,
@@ -252,7 +252,7 @@ mod tests {
         assert_eq!(
             (
                 "source",
-                AttributeValue::URIRef(&Url::parse("https://example.net").unwrap())
+                AttributeValue::URIRef(&"https://example.net".to_string())
             ),
             b.next().unwrap()
         );

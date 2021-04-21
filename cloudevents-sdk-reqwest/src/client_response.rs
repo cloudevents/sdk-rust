@@ -139,8 +139,6 @@ mod tests {
     use chrono::Utc;
     use cloudevents::{EventBuilder, EventBuilderV10};
     use serde_json::json;
-    use std::str::FromStr;
-    use url::Url;
 
     #[tokio::test]
     async fn test_response() {
@@ -162,7 +160,7 @@ mod tests {
             //TODO this is required now because the message deserializer implictly set default values
             // As soon as this defaulting doesn't happen anymore, we can remove it (Issues #40/#41)
             .time(time)
-            .source(Url::from_str("http://localhost").unwrap())
+            .source("http://localhost")
             .extension("someint", "10")
             .build()
             .unwrap();
@@ -204,7 +202,7 @@ mod tests {
             //TODO this is required now because the message deserializer implictly set default values
             // As soon as this defaulting doesn't happen anymore, we can remove it (Issues #40/#41)
             .time(time)
-            .source(Url::from_str("http://localhost").unwrap())
+            .source("http://localhost/")
             .data("application/json", j.to_string().into_bytes())
             .extension("someint", "10")
             .build()
@@ -234,7 +232,7 @@ mod tests {
             //TODO this is required now because the message deserializer implictly set default values
             // As soon as this defaulting doesn't happen anymore, we can remove it (Issues #40/#41)
             .time(time)
-            .source(Url::from_str("http://localhost").unwrap())
+            .source("http://localhost")
             .data("application/json", j.clone())
             .extension("someint", "10")
             .build()

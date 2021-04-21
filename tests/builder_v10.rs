@@ -12,7 +12,7 @@ use url::Url;
 #[test]
 fn build_event() {
     let id = "aaa";
-    let source = Url::parse("http://localhost:8080").unwrap();
+    let source = "http://localhost:8080";
     let ty = "bbb";
     let subject = "francesco";
     let time: DateTime<Utc> = Utc::now();
@@ -53,6 +53,16 @@ fn build_event() {
 }
 
 #[test]
+fn source_valid_relative_url() {
+    let res = EventBuilderV10::new()
+        .id("id1")
+        .source("/source") // relative URL
+        .ty("type")
+        .build();
+    assert_match_pattern!(res, Ok(_));
+}
+
+#[test]
 fn build_missing_id() {
     let res = EventBuilderV10::new()
         .source("http://localhost:8080")
@@ -70,9 +80,8 @@ fn source_invalid_url() {
     let res = EventBuilderV10::new().source("").build();
     assert_match_pattern!(
         res,
-        Err(EventBuilderError::ParseUrlError {
+        Err(EventBuilderError::InvalidUriRefError {
             attribute_name: "source",
-            ..
         })
     );
 }

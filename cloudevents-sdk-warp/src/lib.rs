@@ -31,7 +31,7 @@
 //!     let routes = warp::any().map(|| {
 //!         let event = EventBuilderV10::new()
 //!             .id("1")
-//!             .source(url::Url::parse("url://example_response/").unwrap())
+//!             .source("url://example_response/")
 //!             .ty("example.ce")
 //!             .data(
 //!                 mime::APPLICATION_JSON.to_string(),

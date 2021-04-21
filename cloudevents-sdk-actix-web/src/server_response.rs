@@ -107,21 +107,19 @@ mod private {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use url::Url;
 
     use actix_web::http::StatusCode;
     use actix_web::test;
     use cloudevents::{EventBuilder, EventBuilderV10};
     use futures::TryStreamExt;
     use serde_json::json;
-    use std::str::FromStr;
 
     #[actix_rt::test]
     async fn test_response() {
         let input = EventBuilderV10::new()
             .id("0001")
             .ty("example.test")
-            .source(Url::from_str("http://localhost/").unwrap())
+            .source("http://localhost/")
             .extension("someint", "10")
             .build()
             .unwrap();
@@ -164,7 +162,7 @@ mod tests {
         let input = EventBuilderV10::new()
             .id("0001")
             .ty("example.test")
-            .source(Url::from_str("http://localhost").unwrap())
+            .source("http://localhost")
             .data("application/json", j.clone())
             .extension("someint", "10")
             .build()
@@ -193,7 +191,7 @@ mod tests {
         );
         assert_eq!(
             resp.headers().get("ce-source").unwrap().to_str().unwrap(),
-            "http://localhost/"
+            "http://localhost"
         );
         assert_eq!(
             resp.headers()

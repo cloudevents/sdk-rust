@@ -42,13 +42,11 @@ async fn create_event(headers: HeaderMap, body: bytes::Bytes) -> Result<Event, R
 #[cfg(test)]
 mod tests {
     use super::to_event;
-    use url::Url;
     use warp::test;
 
     use chrono::Utc;
     use cloudevents::{EventBuilder, EventBuilderV10};
     use serde_json::json;
-    use std::str::FromStr;
 
     #[tokio::test]
     async fn test_request() {
@@ -110,7 +108,7 @@ mod tests {
         let expected = EventBuilderV10::new()
             .id("0001")
             .ty("example.test")
-            .source(Url::from_str("http://localhost").unwrap())
+            .source("http://localhost")
             .time(time)
             .data("application/json", j.to_string().into_bytes())
             .extension("someint", "10")

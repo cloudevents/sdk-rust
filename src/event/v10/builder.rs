@@ -31,7 +31,14 @@ impl EventBuilder {
     }
 
     pub fn source(mut self, source: impl Into<String>) -> Self {
-        self.source = Some(source.into());
+        let source = source.into();
+        if source.is_empty() {
+            self.error = Some(EventBuilderError::InvalidUriRefError {
+                attribute_name: "source",
+            });
+        } else {
+            self.source = Some(source);
+        }
         self
     }
 

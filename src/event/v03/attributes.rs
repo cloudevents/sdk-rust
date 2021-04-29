@@ -1,7 +1,7 @@
 use crate::event::attributes::{default_hostname, AttributeValue, AttributesConverter};
+use crate::event::types::*;
 use crate::event::{AttributesReader, AttributesV10, AttributesWriter, SpecVersion};
 use crate::message::{BinarySerializer, MessageAttributeValue};
-use crate::event::types::*;
 use uuid::Uuid;
 
 pub(crate) const ATTRIBUTE_NAMES: [&str; 8] = [

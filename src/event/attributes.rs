@@ -1,7 +1,6 @@
 use super::{
-    AttributesIntoIteratorV03, AttributesIntoIteratorV10, AttributesV03, AttributesV10,
+    types::*, AttributesIntoIteratorV03, AttributesIntoIteratorV10, AttributesV03, AttributesV10,
     ExtensionValue, SpecVersion,
-    types::*
 };
 use chrono::{DateTime, Utc};
 use serde::Serializer;

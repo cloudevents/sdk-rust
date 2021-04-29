@@ -1,10 +1,10 @@
 use super::Attributes as AttributesV10;
+use crate::event::types::*;
 use crate::event::{
     Attributes, Data, Event, EventBuilderError, ExtensionValue, TryIntoTime, TryIntoUri,
     UriReference,
 };
 use crate::message::MessageAttributeValue;
-use crate::event::types::*;
 use std::collections::HashMap;
 use std::convert::TryInto;
 

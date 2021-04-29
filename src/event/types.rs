@@ -1,6 +1,6 @@
-pub use self::uri::Uri;
 pub use self::uri::ParseUriError;
 pub use self::uri::TryIntoUri;
+pub use self::uri::Uri;
 
 pub use urireference::UriReference;
 

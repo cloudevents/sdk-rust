@@ -1,5 +1,5 @@
-use snafu::Snafu;
 use crate::event::types;
+use snafu::Snafu;
 
 /// Represents an error during serialization/deserialization process
 #[derive(Debug, Snafu)]

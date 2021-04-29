@@ -1,7 +1,7 @@
+use crate::event::types::*;
 use crate::event::ExtensionValue;
 use std::convert::TryInto;
 use std::fmt;
-use crate::event::types::*;
 
 /// Union type representing a [CloudEvent context attribute type](https://github.com/cloudevents/spec/blob/v1.0/spec.md#type-system).
 #[derive(PartialEq, Eq, Debug, Clone)]

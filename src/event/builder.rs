@@ -1,6 +1,6 @@
-use snafu::Snafu;
-use super::Event;
 use super::types;
+use super::Event;
+use snafu::Snafu;
 
 /// Trait to implement a builder for [`Event`]:
 /// ```

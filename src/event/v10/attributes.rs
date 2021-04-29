@@ -1,7 +1,7 @@
 use crate::event::attributes::{default_hostname, AttributeValue, AttributesConverter};
+use crate::event::types::*;
 use crate::event::{AttributesReader, AttributesV03, AttributesWriter, SpecVersion, UriReference};
 use crate::message::{BinarySerializer, MessageAttributeValue};
-use crate::event::types::*;
 use core::fmt::Debug;
 use uuid::Uuid;
 

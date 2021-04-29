@@ -1,7 +1,7 @@
 use super::Attributes;
 use crate::event::data::is_json_content_type;
-use crate::event::{Data, ExtensionValue};
 use crate::event::types::*;
+use crate::event::{Data, ExtensionValue};
 use serde::de::IntoDeserializer;
 use serde::ser::SerializeMap;
 use serde::{Deserialize, Serializer};

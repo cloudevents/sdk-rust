@@ -1,9 +1,7 @@
 use super::Attributes as AttributesV03;
-use crate::event::{
-    Attributes, Data, Event, EventBuilderError, ExtensionValue
-};
-use crate::message::MessageAttributeValue;
 use crate::event::types::*;
+use crate::event::{Attributes, Data, Event, EventBuilderError, ExtensionValue};
+use crate::message::MessageAttributeValue;
 use std::collections::HashMap;
 use std::convert::TryInto;
 

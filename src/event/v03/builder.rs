@@ -1,13 +1,11 @@
 use super::Attributes as AttributesV03;
 use crate::event::{
-    Attributes, Data, Event, EventBuilderError, ExtensionValue, TryIntoTime, TryIntoUrl,
-    UriReference,
+    Attributes, Data, Event, EventBuilderError, ExtensionValue
 };
 use crate::message::MessageAttributeValue;
-use chrono::{DateTime, Utc};
+use crate::event::types::*;
 use std::collections::HashMap;
 use std::convert::TryInto;
-use url::Url;
 
 /// Builder to create a CloudEvent V0.3
 #[derive(Clone, Debug)]
@@ -16,7 +14,7 @@ pub struct EventBuilder {
     ty: Option<String>,
     source: Option<UriReference>,
     datacontenttype: Option<String>,
-    schemaurl: Option<Url>,
+    schemaurl: Option<Uri>,
     subject: Option<String>,
     time: Option<DateTime<Utc>>,
     data: Option<Data>,
@@ -89,14 +87,14 @@ impl EventBuilder {
     pub fn data_with_schema(
         mut self,
         datacontenttype: impl Into<String>,
-        schemaurl: impl TryIntoUrl,
+        schemaurl: impl TryIntoUri,
         data: impl Into<Data>,
     ) -> Self {
         self.datacontenttype = Some(datacontenttype.into());
-        match schemaurl.into_url() {
+        match schemaurl.into_uri() {
             Ok(u) => self.schemaurl = Some(u),
             Err(e) => {
-                self.error = Some(EventBuilderError::ParseUrlError {
+                self.error = Some(EventBuilderError::ParseUriError {
                     attribute_name: "schemaurl",
                     source: e,
                 })

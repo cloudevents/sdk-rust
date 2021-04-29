@@ -67,6 +67,22 @@ jobs:
         toolchain: ${{ matrix.toolchain }}
         args: --target ${{ matrix.target }} --all-features
 
+    # If glibc, compile and test only the core module with no_std
+    - uses: actions-rs/cargo@v1
+      name: "Build"
+      if: matrix.target == 'x86_64-unknown-linux-gnu'
+      with:
+        command: build
+        toolchain: ${{ matrix.toolchain }}
+        args: --target ${{ matrix.target }} --package cloudevents-sdk --workspace --no-default-features
+    - uses: actions-rs/cargo@v1
+      name: "Test"
+      if: matrix.target == 'x86_64-unknown-linux-gnu'
+      with:
+        command: test
+        toolchain: ${{ matrix.toolchain }}
+        args: --target ${{ matrix.target }} --package cloudevents-sdk --workspace --no-default-features
+
     # If musl, compile and test all
     - uses: actions-rs/cargo@v1
       name: "Build"

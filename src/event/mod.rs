@@ -8,7 +8,7 @@ mod extensions;
 mod format;
 mod message;
 mod spec_version;
-mod types;
+pub mod types;
 
 pub use attributes::Attributes;
 pub use attributes::{AttributeValue, AttributesReader, AttributesWriter};
@@ -20,7 +20,6 @@ pub(crate) use message::EventBinarySerializer;
 pub(crate) use message::EventStructuredSerializer;
 pub use spec_version::SpecVersion;
 pub use spec_version::UnknownSpecVersion;
-pub use types::{TryIntoTime, TryIntoUrl, UriReference};
 
 mod v03;
 
@@ -38,11 +37,10 @@ pub use v10::EventBuilder as EventBuilderV10;
 pub(crate) use v10::EventFormatDeserializer as EventFormatDeserializerV10;
 pub(crate) use v10::EventFormatSerializer as EventFormatSerializerV10;
 
-use chrono::{DateTime, Utc};
 use delegate_attr::delegate;
 use std::collections::HashMap;
 use std::fmt;
-use url::Url;
+use types::*;
 
 /// Data structure that represents a [CloudEvent](https://github.com/cloudevents/spec/blob/master/spec.md).
 /// It provides methods to get the attributes through [`AttributesReader`]
@@ -89,7 +87,7 @@ impl AttributesReader for Event {
     fn specversion(&self) -> SpecVersion;
     fn ty(&self) -> &str;
     fn datacontenttype(&self) -> Option<&str>;
-    fn dataschema(&self) -> Option<&Url>;
+    fn dataschema(&self) -> Option<&Uri>;
     fn subject(&self) -> Option<&str>;
     fn time(&self) -> Option<&DateTime<Utc>>;
 }
@@ -103,7 +101,7 @@ impl AttributesWriter for Event {
     fn set_time(&mut self, time: Option<impl Into<DateTime<Utc>>>) -> Option<DateTime<Utc>>;
     fn set_datacontenttype(&mut self, datacontenttype: Option<impl Into<String>>)
         -> Option<String>;
-    fn set_dataschema(&mut self, dataschema: Option<impl Into<Url>>) -> Option<Url>;
+    fn set_dataschema(&mut self, dataschema: Option<impl Into<Uri>>) -> Option<Uri>;
 }
 
 impl Default for Event {
@@ -165,10 +163,10 @@ impl Event {
     ///
     /// let (datacontenttype, dataschema, data) = e.take_data();
     /// ```
-    pub fn take_data(&mut self) -> (Option<String>, Option<Url>, Option<Data>) {
+    pub fn take_data(&mut self) -> (Option<String>, Option<Uri>, Option<Data>) {
         (
             self.attributes.set_datacontenttype(None as Option<String>),
-            self.attributes.set_dataschema(None as Option<Url>),
+            self.attributes.set_dataschema(None as Option<Uri>),
             self.data.take(),
         )
     }

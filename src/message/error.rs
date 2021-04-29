@@ -1,4 +1,5 @@
 use snafu::Snafu;
+use crate::event::types;
 
 /// Represents an error during serialization/deserialization process
 #[derive(Debug, Snafu)]
@@ -22,7 +23,7 @@ pub enum Error {
     ParseTimeError { source: chrono::ParseError },
     #[snafu(display("Error while parsing a url: {}", source))]
     #[snafu(context(false))]
-    ParseUrlError { source: url::ParseError },
+    ParseUrlError { source: types::ParseUriError },
     #[snafu(display("Error while decoding base64: {}", source))]
     #[snafu(context(false))]
     Base64DecodingError { source: base64::DecodeError },

@@ -1,13 +1,12 @@
 use super::Attributes;
 use crate::event::data::is_json_content_type;
 use crate::event::{Data, ExtensionValue};
-use chrono::{DateTime, Utc};
+use crate::event::types::*;
 use serde::de::IntoDeserializer;
 use serde::ser::SerializeMap;
 use serde::{Deserialize, Serializer};
 use serde_json::{Map, Value};
 use std::collections::HashMap;
-use url::Url;
 
 pub(crate) struct EventFormatDeserializer {}
 
@@ -21,7 +20,7 @@ impl crate::event::format::EventFormatDeserializer for EventFormatDeserializer {
             source: extract_field!(map, "source", String, E)?,
             datacontenttype: extract_optional_field!(map, "datacontenttype", String, E)?,
             schemaurl: extract_optional_field!(map, "schemaurl", String, E, |s: String| {
-                Url::parse(&s)
+                s.into_uri()
             })?,
             subject: extract_optional_field!(map, "subject", String, E)?,
             time: extract_optional_field!(map, "time", String, E, |s: String| {

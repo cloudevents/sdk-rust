@@ -1,11 +1,11 @@
-use super::Event;
 use snafu::Snafu;
+use super::Event;
+use super::types;
 
 /// Trait to implement a builder for [`Event`]:
 /// ```
 /// use cloudevents::event::{EventBuilderV10, EventBuilder};
 /// use chrono::Utc;
-/// use url::Url;
 ///
 /// let event = EventBuilderV10::new()
 ///     .id("my_event.my_application")
@@ -48,9 +48,9 @@ pub enum Error {
         attribute_name,
         source
     ))]
-    ParseUrlError {
+    ParseUriError {
         attribute_name: &'static str,
-        source: url::ParseError,
+        source: types::ParseUriError,
     },
     #[snafu(display(
         "Invalid value setting attribute '{}' with uriref type",

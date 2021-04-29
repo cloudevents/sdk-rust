@@ -1,8 +1,7 @@
-use crate::event::{ExtensionValue, UriReference};
-use chrono::{DateTime, Utc};
+use crate::event::ExtensionValue;
 use std::convert::TryInto;
 use std::fmt;
-use url::Url;
+use crate::event::types::*;
 
 /// Union type representing a [CloudEvent context attribute type](https://github.com/cloudevents/spec/blob/v1.0/spec.md#type-system).
 #[derive(PartialEq, Eq, Debug, Clone)]
@@ -11,7 +10,7 @@ pub enum MessageAttributeValue {
     Integer(i64),
     String(String),
     Binary(Vec<u8>),
-    Uri(Url),
+    Uri(Uri),
     UriRef(UriReference),
     DateTime(DateTime<Utc>),
 }
@@ -29,13 +28,13 @@ impl TryInto<DateTime<Utc>> for MessageAttributeValue {
     }
 }
 
-impl TryInto<Url> for MessageAttributeValue {
+impl TryInto<Uri> for MessageAttributeValue {
     type Error = super::Error;
 
-    fn try_into(self) -> Result<Url, Self::Error> {
+    fn try_into(self) -> Result<Uri, Self::Error> {
         match self {
             MessageAttributeValue::Uri(u) => Ok(u),
-            v => Ok(Url::parse(v.to_string().as_ref())?),
+            v => Ok(v.to_string().into_uri()?),
         }
     }
 }

@@ -1,4 +1,5 @@
 use super::headers;
+use async_trait::async_trait;
 use bytes::{Bytes, BytesMut};
 use cloudevents::event::SpecVersion;
 use cloudevents::message::{
@@ -105,7 +106,7 @@ impl<'a> MessageDeserializer for RequestDeserializer {
 }
 
 /// Method to transform an incoming [`Request`] to [`Event`].
-pub fn request_to_event(
+pub async fn request_to_event(
     headers: HashMap<String, String>,
     body: Vec<u8>,
 ) -> std::result::Result<Event, tide::Error> {
@@ -119,18 +120,20 @@ pub fn request_to_event(
 ///
 /// This trait is sealed and cannot be implemented for types outside of this crate.
 #[allow(patterns_in_fns_without_body)]
+#[async_trait]
 pub trait RequestExt: private::Sealed {
     /// Convert this [`Request`] into an [`Event`].
-    fn to_event(&self, mut body: Vec<u8>) -> std::result::Result<Event, tide::Error>;
+    async fn to_event(&self, mut body: Vec<u8>) -> std::result::Result<Event, tide::Error>;
 }
 
-impl<State> RequestExt for Request<State> {
-    fn to_event(&self, body: Vec<u8>) -> std::result::Result<Event, tide::Error> {
+#[async_trait]
+impl<State : Clone + Send + Sync + 'static> RequestExt for Request<State> {
+    async fn to_event(&self, body: Vec<u8>) -> std::result::Result<Event, tide::Error> {
         let mut headers = HashMap::new();
         for (n, v) in self.iter() {
             headers.insert(String::from(n.as_str()), String::from(v.as_str()));
         }
-        request_to_event(headers, body)
+        request_to_event(headers, body).await
     }
 }
 
@@ -165,7 +168,7 @@ mod tests {
                 .unwrap();
 
             let body = req.body_bytes().await.unwrap();
-            let evtresp: Event = req.to_event(body).unwrap();
+            let evtresp: Event = req.to_event(body).await.unwrap();
 
             assert_eq!(expected, evtresp);
             Ok(Body::from_json(&evtresp)?)
@@ -209,7 +212,7 @@ mod tests {
                 .build()
                 .unwrap();
 
-            let evtresp: Event = req.to_event(body.to_vec()).unwrap();
+            let evtresp: Event = req.to_event(body.to_vec()).await.unwrap();
             assert_eq!(expected, evtresp);
             Ok(Body::from_json(&evtresp)?)
         });
@@ -253,7 +256,7 @@ mod tests {
                 .build()
                 .unwrap();
 
-            let evtresp: Event = req.to_event(vec).unwrap();
+            let evtresp: Event = req.to_event(vec).await.unwrap();
             assert_eq!(expected, evtresp);
             Ok(Body::from_json(&evtresp)?)
         });

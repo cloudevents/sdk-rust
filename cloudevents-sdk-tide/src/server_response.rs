@@ -1,4 +1,5 @@
 use super::headers;
+use async_trait::async_trait;
 use cloudevents::event::SpecVersion;
 use cloudevents::message::{
     BinaryDeserializer, BinarySerializer, MessageAttributeValue, Result, StructuredSerializer,
@@ -61,7 +62,7 @@ impl StructuredSerializer<Response> for ResponseSerializer {
 }
 
 /// Method to fill an [`Response`] with an [`Event`].
-pub fn event_to_response(
+pub async fn event_to_response(
     event: Event,
     response: Response,
 ) -> std::result::Result<Response, tide::Error> {
@@ -72,14 +73,16 @@ pub fn event_to_response(
 /// Extension Trait for [`Response`] which acts as a wrapper for the function [`event_to_response()`].
 ///
 /// This trait is sealed and cannot be implemented for types outside of this crate.
+#[async_trait]
 pub trait ResponseBuilderExt: private::Sealed {
     /// Fill this [`Response`] with an [`Event`].
-    fn event(self, event: Event) -> std::result::Result<Response, tide::Error>;
+    async fn event(self, event: Event) -> std::result::Result<Response, tide::Error>;
 }
 
+#[async_trait]
 impl ResponseBuilderExt for Response {
-    fn event(self, event: Event) -> std::result::Result<Response, tide::Error> {
-        event_to_response(event, self)
+    async fn event(self, event: Event) -> std::result::Result<Response, tide::Error> {
+        event_to_response(event, self).await
     }
 }
 
@@ -106,7 +109,7 @@ mod tests {
             .build()
             .unwrap();
 
-        let resp = Response::new(200).event(input).unwrap();
+        let resp = Response::new(200).event(input).await.unwrap();
 
         assert_eq!(resp.header("ce-specversion").unwrap().as_str(), "1.0");
         assert_eq!(resp.header("ce-id").unwrap().as_str(), "0001");
@@ -131,7 +134,7 @@ mod tests {
             .build()
             .unwrap();
 
-        let resp = Response::new(200).event(input).unwrap();
+        let resp = Response::new(200).event(input).await.unwrap();
 
         assert_eq!(resp.header("ce-specversion").unwrap().as_str(), "1.0");
         assert_eq!(resp.header("ce-id").unwrap().as_str(), "0001");
@@ -161,7 +164,7 @@ mod tests {
                 .build()
                 .unwrap();
 
-            let resp = Response::new(200).event(input).unwrap();
+            let resp = Response::new(200).event(input).await.unwrap();
             Ok(resp)
         });
 

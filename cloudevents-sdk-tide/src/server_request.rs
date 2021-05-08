@@ -127,7 +127,7 @@ pub trait RequestExt: private::Sealed {
 }
 
 #[async_trait]
-impl<State : Clone + Send + Sync + 'static> RequestExt for Request<State> {
+impl<State: Clone + Send + Sync + 'static> RequestExt for Request<State> {
     async fn to_event(&self, body: Vec<u8>) -> std::result::Result<Event, tide::Error> {
         let mut headers = HashMap::new();
         for (n, v) in self.iter() {
@@ -151,15 +151,18 @@ mod tests {
     use serde_json::{json, Value};
     use tide::{Body, Request};
     use tide_testing::TideTestingExt;
+    use chrono::Utc;
 
     #[async_std::test]
     async fn test_request() {
+        let time = Utc::now();
         let mut app = tide::new();
-        app.at("/").post(|mut req: Request<()>| async move {
+        app.at("/").post(move |mut req: Request<()>| async move {
             let expected = EventBuilderV10::new()
                 .id("0001")
                 .ty("example.test")
                 .source("http://localhost/")
+                .time(time)
                 .data(
                     "application/octet-stream",
                     String::from("hello").into_bytes(),
@@ -182,6 +185,7 @@ mod tests {
             .header("ce-id", "0001")
             .header("ce-type", "example.test")
             .header("ce-source", "http://localhost/")
+            .header("ce-time", time.to_rfc3339())
             .recv_string()
             .await
         {

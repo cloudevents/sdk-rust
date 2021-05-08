@@ -53,10 +53,10 @@ mod headers;
 mod server_request;
 mod server_response;
 
+pub use cloudevents::Event;
 pub use server_request::request_to_event;
 pub use server_request::RequestDeserializer;
 pub use server_request::RequestExt;
 pub use server_response::event_to_response;
 pub use server_response::ResponseBuilderExt;
 pub use server_response::ResponseSerializer;
-pub use cloudevents::Event;

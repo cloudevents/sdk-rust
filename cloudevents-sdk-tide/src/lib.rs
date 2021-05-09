@@ -24,7 +24,7 @@
 //! To serialize a CloudEvent to an HTTP response:
 //!
 //! ```
-//! use cloudevents_sdk_tide::ResponseBuilderExt;
+//! use cloudevents_sdk_tide::ResponseExt;
 //! use tide::{Request, Response, Result};
 //! use cloudevents::{EventBuilderV10, EventBuilder};
 //! use serde_json::json;
@@ -58,5 +58,5 @@ pub use server_request::request_to_event;
 pub use server_request::RequestDeserializer;
 pub use server_request::RequestExt;
 pub use server_response::event_to_response;
-pub use server_response::ResponseBuilderExt;
+pub use server_response::ResponseExt;
 pub use server_response::ResponseSerializer;

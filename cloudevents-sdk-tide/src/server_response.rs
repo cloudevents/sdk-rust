@@ -74,13 +74,13 @@ pub async fn event_to_response(
 ///
 /// This trait is sealed and cannot be implemented for types outside of this crate.
 #[async_trait]
-pub trait ResponseBuilderExt: private::Sealed {
+pub trait ResponseExt: private::Sealed {
     /// Fill this [`Response`] with an [`Event`].
     async fn event(self, event: Event) -> std::result::Result<Response, tide::Error>;
 }
 
 #[async_trait]
-impl ResponseBuilderExt for Response {
+impl ResponseExt for Response {
     async fn event(self, event: Event) -> std::result::Result<Response, tide::Error> {
         event_to_response(event, self).await
     }

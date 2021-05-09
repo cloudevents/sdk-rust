@@ -91,7 +91,7 @@ impl<'a> MessageDeserializer for RequestDeserializer {
             Some(s) => s.as_str(),
             None => "",
         };
-        if contentheader == "application/cloudevents+json" {
+        if contentheader.starts_with("application/cloudevents+json") {
             Encoding::STRUCTURED
         } else if self
             .headers

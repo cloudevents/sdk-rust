@@ -11,13 +11,13 @@ use tide::{Response, Request, Body};
                  .data("text/xml", "<xml data=\"hello\" />".as_bytes().to_vec())
                  .build()
                  .expect("No error while building the event"),
-         )?
+         ).await?
      )
  }
 
  pub async fn post(mut req: Request<()>) -> tide::Result {
     let body = req.body_bytes().await?;
-     let evtresp: Event = req.to_event(body.to_vec())?;
+     let evtresp: Event = req.to_event(body.to_vec()).await?;
      let response = Response::builder(200)
      .body(Body::from_json(&evtresp)?)
      .build();

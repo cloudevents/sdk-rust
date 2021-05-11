@@ -86,7 +86,7 @@ impl ResponseExt for Response {
     }
 }
 
-// Sealing the ResponseBuilderExt
+// Sealing the ResponseExt
 mod private {
     pub trait Sealed {}
     impl Sealed for tide::Response {}

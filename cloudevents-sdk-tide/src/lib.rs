@@ -14,8 +14,7 @@
 //!     req.insert_header("ce-id", "0001");
 //!     req.insert_header("ce-type", "example.test");
 //!     req.insert_header("ce-source", "http://localhost/");
-//!     let bytes = req.body_bytes().await.unwrap();
-//!     let event : Event = req.to_event(bytes).await?;
+//!     let event : Event = req.to_event().await?;
 //!     let resp = Response::builder(200).body(Body::from_json(&event)?).build();
 //!     Ok(resp)
 //! }

@@ -123,16 +123,17 @@ pub async fn request_to_event(
 #[async_trait]
 pub trait RequestExt: private::Sealed {
     /// Convert this [`Request`] into an [`Event`].
-    async fn to_event(&self, mut body: Vec<u8>) -> std::result::Result<Event, tide::Error>;
+    async fn to_event(mut self) -> std::result::Result<Event, tide::Error>;
 }
 
 #[async_trait]
 impl<State: Clone + Send + Sync + 'static> RequestExt for Request<State> {
-    async fn to_event(&self, body: Vec<u8>) -> std::result::Result<Event, tide::Error> {
+    async fn to_event(mut self) -> std::result::Result<Event, tide::Error> {
         let mut headers = HashMap::new();
         for (n, v) in self.iter() {
             headers.insert(String::from(n.as_str()), String::from(v.as_str()));
         }
+        let body = self.body_bytes().await?;
         request_to_event(headers, body).await
     }
 }
@@ -157,7 +158,7 @@ mod tests {
     async fn test_request() {
         let time = Utc::now();
         let mut app = tide::new();
-        app.at("/").post(move |mut req: Request<()>| async move {
+        app.at("/").post(move |req: Request<()>| async move {
             let expected = EventBuilderV10::new()
                 .id("0001")
                 .ty("example.test")
@@ -170,8 +171,7 @@ mod tests {
                 .build()
                 .unwrap();
 
-            let body = req.body_bytes().await.unwrap();
-            let evtresp: Event = req.to_event(body).await.unwrap();
+            let evtresp: Event = req.to_event().await.unwrap();
 
             assert_eq!(expected, evtresp);
             Ok(Body::from_json(&evtresp)?)
@@ -200,8 +200,8 @@ mod tests {
     #[async_std::test]
     async fn test_request_with_full_data() {
         let mut app = tide::new();
-        app.at("/").post(|mut req: Request<()>| async move {
-            let body = req.body_bytes().await.unwrap();
+        app.at("/").post(|req: Request<()>| async move {
+            
             let expected = EventBuilderV10::new()
                 .id("0001")
                 .ty("example.test")
@@ -216,7 +216,7 @@ mod tests {
                 .build()
                 .unwrap();
 
-            let evtresp: Event = req.to_event(body.to_vec()).await.unwrap();
+            let evtresp: Event = req.to_event().await.unwrap();
             assert_eq!(expected, evtresp);
             Ok(Body::from_json(&evtresp)?)
         });
@@ -260,7 +260,8 @@ mod tests {
                 .build()
                 .unwrap();
 
-            let evtresp: Event = req.to_event(vec).await.unwrap();
+            req.set_body(vec);
+            let evtresp: Event = req.to_event().await.unwrap();
             assert_eq!(expected, evtresp);
             Ok(Body::from_json(&evtresp)?)
         });

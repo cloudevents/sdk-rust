@@ -1,0 +1,28 @@
+[package]
+name = "cloudevents-sdk-surf"
+authors = ["Anthony Whalley <anton@venshare.com>"]
+edition = "2018"
+version = "0.3.1"
+license-file = "../LICENSE"
+description = "CloudEvents official Rust SDK - Surf integration"
+documentation = "https://docs.rs/cloudevents-sdk-surf"
+repository = "https://github.com/cloudevents/sdk-rust"
+readme = "README.md"
+categories = ["web-programming", "encoding", "web-programming::http-client"]
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+async-trait = "^0.1.33"
+bytes = "1.0.1"
+cloudevents-sdk = { version = "0.3.0", path = ".." }
+lazy_static = "1.4.0"
+surf = "2.2.0"
+
+[dev-dependencies]
+serde = { version = "1.0.117", features = ["derive"] }
+serde_json = "^1.0"
+chrono = { version = "^0.4", features = ["serde"] }
+version-sync = "^0.9"
+async-std = { version = "1", features = ["attributes"] }
+mockito = "0.25.1"

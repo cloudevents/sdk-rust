@@ -15,9 +15,8 @@ use tide::{Response, Request, Body};
      )
  }
 
- pub async fn post(mut req: Request<()>) -> tide::Result {
-    let body = req.body_bytes().await?;
-     let evtresp: Event = req.to_event(body.to_vec()).await?;
+ pub async fn post(req: Request<()>) -> tide::Result {
+     let evtresp: Event = req.to_event().await?;
      let response = Response::builder(200)
      .body(Body::from_json(&evtresp)?)
      .build();

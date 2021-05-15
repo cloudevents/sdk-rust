@@ -1,5 +1,4 @@
 use super::headers;
-use async_trait::async_trait;
 use bytes::{Bytes, BytesMut};
 use cloudevents::event::SpecVersion;
 use cloudevents::message::{
@@ -120,13 +119,13 @@ pub async fn request_to_event(
 ///
 /// This trait is sealed and cannot be implemented for types outside of this crate.
 #[allow(patterns_in_fns_without_body)]
-#[async_trait]
+#[tide::utils::async_trait]
 pub trait RequestExt: private::Sealed {
     /// Convert this [`Request`] into an [`Event`].
     async fn to_event(mut self) -> std::result::Result<Event, tide::Error>;
 }
 
-#[async_trait]
+#[tide::utils::async_trait]
 impl<State: Clone + Send + Sync + 'static> RequestExt for Request<State> {
     async fn to_event(mut self) -> std::result::Result<Event, tide::Error> {
         let mut headers = HashMap::new();

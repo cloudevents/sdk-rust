@@ -1,5 +1,4 @@
 use super::headers;
-use async_trait::async_trait;
 use cloudevents::event::SpecVersion;
 use cloudevents::message::{
     BinaryDeserializer, BinarySerializer, MessageAttributeValue, Result, StructuredSerializer,
@@ -73,13 +72,13 @@ pub async fn event_to_response(
 /// Extension Trait for [`Response`] which acts as a wrapper for the function [`event_to_response()`].
 ///
 /// This trait is sealed and cannot be implemented for types outside of this crate.
-#[async_trait]
+#[tide::utils::async_trait]
 pub trait ResponseExt: private::Sealed {
     /// Fill this [`Response`] with an [`Event`].
     async fn event(self, event: Event) -> std::result::Result<Response, tide::Error>;
 }
 
-#[async_trait]
+#[tide::utils::async_trait]
 impl ResponseExt for Response {
     async fn event(self, event: Event) -> std::result::Result<Response, tide::Error> {
         event_to_response(event, self).await

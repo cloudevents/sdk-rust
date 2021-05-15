@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>CloudEvent UI</title>
+  <meta charset="utf-8">
+  <meta name="author" content="Anton Whalley">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <style>
+      textarea {
+        width: 500px;
+        height: 300px;
+        }
+
+  </style>
+</head>
+<body>
+    CloudEvent UI
+    <br />
+    <textarea id="msg">
+        {
+            "specversion" : "1.0",
+            "type" : "com.example.someevent",
+            "source" : "/mycontext",
+            "id" : "A234-1234-1234",
+            "time" : "2018-04-05T17:31:00Z",
+            "comexampleextension1" : "value",
+            "comexampleothervalue" : 5,
+            "datacontenttype" : "text/xml",
+            "data" : "<much wow=\"xml\"/>"
+        }
+    </textarea>
+    <br/>
+    <button onclick="send()">Send</button>
+    <div>Responses:</div>
+    <div id="responses"></div>
+<script>
+let io;
+document.addEventListener("DOMContentLoaded", function() {
+    // connect to ws
+    const ws_url = `${window.location.protocol === "https:" ? "wss" : "ws"}://${window.location.host}${window.location.pathname}`;
+    io = new WebSocket( ws_url, ["cloudevents.json", "cloudevents.avro"] );
+    io.onmessage = function (event) {
+        let msg = document.getElementById("responses").innerHTML;
+        msg += JSON.stringify(event.data);
+        console.log(event.data);
+        document.getElementById("responses").innerHTML = msg;
+    }
+} );
+
+function send() {
+    let msg = document.getElementById("msg").value;
+    console.log(msg);
+    io.send(msg);
+}
+
+
+
+</script>
+</body>
+</html>

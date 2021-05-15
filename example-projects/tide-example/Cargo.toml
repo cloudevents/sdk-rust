@@ -11,5 +11,9 @@ cloudevents-sdk = { path = "../.." }
 cloudevents-sdk-tide = { path = "../../cloudevents-sdk-tide" }
 tide = { version = "0.16" }
 async-std = { version = "1", features = ["attributes"] }
+tide-websockets = "0.3.0"
+futures-util = "0.3.8"
+serde_json = "1.0.64"
+chrono = { version = "^0.4", features = ["serde"] }
 
 [workspace]

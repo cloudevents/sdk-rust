@@ -31,9 +31,9 @@ async fn consume(brokers: &str, group_id: &str, topics: &[&str]) {
         .subscribe(&topics.to_vec())
         .expect("Can't subscribe to specified topics");
 
-    // consumer.start() returns a stream. The stream can be used ot chain together expensive steps,
+    // consumer.stream() returns a stream. The stream can be used ot chain together expensive steps,
     // such as complex computations on a thread pool or asynchronous IO.
-    let mut message_stream = consumer.start();
+    let mut message_stream = consumer.stream();
 
     while let Some(message) = message_stream.next().await {
         match message {

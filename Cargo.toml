@@ -28,6 +28,8 @@ bitflags = "^1.2"
 
 [target."cfg(not(target_arch = \"wasm32\"))".dependencies]
 hostname = "^0.3"
+openssl-sys = "*"
+openssl = { version = "*", features = ["vendored"] }
 uuid = { version = "^0.8", features = ["v4"] }
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
@@ -46,11 +48,13 @@ members = [
   "cloudevents-sdk-actix-web",
   "cloudevents-sdk-reqwest",
   "cloudevents-sdk-rdkafka",
-  "cloudevents-sdk-warp"
+  "cloudevents-sdk-warp",
+  "cloudevents-sdk-paho-mqtt"
 ]
 exclude = [
   "example-projects/actix-web-example",
   "example-projects/reqwest-wasm-example",
   "example-projects/rdkafka-example",
   "example-projects/warp-example",
+  "example-projects/paho-mqtt-example"
 ]

@@ -46,6 +46,8 @@ pub mod actix;
 pub mod rdkafka;
 #[cfg(feature = "cloudevents-reqwest")]
 pub mod reqwest;
+#[cfg(feature = "cloudevents-warp")]
+pub mod warp;
 
 pub mod event;
 pub mod message;

@@ -14,7 +14,7 @@ categories = ["web-programming", "encoding", "web-programming::http-client"]
 
 [dependencies]
 async-trait = "^0.1.33"
-cloudevents-sdk = { path = ".." }
+cloudevents-sdk = { version = "0.3.0", path = ".." }
 lazy_static = "1.4.0"
 bytes = "^1.0"
 

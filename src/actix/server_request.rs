@@ -1,14 +1,14 @@
 use super::headers;
-use actix_web::http::HeaderName;
-use actix_web::web::{Bytes, BytesMut};
-use actix_web::{web, HttpMessage, HttpRequest};
-use async_trait::async_trait;
 use crate::event::SpecVersion;
 use crate::message::{
     BinaryDeserializer, BinarySerializer, Encoding, MessageAttributeValue, MessageDeserializer,
     Result, StructuredDeserializer, StructuredSerializer,
 };
 use crate::{message, Event};
+use actix_web::http::HeaderName;
+use actix_web::web::{Bytes, BytesMut};
+use actix_web::{web, HttpMessage, HttpRequest};
+use async_trait::async_trait;
 use futures::StreamExt;
 use std::convert::TryFrom;
 
@@ -145,8 +145,8 @@ mod tests {
     use super::*;
     use actix_web::test;
 
-    use chrono::Utc;
     use crate::{EventBuilder, EventBuilderV10};
+    use chrono::Utc;
     use serde_json::json;
 
     #[actix_rt::test]

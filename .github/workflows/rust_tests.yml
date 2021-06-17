@@ -91,14 +91,13 @@ jobs:
         CC: musl-gcc
         CXX: g++
 
-    # If wasm, then we test only the main module and cloudevents-sdk-reqwest
     - uses: actions-rs/cargo@v1
       name: "Build"
       if: matrix.target == 'wasm32-unknown-unknown'
       with:
         command: build
         toolchain: ${{ matrix.toolchain }}
-        args: --target wasm32-unknown-unknown --package cloudevents-sdk --package cloudevents-sdk-reqwest
+        args: --target wasm32-unknown-unknown --package cloudevents-sdk
 
     # Build examples
     - uses: actions-rs/cargo@v1

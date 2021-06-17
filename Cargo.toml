@@ -18,6 +18,7 @@ name = "cloudevents"
 
 [features]
 cloudevents-actix = ["actix-web", "async-trait", "lazy_static", "bytes", "futures"]
+cloudevents-reqwest = ["reqwest", "async-trait", "lazy_static", "bytes"]
 
 [dependencies]
 serde = { version = "^1.0", features = ["derive"] }
@@ -29,8 +30,9 @@ url = { version = "^2.1", features = ["serde"] }
 snafu = "^0.6"
 bitflags = "^1.2"
 
-# actix optional deps
+# runtime optional deps
 actix-web = { version = "^3", default-features = false, optional = true }
+reqwest = { version = "^0.11", default-features = false, features = ["rustls-tls"], optional = true }
 async-trait = { version = "^0.1.33", optional = true }
 lazy_static = { version = "1.4.0", optional = true }
 bytes = { version = "^1.0", optional = true }
@@ -50,11 +52,13 @@ claim = "0.3.1"
 version-sync = "^0.9"
 serde_yaml = "0.8"
 
-# actix dev-deps
+# runtime dev-deps
 actix-rt = { version = "^1" }
 url = { version = "^2.1", features = ["serde"] }
 serde_json = { version = "^1.0" }
 chrono = { version = "^0.4", features = ["serde"] }
+mockito = "0.25.1"
+tokio = { version = "^1.0", features = ["full"] }
 
 [workspace]
 members = [

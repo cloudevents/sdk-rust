@@ -1,6 +1,6 @@
 use actix_web::{get, post, web, App, HttpRequest, HttpResponse, HttpServer};
+use cloudevents::actix::{HttpRequestExt, HttpResponseBuilderExt};
 use cloudevents::{EventBuilder, EventBuilderV10};
-use cloudevents_sdk_actix_web::{HttpResponseBuilderExt, HttpRequestExt};
 use serde_json::json;
 
 #[post("/")]

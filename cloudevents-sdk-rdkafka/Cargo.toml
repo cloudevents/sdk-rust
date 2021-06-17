@@ -14,7 +14,7 @@ categories = ["web-programming", "encoding"]
 
 [dependencies]
 bytes = "^1.0"
-cloudevents-sdk = { version = "0.3.0", path = ".." }
+cloudevents-sdk = { path = ".." }
 lazy_static = "1.4.0"
 rdkafka = { version = "^0.25", features = ["cmake-build"] }
 
@@ -22,5 +22,5 @@ rdkafka = { version = "^0.25", features = ["cmake-build"] }
 url = { version = "^2.1" }
 serde_json = "^1.0"
 chrono = { version = "^0.4", features = ["serde"] }
-futures = "0.3.5"
+futures = "^0.3"
 version-sync = "^0.9"

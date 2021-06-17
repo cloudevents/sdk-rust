@@ -40,6 +40,9 @@
 #![doc(html_root_url = "https://docs.rs/cloudevents-sdk/0.3.1")]
 #![deny(broken_intra_doc_links)]
 
+#[cfg(feature = "cloudevents-actix")]
+pub mod actix;
+
 pub mod event;
 pub mod message;
 

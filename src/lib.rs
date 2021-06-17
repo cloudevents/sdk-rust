@@ -42,6 +42,8 @@
 
 #[cfg(feature = "cloudevents-actix")]
 pub mod actix;
+#[cfg(feature = "cloudevents-rdkafka")]
+pub mod rdkafka;
 #[cfg(feature = "cloudevents-reqwest")]
 pub mod reqwest;
 

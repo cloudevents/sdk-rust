@@ -13,7 +13,7 @@ pub struct EventFilterError {
 impl warp::reject::Reject for EventFilterError {}
 
 ///
-/// # Extracts [`cloudevents::Event`] from incoming request
+/// # Extracts [`crate::Event`] from incoming request
 ///
 /// ```
 /// use cloudevents::warp::filter::to_event;

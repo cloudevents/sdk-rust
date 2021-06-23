@@ -1,4 +1,4 @@
-//! This crate integrates the [cloudevents-sdk](https://docs.rs/cloudevents-sdk) with [Warp web service framework](https://docs.rs/warp/)
+//! This module integrates the [cloudevents-sdk](https://docs.rs/cloudevents-sdk) with [Warp web service framework](https://docs.rs/warp/)
 //! to easily send and receive CloudEvents.
 //!
 //! To deserialize an HTTP request as CloudEvent
@@ -57,8 +57,6 @@
 //!     });
 //!     warp::serve(routes).run(([127, 0, 0, 1], 3030));
 //! ```
-//!
-//! Check out the [cloudevents-sdk](https://docs.rs/cloudevents-sdk) docs for more details on how to use [`cloudevents::Event`]
 
 #[macro_use]
 mod headers;

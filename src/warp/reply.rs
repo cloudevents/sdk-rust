@@ -5,7 +5,7 @@ use http::StatusCode;
 use warp::reply::Response;
 
 ///
-/// # Serializes [`cloudevents::Event`] as a http response
+/// # Serializes [`crate::Event`] as a http response
 ///
 /// ```
 /// use cloudevents::warp::reply::from_event;

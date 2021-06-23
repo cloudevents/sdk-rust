@@ -11,7 +11,7 @@ use rdkafka::producer::{BaseRecord, FutureRecord};
 /// Implements [`StructuredSerializer`] & [`BinarySerializer`] traits.
 ///
 /// To instantiate a new `MessageRecord` from an [`Event`],
-/// look at [`Self::from_event`] or use [`StructuredDeserializer::deserialize_structured`](cloudevents::message::StructuredDeserializer::deserialize_structured)
+/// look at [`Self::from_event`] or use [`StructuredDeserializer::deserialize_structured`](crate::message::StructuredDeserializer::deserialize_structured)
 /// or [`BinaryDeserializer::deserialize_binary`].
 pub struct MessageRecord {
     pub(crate) headers: OwnedHeaders,

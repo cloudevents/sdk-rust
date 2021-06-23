@@ -29,15 +29,9 @@
 //! * The [`EventBuilder`] trait and implementations, to create [`Event`] instances
 //! * The implementation of [`serde::Serialize`] and [`serde::Deserialize`] for [`Event`] to serialize/deserialize CloudEvents to/from JSON
 //! * Traits and utilities in [`message`] to implement Protocol Bindings
-//!
-//! If you're looking for Protocol Binding implementations, look at crates:
-//!
-//! * [cloudevents-sdk-actix-web](https://docs.rs/cloudevents-sdk-actix-web): Integration with [Actix Web](https://github.com/actix/actix-web)
-//! * [cloudevents-sdk-reqwest](https://docs.rs/cloudevents-sdk-reqwest): Integration with [reqwest](https://github.com/seanmonstar/reqwest)
-//! * [cloudevents-sdk-rdkafka](https://docs.rs/cloudevents-sdk-rdkafka): Integration with [rdkafka](https://fede1024.github.io/rust-rdkafka)
+//! * Feature-guarded modules for various Protocol Binding implementations, e.g. actix, reqwest, warp, rdkafka
 //!
 
-#![doc(html_root_url = "https://docs.rs/cloudevents-sdk/0.3.1")]
 #![deny(broken_intra_doc_links)]
 
 #[cfg(feature = "cloudevents-actix")]

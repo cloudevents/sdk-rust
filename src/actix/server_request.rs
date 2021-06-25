@@ -9,7 +9,8 @@ use actix_web::http::HeaderName;
 use actix_web::web::{Bytes, BytesMut};
 use actix_web::{web, HttpMessage, HttpRequest};
 use async_trait::async_trait;
-use futures::StreamExt;
+use futures::future::LocalBoxFuture;
+use futures::{FutureExt, StreamExt};
 use std::convert::TryFrom;
 
 /// Wrapper for [`HttpRequest`] that implements [`MessageDeserializer`] trait.
@@ -110,6 +111,19 @@ pub async fn request_to_event(
     }
     MessageDeserializer::into_event(HttpRequestDeserializer::new(req, bytes.freeze()))
         .map_err(actix_web::error::ErrorBadRequest)
+}
+
+/// So that an actix-web handler may take an Event parameter
+impl actix_web::FromRequest for Event {
+    type Config = ();
+    type Error = actix_web::Error;
+    type Future = LocalBoxFuture<'static, std::result::Result<Self, Self::Error>>;
+
+    fn from_request(r: &HttpRequest, p: &mut actix_web::dev::Payload) -> Self::Future {
+        let payload = web::Payload(p.take());
+        let request = r.to_owned();
+        async move { request_to_event(&request, payload).await }.boxed_local()
+    }
 }
 
 /// Extention Trait for [`HttpRequest`] which acts as a wrapper for the function [`request_to_event()`].

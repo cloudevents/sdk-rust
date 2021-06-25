@@ -5,9 +5,11 @@ use crate::message::{
 };
 use crate::Event;
 use actix_web::dev::HttpResponseBuilder;
-use actix_web::http::{HeaderName, HeaderValue};
+use actix_web::http::{HeaderName, HeaderValue, StatusCode};
 use actix_web::HttpResponse;
 use async_trait::async_trait;
+use futures::future::LocalBoxFuture;
+use futures::FutureExt;
 use std::str::FromStr;
 
 /// Wrapper for [`HttpResponseBuilder`] that implements [`StructuredSerializer`] and [`BinarySerializer`].
@@ -74,6 +76,16 @@ pub async fn event_to_response(
 ) -> std::result::Result<HttpResponse, actix_web::error::Error> {
     BinaryDeserializer::deserialize_binary(event, HttpResponseSerializer::new(response))
         .map_err(actix_web::error::ErrorBadRequest)
+}
+
+/// So that an actix-web handler may return an Event
+impl actix_web::Responder for Event {
+    type Error = actix_web::Error;
+    type Future = LocalBoxFuture<'static, std::result::Result<HttpResponse, Self::Error>>;
+
+    fn respond_to(self, _: &actix_web::HttpRequest) -> Self::Future {
+        async { HttpResponse::build(StatusCode::OK).event(self).await }.boxed_local()
+    }
 }
 
 /// Extension Trait for [`HttpResponseBuilder`] which acts as a wrapper for the function [`event_to_response()`].

@@ -1,31 +1,25 @@
-use actix_web::{get, post, web, App, HttpRequest, HttpResponse, HttpServer};
-use cloudevents::actix::{HttpRequestExt, HttpResponseBuilderExt};
-use cloudevents::{EventBuilder, EventBuilderV10};
+use actix_web::{get, post, App, HttpServer};
+use cloudevents::{Event, EventBuilder, EventBuilderV10};
 use serde_json::json;
 
 #[post("/")]
-async fn post_event(req: HttpRequest, payload: web::Payload) -> Result<String, actix_web::Error> {
-    let event = req.to_event(payload).await?;
+async fn post_event(event: Event) -> Event {
     println!("Received Event: {:?}", event);
-    Ok(format!("{:?}", event))
+    event
 }
 
 #[get("/")]
-async fn get_event() -> Result<HttpResponse, actix_web::Error> {
+async fn get_event() -> Event {
     let payload = json!({"hello": "world"});
 
-    Ok(HttpResponse::Ok()
-        .event(
-            EventBuilderV10::new()
-                .id("0001")
-                .ty("example.test")
-                .source("http://localhost/")
-                .data("application/json", payload)
-                .extension("someint", "10")
-                .build()
-                .unwrap(),
-        )
-        .await?)
+    EventBuilderV10::new()
+        .id("0001")
+        .ty("example.test")
+        .source("http://localhost/")
+        .data("application/json", payload)
+        .extension("someint", "10")
+        .build()
+        .unwrap()
 }
 
 #[actix_web::main]

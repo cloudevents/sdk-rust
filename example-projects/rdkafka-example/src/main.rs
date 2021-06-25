@@ -3,7 +3,7 @@ use futures::StreamExt;
 use serde_json::json;
 
 use cloudevents::{EventBuilder, EventBuilderV10};
-use cloudevents_sdk_rdkafka::{FutureRecordExt, MessageExt, MessageRecord};
+use cloudevents::rdkafka::{FutureRecordExt, MessageExt, MessageRecord};
 
 use rdkafka::config::{ClientConfig, RDKafkaLogLevel};
 use rdkafka::consumer::stream_consumer::StreamConsumer;

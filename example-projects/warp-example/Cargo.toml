@@ -7,8 +7,7 @@ categories = ["web-programming", "encoding"]
 license-file = "../LICENSE"
 
 [dependencies]
-cloudevents-sdk = { path = "../.." }
-cloudevents-sdk-warp = { path = "../../cloudevents-sdk-warp"}
+cloudevents-sdk = { path = "../..", features = ["cloudevents-warp"] }
 warp = "^0.3"
 tokio = { version = "^1.0", features = ["full"] }
 

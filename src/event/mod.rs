@@ -120,8 +120,7 @@ impl fmt::Display for Event {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         writeln!(f, "CloudEvent:")?;
         self.iter()
-            .map(|(name, val)| writeln!(f, "  {}: '{}'", name, val))
-            .collect::<fmt::Result>()?;
+            .try_for_each(|(name, val)| writeln!(f, "  {}: '{}'", name, val))?;
         match self.data() {
             Some(data) => write!(f, "  {}", data)?,
             None => write!(f, "  No data")?,

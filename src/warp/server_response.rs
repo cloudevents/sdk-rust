@@ -84,8 +84,7 @@ impl BinarySerializer<Response> for ResponseSerializer {
 
 impl StructuredSerializer<Response> for ResponseSerializer {
     fn set_structured_event(self, bytes: Vec<u8>) -> Result<Response> {
-        Ok(self
-            .builder
+        self.builder
             .header(
                 http::header::CONTENT_TYPE,
                 headers::CLOUDEVENTS_JSON_HEADER.clone(),
@@ -93,7 +92,7 @@ impl StructuredSerializer<Response> for ResponseSerializer {
             .body(Body::from(bytes))
             .map_err(|e| crate::message::Error::Other {
                 source: Box::new(e),
-            })?)
+            })
     }
 }
 

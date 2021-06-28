@@ -1,7 +1,7 @@
 import $ from 'jquery';
 
-import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap';
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 import("./pkg").then(rustModule => {
     $(document).ready(function () {

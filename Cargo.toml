@@ -66,18 +66,3 @@ chrono = { version = "^0.4", features = ["serde"] }
 mockito = "0.25.1"
 tokio = { version = "^1.0", features = ["full"] }
 mime = "0.3"
-
-[workspace]
-members = [
-  ".",
-  "cloudevents-sdk-actix-web",
-  "cloudevents-sdk-reqwest",
-  "cloudevents-sdk-rdkafka",
-  "cloudevents-sdk-warp",
-]
-exclude = [
-  "example-projects/actix-web-example",
-  "example-projects/reqwest-wasm-example",
-  "example-projects/rdkafka-example",
-  "example-projects/warp-example",
-]

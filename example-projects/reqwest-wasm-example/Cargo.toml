@@ -16,5 +16,3 @@ url = { version = "^2.1" }
 web-sys = { version = "0.3.39", features = ["Window", "Location"] }
 wasm-bindgen-futures = "0.4.12"
 wasm-bindgen = { version = "0.2.62", features = ["serde-serialize"]  }
-
-[workspace]

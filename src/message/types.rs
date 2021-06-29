@@ -54,9 +54,9 @@ impl fmt::Display for MessageAttributeValue {
     }
 }
 
-impl Into<MessageAttributeValue> for ExtensionValue {
-    fn into(self) -> MessageAttributeValue {
-        match self {
+impl From<ExtensionValue> for MessageAttributeValue {
+    fn from(that: ExtensionValue) -> Self {
+        match that {
             ExtensionValue::String(s) => MessageAttributeValue::String(s),
             ExtensionValue::Boolean(b) => MessageAttributeValue::Boolean(b),
             ExtensionValue::Integer(i) => MessageAttributeValue::Integer(i),
@@ -64,9 +64,9 @@ impl Into<MessageAttributeValue> for ExtensionValue {
     }
 }
 
-impl Into<ExtensionValue> for MessageAttributeValue {
-    fn into(self) -> ExtensionValue {
-        match self {
+impl From<MessageAttributeValue> for ExtensionValue {
+    fn from(that: MessageAttributeValue) -> Self {
+        match that {
             MessageAttributeValue::Integer(i) => ExtensionValue::Integer(i),
             MessageAttributeValue::Boolean(b) => ExtensionValue::Boolean(b),
             v => ExtensionValue::String(v.to_string()),

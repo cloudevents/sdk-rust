@@ -55,6 +55,6 @@ impl TryIntoTime for String {
 /// here.
 ///
 /// Also see:
-/// * https://github.com/cloudevents/spec/blob/v1.0.1/spec.md#type-system
-/// * https://tools.ietf.org/html/rfc3986#section-4.1
+/// * <https://github.com/cloudevents/spec/blob/v1.0.1/spec.md#type-system>
+/// * <https://tools.ietf.org/html/rfc3986#section-4.1>
 pub type UriReference = String;

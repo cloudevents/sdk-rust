@@ -5,14 +5,6 @@ use lazy_static::lazy_static;
 use std::collections::HashMap;
 use std::str::FromStr;
 
-macro_rules! unwrap_optional_header {
-    ($headers:expr, $name:expr) => {
-        $headers
-            .get::<&'static HeaderName>(&$name)
-            .map(|a| header_value_to_str!(a))
-    };
-}
-
 macro_rules! header_value_to_str {
     ($header_value:expr) => {
         $header_value
@@ -61,8 +53,8 @@ fn attributes_to_headers(
 lazy_static! {
     pub(crate) static ref ATTRIBUTES_TO_HEADERS: HashMap<&'static str, HeaderName> =
         attributes_to_headers(SpecVersion::all_attribute_names());
-    pub(crate) static ref SPEC_VERSION_HEADER: HeaderName =
-        HeaderName::from_static("ce-specversion");
     pub(crate) static ref CLOUDEVENTS_JSON_HEADER: HeaderValue =
         HeaderValue::from_static("application/cloudevents+json");
 }
+
+pub(crate) static SPEC_VERSION_HEADER: &str = "ce-specversion";

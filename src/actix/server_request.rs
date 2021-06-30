@@ -5,7 +5,6 @@ use crate::message::{
     Result, StructuredDeserializer, StructuredSerializer,
 };
 use crate::{message, Event};
-use actix_web::http::HeaderName;
 use actix_web::web::{Bytes, BytesMut};
 use actix_web::{web, HttpMessage, HttpRequest};
 use async_trait::async_trait;
@@ -32,18 +31,22 @@ impl<'a> BinaryDeserializer for HttpRequestDeserializer<'a> {
         }
 
         let spec_version = SpecVersion::try_from(
-            unwrap_optional_header!(self.req.headers(), headers::SPEC_VERSION_HEADER).unwrap()?,
+            self.req
+                .headers()
+                .get(headers::SPEC_VERSION_HEADER)
+                .unwrap()
+                .to_str()
+                .unwrap(),
         )?;
 
         visitor = visitor.set_spec_version(spec_version.clone())?;
 
         let attributes = spec_version.attribute_names();
 
-        for (hn, hv) in
-            self.req.headers().iter().filter(|(hn, _)| {
-                headers::SPEC_VERSION_HEADER.ne(hn) && hn.as_str().starts_with("ce-")
-            })
-        {
+        for (hn, hv) in self.req.headers().iter().filter(|(hn, _)| {
+            let key = hn.as_str();
+            headers::SPEC_VERSION_HEADER.ne(key) && key.starts_with("ce-")
+        }) {
             let name = &hn.as_str()["ce-".len()..];
 
             if attributes.contains(&name) {
@@ -90,8 +93,7 @@ impl<'a> MessageDeserializer for HttpRequestDeserializer<'a> {
         } else if self
             .req
             .headers()
-            .get::<&'static HeaderName>(&super::headers::SPEC_VERSION_HEADER)
-            .is_some()
+            .contains_key(super::headers::SPEC_VERSION_HEADER)
         {
             Encoding::BINARY
         } else {
@@ -178,12 +180,12 @@ mod tests {
             .unwrap();
 
         let (req, payload) = test::TestRequest::post()
-            .header("ce-specversion", "1.0")
-            .header("ce-id", "0001")
-            .header("ce-type", "example.test")
-            .header("ce-source", "http://localhost/")
-            .header("ce-someint", "10")
-            .header("ce-time", time.to_rfc3339())
+            .insert_header(("ce-specversion", "1.0"))
+            .insert_header(("ce-id", "0001"))
+            .insert_header(("ce-type", "example.test"))
+            .insert_header(("ce-source", "http://localhost/"))
+            .insert_header(("ce-someint", "10"))
+            .insert_header(("ce-time", time.to_rfc3339()))
             .to_http_parts();
 
         let resp = req.to_event(web::Payload(payload)).await.unwrap();
@@ -208,13 +210,13 @@ mod tests {
             .unwrap();
 
         let (req, payload) = test::TestRequest::post()
-            .header("ce-specversion", "1.0")
-            .header("ce-id", "0001")
-            .header("ce-type", "example.test")
-            .header("ce-source", "http://localhost")
-            .header("ce-someint", "10")
-            .header("ce-time", time.to_rfc3339())
-            .header("content-type", "application/json")
+            .insert_header(("ce-specversion", "1.0"))
+            .insert_header(("ce-id", "0001"))
+            .insert_header(("ce-type", "example.test"))
+            .insert_header(("ce-source", "http://localhost"))
+            .insert_header(("ce-someint", "10"))
+            .insert_header(("ce-time", time.to_rfc3339()))
+            .insert_header(("content-type", "application/json"))
             .set_json(&j)
             .to_http_parts();
 

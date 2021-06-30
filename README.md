@@ -97,4 +97,4 @@ information.
 [crates.io]: https://crates.io/crates/cloudevents-sdk
 [Docs badge]: https://docs.rs/cloudevents-sdk/badge.svg
 [docs.rs]: https://docs.rs/cloudevents-sdk
-[feature flags]: https://doc.rust-lang.org/cargo/reference/manifest.html#the-features-section
+[feature flag]: https://doc.rust-lang.org/cargo/reference/manifest.html#the-features-section

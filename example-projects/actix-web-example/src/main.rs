@@ -30,7 +30,6 @@ async fn main() -> std::io::Result<()> {
     HttpServer::new(|| {
         App::new()
             .wrap(actix_web::middleware::Logger::default())
-            .wrap(actix_cors::Cors::permissive())
             .service(post_event)
             .service(get_event)
     })

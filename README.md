@@ -18,21 +18,29 @@ Note: This project is WIP under active development, hence all APIs are considere
 | NATS Protocol Binding         | ✕ | ✕ |
 | Web hook                      | ✕ | ✕ |
 
-## Crates
+## Crate Structure
 
-* `cloudevents-sdk`: Provides Event data structure, JSON Event format implementation. This module is tested to work with GNU libc, WASM and musl toolchains.
-* `cloudevents-sdk-actix-web`: Integration with [Actix Web](https://github.com/actix/actix-web).
-* `cloudevents-sdk-reqwest`: Integration with [reqwest](https://github.com/seanmonstar/reqwest).
-* `cloudevents-sdk-rdkafka`: Integration with [rust-rdkafka](https://fede1024.github.io/rust-rdkafka).
-* `cloudevents-sdk-warp`: Integration with [warp](https://github.com/seanmonstar/warp/).
+The core modules include definitions for the `Event` and
+`EventBuilder` data structures, JSON serialization rules, and a
+mechanism to support various Protocol Bindings, each of which is
+enabled by a specific [feature flag]:
+
+* `cloudevents-actix`: Integration with [actix](https://actix.rs/).
+* `cloudevents-warp`: Integration with [warp](https://github.com/seanmonstar/warp/).
+* `cloudevents-reqwest`: Integration with [reqwest](https://github.com/seanmonstar/reqwest).
+* `cloudevents-rdkafka`: Integration with [rdkafka](https://fede1024.github.io/rust-rdkafka).
+
+This crate is continuously tested to work with GNU libc, WASM and musl
+toolchains.
 
 ## Get Started
 
-To get started, add the dependency to `Cargo.toml`:
+To get started, add the dependency to `Cargo.toml`, optionally
+enabling your Protocol Binding of choice:
 
 ```toml
 [dependencies]
-cloudevents-sdk = "0.3.1"
+cloudevents-sdk = { version = "0.3.1", features = ["cloudevents-actix"] }
 ```
 
 Now you can start creating events:
@@ -89,3 +97,4 @@ information.
 [crates.io]: https://crates.io/crates/cloudevents-sdk
 [Docs badge]: https://docs.rs/cloudevents-sdk/badge.svg
 [docs.rs]: https://docs.rs/cloudevents-sdk
+[feature flags]: https://doc.rust-lang.org/cargo/reference/manifest.html#the-features-section

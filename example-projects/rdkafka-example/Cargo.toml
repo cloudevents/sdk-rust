@@ -17,5 +17,3 @@ futures = "^0.3"
 tokio = { version = "^1.0", features = ["full"] }
 clap = "2.33.1"
 rdkafka = { version = "^0.25", features = ["cmake-build"] }
-
-[workspace]

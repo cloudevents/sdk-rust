@@ -39,7 +39,7 @@ cargo test --all-features --all
 To build and open the documentation:
 
 ```sh
-cargo doc --lib --open
+cargo doc --all-features --lib --open
 ```
 
 Before performing the PR, once you have committed all changes, run:

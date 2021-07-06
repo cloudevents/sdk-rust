@@ -8,7 +8,7 @@ use warp::reply::Response;
 /// # Serializes [`crate::Event`] as a http response
 ///
 /// ```
-/// use cloudevents::warp::reply::from_event;
+/// use cloudevents::binding::warp::reply::from_event;
 /// use cloudevents::Event;
 /// use warp::Filter;
 /// use warp::Reply;

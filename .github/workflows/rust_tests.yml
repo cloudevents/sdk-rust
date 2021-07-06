@@ -97,7 +97,7 @@ jobs:
       with:
         command: build
         toolchain: ${{ matrix.toolchain }}
-        args: --target wasm32-unknown-unknown --features cloudevents-reqwest
+        args: --target wasm32-unknown-unknown --features reqwest-binding
 
     # Build examples
     - uses: actions-rs/cargo@v1

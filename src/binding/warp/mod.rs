@@ -7,8 +7,8 @@
 //!
 //! ```
 //! use warp::{Filter, Reply};
-//! use cloudevents::warp::reply::from_event;
-//! use cloudevents::warp::filter::to_event;
+//! use cloudevents::binding::warp::reply::from_event;
+//! use cloudevents::binding::warp::filter::to_event;
 //!
 //!     let routes = warp::any()
 //!         // extracting event from request
@@ -26,7 +26,7 @@
 //! use http::StatusCode;
 //! use serde_json::json;
 //! use warp::{Filter, Reply};
-//! use cloudevents::warp::reply::from_event;
+//! use cloudevents::binding::warp::reply::from_event;
 //!
 //!     let routes = warp::any().map(|| {
 //!         let event = EventBuilderV10::new()

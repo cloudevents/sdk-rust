@@ -16,7 +16,7 @@ impl warp::reject::Reject for EventFilterError {}
 /// # Extracts [`crate::Event`] from incoming request
 ///
 /// ```
-/// use cloudevents::warp::filter::to_event;
+/// use cloudevents::binding::warp::filter::to_event;
 /// use warp::Filter;
 /// use warp::Reply;
 ///

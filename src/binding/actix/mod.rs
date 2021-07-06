@@ -3,7 +3,7 @@
 //! To deserialize an HTTP request as CloudEvent:
 //!
 //! ```
-//! use cloudevents::actix::HttpRequestExt;
+//! use cloudevents::binding::actix::HttpRequestExt;
 //! use actix_web::{HttpRequest, web, post};
 //!
 //! #[post("/")]
@@ -17,7 +17,7 @@
 //! To serialize a CloudEvent to an HTTP response:
 //!
 //! ```
-//! use cloudevents::actix::HttpResponseBuilderExt;
+//! use cloudevents::binding::actix::HttpResponseBuilderExt;
 //! use actix_web::{HttpRequest, web, get, HttpResponse};
 //! use cloudevents::{EventBuilderV10, EventBuilder};
 //! use serde_json::json;

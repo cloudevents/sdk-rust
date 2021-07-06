@@ -36,7 +36,7 @@
 //! Cloudevents uses a set of [feature flags] to conditionally compile
 //! only the module associated with the Protocol Binding you need:
 //!
-//! - `cloudevents-actix`: Enables the [actix] module. This
+//! - `actix-binding`: Enables the [actix] protocol binding module. This
 //! extends the [`actix_web::HttpRequest`] with a
 //! [`to_event`](actix::HttpRequestExt::to_event) function, the
 //! [`actix_web::dev::HttpResponseBuilder`] with an
@@ -44,12 +44,9 @@
 //! and implementations for [`actix_web::FromRequest`] and
 //! [`actix_web::Responder`] in order to take advantage of actix-web's
 //! [Extractors] and [Responders]
-//!
-//! - `cloudevents-reqwest`: Enables the [reqwest] module.
-//!
-//! - `cloudevents-warp`: Enables the [warp] module.
-//!
-//! - `cloudevents-rdkafka`: Enables the [rdkafka] module to
+//! - `reqwest-binding`: Enables the [reqwest] protocol binding module.
+//! - `warp-binding`: Enables the [warp] protocol binding module.
+//! - `rdkafka-binding`: Enables the [rdkafka] protocol binding module to
 //! seamlessly consume/produce cloudevents within Kafka messages.
 //!
 //! [feature flags]: https://doc.rust-lang.org/cargo/reference/manifest.html#the-features-section
@@ -58,17 +55,9 @@
 
 #![deny(broken_intra_doc_links)]
 
-#[cfg(feature = "cloudevents-actix")]
-pub mod actix;
-#[cfg(feature = "cloudevents-rdkafka")]
-pub mod rdkafka;
-#[cfg(feature = "cloudevents-reqwest")]
-pub mod reqwest;
-#[cfg(feature = "cloudevents-warp")]
-pub mod warp;
-
 pub mod event;
 pub mod message;
+pub mod binding;
 
 pub use event::Data;
 pub use event::Event;

@@ -17,10 +17,10 @@ categories = ["web-programming", "encoding", "data-structures"]
 name = "cloudevents"
 
 [features]
-cloudevents-actix = ["actix-web", "async-trait", "lazy_static", "bytes", "futures"]
-cloudevents-reqwest = ["reqwest", "async-trait", "lazy_static", "bytes"]
-cloudevents-rdkafka = ["rdkafka", "lazy_static", "bytes"]
-cloudevents-warp = ["warp", "lazy_static", "bytes", "http", "hyper"]
+actix-binding = ["actix-web", "async-trait", "lazy_static", "bytes", "futures"]
+reqwest-binding = ["reqwest", "async-trait", "lazy_static", "bytes"]
+rdkafka-binding = ["rdkafka", "lazy_static", "bytes"]
+warp-binding = ["warp", "lazy_static", "bytes", "http", "hyper"]
 
 [dependencies]
 serde = { version = "^1.0", features = ["derive"] }

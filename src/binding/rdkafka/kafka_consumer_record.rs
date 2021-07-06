@@ -164,7 +164,7 @@ mod private {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::rdkafka::kafka_producer_record::MessageRecord;
+    use crate::binding::rdkafka::kafka_producer_record::MessageRecord;
 
     use crate::{EventBuilder, EventBuilderV10};
     use chrono::Utc;

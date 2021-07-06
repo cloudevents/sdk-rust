@@ -1,4 +1,4 @@
-use cloudevents::reqwest::RequestBuilderExt;
+use cloudevents::binding::reqwest::RequestBuilderExt;
 use cloudevents::{EventBuilder, EventBuilderV10};
 use wasm_bindgen::prelude::*;
 

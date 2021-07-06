@@ -8,7 +8,7 @@
 //! use cloudevents::Event;
 //! use rdkafka::producer::{FutureProducer, FutureRecord};
 //! use rdkafka::util::Timeout;
-//! use cloudevents::rdkafka::{MessageRecord, FutureRecordExt};
+//! use cloudevents::binding::rdkafka::{MessageRecord, FutureRecordExt};
 //!
 //! # async fn produce(producer: &FutureProducer, event: Event) -> Result<(), Box<dyn std::error::Error>> {
 //! let message_record = MessageRecord::from_event(event)?;
@@ -28,7 +28,7 @@
 //!
 //! ```
 //! use rdkafka::consumer::{StreamConsumer, DefaultConsumerContext, Consumer, CommitMode};
-//! use cloudevents::rdkafka::MessageExt;
+//! use cloudevents::binding::rdkafka::MessageExt;
 //! use futures::StreamExt;
 //!
 //! # async fn consume(consumer: StreamConsumer<DefaultConsumerContext>) -> Result<(), Box<dyn std::error::Error>> {

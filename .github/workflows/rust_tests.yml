@@ -39,12 +39,12 @@ jobs:
           ~/.cargo/registry/index/
           ~/.cargo/registry/cache/
           ~/.cargo/git/db/
-        key: ${{ runner.os }}-cargo-deps-${{ hashFiles('**/Cargo.lock') }}
+        key: ${{ runner.os }}-cargo-deps-${{ hashFiles('**/Cargo.toml') }}
     - uses: actions/cache@v2
       with:
         path: |
           target/
-        key: ${{ runner.os }}-cargo-target-${{ matrix.toolchain }}-${{ matrix.target }}-${{ hashFiles('**/Cargo.lock') }}
+        key: ${{ runner.os }}-cargo-target-${{ matrix.toolchain }}-${{ matrix.target }}-${{ hashFiles('**/Cargo.toml') }}
     - uses: actions-rs/toolchain@v1
       with:
         toolchain: ${{ matrix.toolchain }}

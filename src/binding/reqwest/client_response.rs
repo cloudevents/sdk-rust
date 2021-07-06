@@ -1,3 +1,5 @@
+use reqwest_lib as reqwest;
+
 use super::headers;
 use crate::event::SpecVersion;
 use crate::message::{
@@ -127,6 +129,8 @@ impl ResponseExt for Response {
 
 // Sealing the ResponseExt
 mod private {
+    use reqwest_lib as reqwest;
+
     pub trait Sealed {}
     impl Sealed for reqwest::Response {}
 }
@@ -135,6 +139,7 @@ mod private {
 mod tests {
     use super::*;
     use mockito::mock;
+    use reqwest_lib as reqwest;
 
     use crate::{EventBuilder, EventBuilderV10};
     use chrono::Utc;

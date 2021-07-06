@@ -4,7 +4,7 @@
 //! To produce Cloudevents:
 //!
 //! ```
-//!
+//! # use rdkafka_lib as rdkafka;
 //! use cloudevents::Event;
 //! use rdkafka::producer::{FutureProducer, FutureRecord};
 //! use rdkafka::util::Timeout;
@@ -27,6 +27,7 @@
 //! To consume Cloudevents:
 //!
 //! ```
+//! # use rdkafka_lib as rdkafka;
 //! use rdkafka::consumer::{StreamConsumer, DefaultConsumerContext, Consumer, CommitMode};
 //! use cloudevents::binding::rdkafka::MessageExt;
 //! use futures::StreamExt;

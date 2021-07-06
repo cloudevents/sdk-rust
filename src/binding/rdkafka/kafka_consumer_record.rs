@@ -1,3 +1,5 @@
+use rdkafka_lib as rdkafka;
+
 use super::headers;
 use crate::event::SpecVersion;
 use crate::message::{
@@ -155,6 +157,8 @@ impl MessageExt for OwnedMessage {
 }
 
 mod private {
+    use rdkafka_lib as rdkafka;
+
     // Sealing the MessageExt
     pub trait Sealed {}
     impl Sealed for rdkafka::message::OwnedMessage {}
@@ -163,6 +167,8 @@ mod private {
 
 #[cfg(test)]
 mod tests {
+    use rdkafka_lib as rdkafka;
+
     use super::*;
     use crate::binding::rdkafka::kafka_producer_record::MessageRecord;
 

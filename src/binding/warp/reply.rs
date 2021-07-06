@@ -1,3 +1,5 @@
+use warp_lib as warp;
+
 use super::server_response::event_to_response;
 
 use crate::Event;
@@ -8,6 +10,7 @@ use warp::reply::Response;
 /// # Serializes [`crate::Event`] as a http response
 ///
 /// ```
+/// # use warp_lib as warp;
 /// use cloudevents::binding::warp::reply::from_event;
 /// use cloudevents::Event;
 /// use warp::Filter;
@@ -28,7 +31,6 @@ pub fn from_event(event: Event) -> Response {
 
 #[cfg(test)]
 mod tests {
-
     use crate::{EventBuilder, EventBuilderV10};
     use serde_json::json;
 

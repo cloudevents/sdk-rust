@@ -55,9 +55,9 @@
 
 #![deny(broken_intra_doc_links)]
 
+pub mod binding;
 pub mod event;
 pub mod message;
-pub mod binding;
 
 pub use event::Data;
 pub use event::Event;

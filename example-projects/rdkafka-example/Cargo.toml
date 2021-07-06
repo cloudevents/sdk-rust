@@ -8,7 +8,7 @@ edition = "2018"
 
 [dependencies]
 async-trait = "^0.1.33"
-cloudevents-sdk = { path = "../..", features = ["rdkafka-binding"] }
+cloudevents-sdk = { path = "../..", features = ["rdkafka"] }
 lazy_static = "1.4.0"
 bytes = "^1.0"
 url = { version = "^2.1", features = ["serde"] }

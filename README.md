@@ -25,10 +25,10 @@ The core modules include definitions for the `Event` and
 mechanism to support various Protocol Bindings, each of which is
 enabled by a specific [feature flag]:
 
-* `actix-binding`: Integration with [actix](https://actix.rs/).
-* `warp-binding`: Integration with [warp](https://github.com/seanmonstar/warp/).
-* `reqwest-binding`: Integration with [reqwest](https://github.com/seanmonstar/reqwest).
-* `rdkafka-binding`: Integration with [rdkafka](https://fede1024.github.io/rust-rdkafka).
+* `actix`: Integration with [actix](https://actix.rs/).
+* `warp`: Integration with [warp](https://github.com/seanmonstar/warp/).
+* `reqwest`: Integration with [reqwest](https://github.com/seanmonstar/reqwest).
+* `rdkafka`: Integration with [rdkafka](https://fede1024.github.io/rust-rdkafka).
 
 This crate is continuously tested to work with GNU libc, WASM and musl
 toolchains.
@@ -40,7 +40,7 @@ enabling your Protocol Binding of choice:
 
 ```toml
 [dependencies]
-cloudevents-sdk = { version = "0.3.1", features = ["actix-binding"] }
+cloudevents-sdk = { version = "0.3.1", features = ["actix"] }
 ```
 
 Now you can start creating events:

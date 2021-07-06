@@ -1,10 +1,10 @@
 //! Provides protocol binding implementations for [`Event`].
 
-#[cfg(feature = "actix-binding")]
+#[cfg(feature = "actix")]
 pub mod actix;
-#[cfg(feature = "rdkafka-binding")]
+#[cfg(feature = "rdkafka")]
 pub mod rdkafka;
-#[cfg(feature = "reqwest-binding")]
+#[cfg(feature = "reqwest")]
 pub mod reqwest;
-#[cfg(feature = "warp-binding")]
+#[cfg(feature = "warp")]
 pub mod warp;

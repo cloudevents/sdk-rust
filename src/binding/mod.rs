@@ -1,4 +1,4 @@
-//! Provides protocol binding implementations for [`Event`].
+//! Provides protocol binding implementations for [`crate::Event`].
 
 #[cfg(feature = "actix")]
 pub mod actix;

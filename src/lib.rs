@@ -36,7 +36,7 @@
 //! Cloudevents uses a set of [feature flags] to conditionally compile
 //! only the module associated with the Protocol Binding you need:
 //!
-//! - `actix`: Enables the [`actix-web`](actix_web) protocol binding module. This
+//! - `actix`: Enables the [`binding::actix`] protocol binding module. This
 //! extends the [`actix_web::HttpRequest`] with a
 //! [`to_event`](binding::actix::HttpRequestExt::to_event) function, the
 //! [`actix_web::dev::HttpResponseBuilder`] with an
@@ -44,9 +44,9 @@
 //! and implementations for [`actix_web::FromRequest`] and
 //! [`actix_web::Responder`] in order to take advantage of actix-web's
 //! [Extractors] and [Responders]
-//! - `reqwest`: Enables the [`reqwest`](reqwest_lib) protocol binding module.
-//! - `warp`: Enables the [`warp`](warp_lib) protocol binding module.
-//! - `rdkafka`: Enables the [`rdkafka`](rdkafka_lib) protocol binding module to
+//! - `reqwest`: Enables the [`binding::reqwest`] protocol binding module.
+//! - `warp`: Enables the [`binding::warp`] protocol binding module.
+//! - `rdkafka`: Enables the [`binding::rdkafka`] protocol binding module to
 //! seamlessly consume/produce cloudevents within Kafka messages.
 //!
 //! [feature flags]: https://doc.rust-lang.org/cargo/reference/manifest.html#the-features-section

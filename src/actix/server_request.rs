@@ -126,7 +126,7 @@ impl actix_web::FromRequest for Event {
     }
 }
 
-/// Extention Trait for [`HttpRequest`] which acts as a wrapper for the function [`request_to_event()`].
+/// Extension Trait for [`HttpRequest`] which acts as a wrapper for the function [`request_to_event()`].
 ///
 /// This trait is sealed and cannot be implemented for types outside of this crate.
 #[async_trait(?Send)]
@@ -160,19 +160,14 @@ mod tests {
     use actix_web::test;
 
     use crate::{EventBuilder, EventBuilderV10};
-    use chrono::Utc;
     use serde_json::json;
 
     #[actix_rt::test]
     async fn test_request() {
-        let time = Utc::now();
         let expected = EventBuilderV10::new()
             .id("0001")
             .ty("example.test")
             .source("http://localhost/")
-            //TODO this is required now because the message deserializer implictly set default values
-            // As soon as this defaulting doesn't happen anymore, we can remove it (Issues #40/#41)
-            .time(time)
             .extension("someint", "10")
             .build()
             .unwrap();
@@ -183,7 +178,6 @@ mod tests {
             .header("ce-type", "example.test")
             .header("ce-source", "http://localhost/")
             .header("ce-someint", "10")
-            .header("ce-time", time.to_rfc3339())
             .to_http_parts();
 
         let resp = req.to_event(web::Payload(payload)).await.unwrap();
@@ -192,16 +186,12 @@ mod tests {
 
     #[actix_rt::test]
     async fn test_request_with_full_data() {
-        let time = Utc::now();
         let j = json!({"hello": "world"});
 
         let expected = EventBuilderV10::new()
             .id("0001")
             .ty("example.test")
             .source("http://localhost")
-            //TODO this is required now because the message deserializer implictly set default values
-            // As soon as this defaulting doesn't happen anymore, we can remove it (Issues #40/#41)
-            .time(time)
             .data("application/json", j.to_string().into_bytes())
             .extension("someint", "10")
             .build()
@@ -213,9 +203,40 @@ mod tests {
             .header("ce-type", "example.test")
             .header("ce-source", "http://localhost")
             .header("ce-someint", "10")
-            .header("ce-time", time.to_rfc3339())
             .header("content-type", "application/json")
             .set_json(&j)
+            .to_http_parts();
+
+        let resp = req.to_event(web::Payload(payload)).await.unwrap();
+        assert_eq!(expected, resp);
+    }
+
+    #[actix_rt::test]
+    async fn test_structured_request_with_full_data() {
+        let j = json!({"hello": "world"});
+        let payload = json!({
+            "specversion": "1.0",
+            "id": "0001",
+            "type": "example.test",
+            "source": "http://localhost",
+            "someint": "10",
+            "datacontenttype": "application/json",
+            "data": j
+        });
+        let bytes = serde_json::to_string(&payload).expect("Failed to serialize test data to json");
+
+        let expected = EventBuilderV10::new()
+            .id("0001")
+            .ty("example.test")
+            .source("http://localhost")
+            .data("application/json", j)
+            .extension("someint", "10")
+            .build()
+            .unwrap();
+
+        let (req, payload) = test::TestRequest::post()
+            .header("content-type", "application/cloudevents+json")
+            .set_payload(bytes)
             .to_http_parts();
 
         let resp = req.to_event(web::Payload(payload)).await.unwrap();

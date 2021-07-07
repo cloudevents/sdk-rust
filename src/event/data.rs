@@ -36,6 +36,12 @@ impl From<String> for Data {
     }
 }
 
+impl From<&str> for Data {
+    fn from(value: &str) -> Self {
+        Data::String(String::from(value))
+    }
+}
+
 impl TryFrom<Data> for serde_json::Value {
     type Error = serde_json::Error;
 

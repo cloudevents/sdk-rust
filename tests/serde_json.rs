@@ -1,5 +1,5 @@
 use claim::*;
-use cloudevents::{Event, EventBuilderV10, EventBuilder};
+use cloudevents::{Event, EventBuilder, EventBuilderV10};
 use rstest::rstest;
 use serde_json::{json, Value};
 

@@ -1,7 +1,8 @@
 //! This module integrates the [cloudevents-sdk](https://docs.rs/cloudevents-sdk) with [reqwest](https://docs.rs/reqwest/) to easily send and receive CloudEvents.
 //!
 //! ```
-//! use cloudevents::reqwest::{RequestBuilderExt, ResponseExt};
+//! # use reqwest_lib as reqwest;
+//! use cloudevents::binding::reqwest::{RequestBuilderExt, ResponseExt};
 //! use cloudevents::{EventBuilderV10, EventBuilder};
 //! use serde_json::json;
 //!

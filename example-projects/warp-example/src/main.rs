@@ -1,4 +1,4 @@
-use cloudevents::warp::{filter, reply};
+use cloudevents::binding::warp::{filter, reply};
 use warp::Filter;
 
 #[tokio::main]

@@ -1,3 +1,5 @@
+use rdkafka_lib as rdkafka;
+
 use super::headers;
 use crate::event::SpecVersion;
 use crate::message::{
@@ -140,6 +142,8 @@ impl<'a, K: ToBytes + ?Sized> FutureRecordExt<'a, K> for FutureRecord<'a, K, Vec
 }
 
 mod private {
+    use rdkafka_lib as rdkafka;
+
     // Sealing the FutureRecordExt and BaseRecordExt
     pub trait Sealed {}
     impl<K: rdkafka::message::ToBytes + ?Sized, V: rdkafka::message::ToBytes> Sealed

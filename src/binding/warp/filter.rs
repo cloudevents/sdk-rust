@@ -1,3 +1,5 @@
+use warp_lib as warp;
+
 use super::server_request::request_to_event;
 
 use crate::Event;
@@ -16,7 +18,8 @@ impl warp::reject::Reject for EventFilterError {}
 /// # Extracts [`crate::Event`] from incoming request
 ///
 /// ```
-/// use cloudevents::warp::filter::to_event;
+/// # use warp_lib as warp;
+/// use cloudevents::binding::warp::filter::to_event;
 /// use warp::Filter;
 /// use warp::Reply;
 ///
@@ -25,7 +28,7 @@ impl warp::reject::Reject for EventFilterError {}
 ///    .map(|event| {
 ///         // do something with the event
 ///     }
-///     );
+/// );
 /// ```
 ///
 pub fn to_event() -> impl Filter<Extract = (Event,), Error = Rejection> + Copy {
@@ -41,6 +44,8 @@ async fn create_event(headers: HeaderMap, body: bytes::Bytes) -> Result<Event, R
 
 #[cfg(test)]
 mod tests {
+    use warp_lib as warp;
+
     use super::to_event;
     use warp::test;
 

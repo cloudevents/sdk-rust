@@ -1,3 +1,5 @@
+use reqwest_lib as reqwest;
+
 use crate::event::SpecVersion;
 use lazy_static::lazy_static;
 use reqwest::header::{HeaderName, HeaderValue};

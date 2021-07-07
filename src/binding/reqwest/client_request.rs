@@ -1,3 +1,5 @@
+use reqwest_lib as reqwest;
+
 use super::headers;
 use crate::event::SpecVersion;
 use crate::message::{
@@ -83,6 +85,8 @@ impl RequestBuilderExt for RequestBuilder {
 
 // Sealing the RequestBuilderExt
 mod private {
+    use reqwest_lib as reqwest;
+
     pub trait Sealed {}
     impl Sealed for reqwest::RequestBuilder {}
 }
@@ -91,6 +95,7 @@ mod private {
 mod tests {
     use super::*;
     use mockito::{mock, Matcher};
+    use reqwest_lib as reqwest;
 
     use crate::message::StructuredDeserializer;
     use crate::{EventBuilder, EventBuilderV10};

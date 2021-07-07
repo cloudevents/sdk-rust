@@ -1,7 +1,7 @@
 use claim::*;
-use cloudevents::Event;
+use cloudevents::{Event, EventBuilder, EventBuilderV10};
 use rstest::rstest;
-use serde_json::Value;
+use serde_json::{json, Value};
 
 mod test_data;
 use test_data::*;
@@ -82,6 +82,68 @@ fn serialize_should_succeed(in_event: Event, out_json: Value) {
     )
 )]
 fn deserialize_should_succeed(in_json: Value, out_event: Event) {
+    let deserialize_result: Result<Event, serde_json::Error> = serde_json::from_value(in_json);
+    assert_ok!(&deserialize_result);
+    let deserialize_json = deserialize_result.unwrap();
+    assert_eq!(deserialize_json, out_event)
+}
+
+#[test]
+fn deserialize_with_null_attribute() {
+    let in_json = json!({
+        "specversion" : "1.0",
+        "type" : "com.example.someevent",
+        "source" : "/mycontext",
+        "id" : "A234-1234-1234",
+        "time" : null,
+        "comexampleextension1" : "value",
+        "comexampleothervalue" : 5,
+        "datacontenttype" : "text/xml",
+        "data" : "<much wow=\"xml\"/>"
+    });
+
+    let out_event = EventBuilderV10::new()
+        .ty("com.example.someevent")
+        .source("/mycontext")
+        .id("A234-1234-1234")
+        .data("text/xml", "<much wow=\"xml\"/>")
+        .extension("comexampleextension1", "value")
+        .extension("comexampleothervalue", 5)
+        .build()
+        .unwrap();
+
+    let deserialize_result: Result<Event, serde_json::Error> = serde_json::from_value(in_json);
+    assert_ok!(&deserialize_result);
+    let deserialize_json = deserialize_result.unwrap();
+    assert_eq!(deserialize_json, out_event)
+}
+
+#[test]
+fn deserialize_with_null_ext() {
+    let in_json = json!({
+        "specversion" : "1.0",
+        "type" : "com.example.someevent",
+        "source" : "/mycontext",
+        "id" : "A234-1234-1234",
+        "time" : "2018-04-05T17:31:00Z",
+        "comexampleextension1" : "value",
+        "comexampleothervalue" : 5,
+        "unsetextension": null,
+        "datacontenttype" : "text/xml",
+        "data" : "<much wow=\"xml\"/>"
+    });
+
+    let out_event = EventBuilderV10::new()
+        .ty("com.example.someevent")
+        .source("/mycontext")
+        .id("A234-1234-1234")
+        .time("2018-04-05T17:31:00Z")
+        .data("text/xml", "<much wow=\"xml\"/>")
+        .extension("comexampleextension1", "value")
+        .extension("comexampleothervalue", 5)
+        .build()
+        .unwrap();
+
     let deserialize_result: Result<Event, serde_json::Error> = serde_json::from_value(in_json);
     assert_ok!(&deserialize_result);
     let deserialize_json = deserialize_result.unwrap();

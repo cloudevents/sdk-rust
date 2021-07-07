@@ -23,12 +23,14 @@ macro_rules! parse_field {
 macro_rules! extract_optional_field {
     ($map:ident, $name:literal, $target_type:ty, $error:ty) => {
         $map.remove($name)
+            .filter(|v| !v.is_null())
             .map(|v| parse_field!(v, $target_type, $error))
             .transpose()
     };
 
     ($map:ident, $name:literal, $target_type:ty, $error:ty, $mapper:expr) => {
         $map.remove($name)
+            .filter(|v| !v.is_null())
             .map(|v| parse_field!(v, $target_type, $error, $mapper))
             .transpose()
     };
@@ -93,6 +95,7 @@ pub(crate) trait EventFormatDeserializer {
         )?;
         let extensions = map
             .into_iter()
+            .filter(|v| !v.1.is_null())
             .map(|(k, v)| {
                 Ok((
                     k,

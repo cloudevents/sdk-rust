@@ -53,6 +53,7 @@
 //! [Responders]: https://actix.rs/docs/handlers/
 
 #![deny(broken_intra_doc_links)]
+
 #![cfg_attr(not(any(feature = "std", test)), no_std)]
 
 #[cfg(feature = "alloc")]
@@ -62,7 +63,9 @@ extern crate std as alloc;
 #[cfg(any(feature = "std", test))]
 extern crate std as core;
 
+#[cfg(feature = "std")]
 pub mod binding;
+
 pub mod event;
 pub mod message;
 

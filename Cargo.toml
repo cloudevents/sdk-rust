@@ -17,6 +17,11 @@ categories = ["web-programming", "encoding", "data-structures", "no_std"]
 name = "cloudevents"
 
 [features]
+# Without default features, the package acts as no_std
+default = ["std"]
+
+std = ["snafu/std", "url"]
+
 actix = ["actix-web", "async-trait", "lazy_static", "bytes", "futures"]
 reqwest = ["reqwest-lib", "async-trait", "lazy_static", "bytes"]
 rdkafka = ["rdkafka-lib", "lazy_static", "bytes", "futures"]
@@ -28,15 +33,9 @@ serde_json = "^1.0"
 chrono = { version = "^0.4", features = ["serde"] }
 delegate-attr = "^0.2"
 base64 = "^0.12"
-snafu = { version = "^0.6", default-features = false}
+snafu = { version = "^0.6", default-features = false }
 bitflags = "^1.2"
 url = { version = "^2.1", features = ["serde"], optional = true }
-
-[features]
-# Without default features, the package acts as no_std
-default = ["std"]
-
-std = ["snafu/std", "url"]
 
 # runtime optional deps
 actix-web = { version = "^3", default-features = false, optional = true }

@@ -60,6 +60,9 @@ pub mod binding;
 pub mod event;
 pub mod message;
 
+#[cfg(test)]
+pub mod test;
+
 pub use event::Data;
 pub use event::Event;
 pub use event::{AttributesReader, AttributesWriter};

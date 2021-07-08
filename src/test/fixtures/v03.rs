@@ -1,5 +1,5 @@
-use super::*;
-use cloudevents::{Event, EventBuilder, EventBuilderV03};
+use crate::test::fixtures::*;
+use crate::{Event, EventBuilder, EventBuilderV03};
 use serde_json::{json, Value};
 
 use url::Url;

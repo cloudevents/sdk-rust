@@ -1,3 +1,6 @@
+pub mod v03;
+pub mod v10;
+
 use chrono::{DateTime, TimeZone, Utc};
 use serde_json::{json, Value};
 

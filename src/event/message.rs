@@ -118,6 +118,8 @@ impl BinarySerializer<Event> for EventBinarySerializer {
 mod tests {
     use super::*;
     use crate::message::Error;
+    use crate::test::fixtures;
+    use std::convert::TryInto;
 
     #[test]
     fn binary_deserializer_unrecognized_attribute_v03() {
@@ -167,5 +169,66 @@ mod tests {
                 .expect_err("Should return an error")
                 .to_string()
         )
+    }
+
+    #[test]
+    fn message_v03_roundtrip_structured() -> Result<()> {
+        assert_eq!(
+            fixtures::v03::full_json_data(),
+            StructuredDeserializer::into_event(fixtures::v03::full_json_data())?
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn message_v03_roundtrip_binary() -> Result<()> {
+        //TODO this code smells because we're missing a proper way in the public APIs
+        // to destructure an event and rebuild it
+        let wanna_be_expected = fixtures::v03::full_json_data();
+        let data: serde_json::Value = wanna_be_expected.data().unwrap().clone().try_into()?;
+        let bytes = serde_json::to_vec(&data)?;
+        let expected = EventBuilderV03::from(wanna_be_expected.clone())
+            .data(wanna_be_expected.datacontenttype().unwrap(), bytes)
+            .build()
+            .unwrap();
+
+        assert_eq!(
+            expected,
+            BinaryDeserializer::into_event(fixtures::v03::full_json_data())?
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn message_v10_roundtrip_structured() -> Result<()> {
+        assert_eq!(
+            fixtures::v10::full_json_data(),
+            StructuredDeserializer::into_event(fixtures::v10::full_json_data())?
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn message_v10_roundtrip_binary() -> Result<()> {
+        //TODO this code smells because we're missing a proper way in the public APIs
+        // to destructure an event and rebuild it
+        let wanna_be_expected = fixtures::v10::full_json_data();
+        let data: serde_json::Value = wanna_be_expected
+            .data()
+            .cloned()
+            .unwrap()
+            .try_into()
+            .unwrap();
+        let bytes = serde_json::to_vec(&data)?;
+        let expected = EventBuilderV10::from(wanna_be_expected.clone())
+            .data(wanna_be_expected.datacontenttype().unwrap(), bytes)
+            .build()
+            .unwrap();
+
+        assert_eq!(
+            expected,
+            BinaryDeserializer::into_event(fixtures::v10::full_json_data())?
+        );
+        Ok(())
     }
 }

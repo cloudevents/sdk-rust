@@ -4,8 +4,7 @@
 //! # use std::error::Error;
 //! # fn main() -> Result<(), Box<dyn Error>> {
 //! use cloudevents::{EventBuilder, AttributesReader, EventBuilderV10};
-//! use chrono::{Utc, DateTime};
-//! use url::Url;
+//! use chrono::Utc;
 //!
 //! let event = EventBuilderV10::new()
 //!     .id("my_event.my_application")
@@ -56,7 +55,18 @@
 #![doc(html_root_url = "https://docs.rs/cloudevents-sdk/0.4.0")]
 #![deny(broken_intra_doc_links)]
 
+#![cfg_attr(not(any(feature = "std", test)), no_std)]
+
+#[cfg(feature = "alloc")]
+extern crate alloc;
+#[cfg(all(feature = "std", not(feature = "alloc")))]
+extern crate std as alloc;
+#[cfg(any(feature = "std", test))]
+extern crate std as core;
+
+#[cfg(feature = "std")]
 pub mod binding;
+
 pub mod event;
 pub mod message;
 

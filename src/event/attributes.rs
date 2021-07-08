@@ -1,11 +1,10 @@
 use super::{
-    AttributesIntoIteratorV03, AttributesIntoIteratorV10, AttributesV03, AttributesV10,
-    ExtensionValue, SpecVersion, UriReference,
+    types::*, AttributesIntoIteratorV03, AttributesIntoIteratorV10, AttributesV03, AttributesV10,
+    ExtensionValue, SpecVersion,
 };
 use chrono::{DateTime, Utc};
 use serde::Serializer;
 use std::fmt;
-use url::Url;
 
 /// Enum representing a borrowed value of a CloudEvent attribute.
 /// This represents the types defined in the [CloudEvent spec type system](https://github.com/cloudevents/spec/blob/v1.0/spec.md#type-system)
@@ -13,7 +12,7 @@ use url::Url;
 pub enum AttributeValue<'a> {
     SpecVersion(SpecVersion),
     String(&'a str),
-    URI(&'a Url),
+    URI(&'a Uri),
     URIRef(&'a UriReference),
     Boolean(&'a bool),
     Integer(&'a i64),
@@ -57,7 +56,7 @@ pub trait AttributesReader {
     /// Get the [datacontenttype](https://github.com/cloudevents/spec/blob/master/spec.md#datacontenttype).
     fn datacontenttype(&self) -> Option<&str>;
     /// Get the [dataschema](https://github.com/cloudevents/spec/blob/master/spec.md#dataschema).
-    fn dataschema(&self) -> Option<&Url>;
+    fn dataschema(&self) -> Option<&Uri>;
     /// Get the [subject](https://github.com/cloudevents/spec/blob/master/spec.md#subject).
     fn subject(&self) -> Option<&str>;
     /// Get the [time](https://github.com/cloudevents/spec/blob/master/spec.md#time).
@@ -87,7 +86,7 @@ pub trait AttributesWriter {
         -> Option<String>;
     /// Set the [dataschema](https://github.com/cloudevents/spec/blob/master/spec.md#dataschema).
     /// Returns the previous value.
-    fn set_dataschema(&mut self, dataschema: Option<impl Into<Url>>) -> Option<Url>;
+    fn set_dataschema(&mut self, dataschema: Option<impl Into<Uri>>) -> Option<Uri>;
 }
 
 pub(crate) trait AttributesConverter {
@@ -154,7 +153,7 @@ impl AttributesReader for Attributes {
         }
     }
 
-    fn dataschema(&self) -> Option<&Url> {
+    fn dataschema(&self) -> Option<&Uri> {
         match self {
             Attributes::V03(a) => a.dataschema(),
             Attributes::V10(a) => a.dataschema(),
@@ -222,7 +221,7 @@ impl AttributesWriter for Attributes {
         }
     }
 
-    fn set_dataschema(&mut self, dataschema: Option<impl Into<Url>>) -> Option<Url> {
+    fn set_dataschema(&mut self, dataschema: Option<impl Into<Uri>>) -> Option<Uri> {
         match self {
             Attributes::V03(a) => a.set_dataschema(dataschema),
             Attributes::V10(a) => a.set_dataschema(dataschema),
@@ -253,31 +252,27 @@ impl Attributes {
 }
 
 #[cfg(not(target_arch = "wasm32"))]
-pub(crate) fn default_hostname() -> Url {
-    Url::parse(
-        format!(
-            "http://{}",
-            hostname::get()
-                .ok()
-                .map(|s| s.into_string().ok())
-                .flatten()
-                .unwrap_or_else(|| "localhost".to_string())
-        )
-        .as_ref(),
+pub(crate) fn default_hostname() -> Uri {
+    format!(
+        "http://{}",
+        hostname::get()
+            .ok()
+            .map(|s| s.into_string().ok())
+            .flatten()
+            .unwrap_or_else(|| "localhost".to_string())
     )
+    .into_uri()
     .unwrap()
 }
 
 #[cfg(target_arch = "wasm32")]
-pub(crate) fn default_hostname() -> Url {
+pub(crate) fn default_hostname() -> Uri {
     use std::str::FromStr;
 
-    Url::from_str(
-        web_sys::window()
-            .map(|w| w.location().host().ok())
-            .flatten()
-            .unwrap_or(String::from("http://localhost"))
-            .as_str(),
-    )
-    .unwrap()
+    web_sys::window()
+        .map(|w| w.location().host().ok())
+        .flatten()
+        .unwrap_or(String::from("http://localhost"))
+        .into_uri()
+        .unwrap()
 }

@@ -1,8 +1,7 @@
 use crate::event::attributes::{default_hostname, AttributeValue, AttributesConverter};
-use crate::event::{AttributesReader, AttributesV10, AttributesWriter, SpecVersion, UriReference};
+use crate::event::types::*;
+use crate::event::{AttributesReader, AttributesV10, AttributesWriter, SpecVersion};
 use crate::message::{BinarySerializer, MessageAttributeValue};
-use chrono::{DateTime, Utc};
-use url::Url;
 use uuid::Uuid;
 
 pub(crate) const ATTRIBUTE_NAMES: [&str; 8] = [
@@ -23,7 +22,7 @@ pub struct Attributes {
     pub(crate) ty: String,
     pub(crate) source: UriReference,
     pub(crate) datacontenttype: Option<String>,
-    pub(crate) schemaurl: Option<Url>,
+    pub(crate) schemaurl: Option<Uri>,
     pub(crate) subject: Option<String>,
     pub(crate) time: Option<DateTime<Utc>>,
 }
@@ -105,7 +104,7 @@ impl AttributesReader for Attributes {
         self.datacontenttype.as_deref()
     }
 
-    fn dataschema(&self) -> Option<&Url> {
+    fn dataschema(&self) -> Option<&Uri> {
         self.schemaurl.as_ref()
     }
 
@@ -146,7 +145,7 @@ impl AttributesWriter for Attributes {
         std::mem::replace(&mut self.datacontenttype, datacontenttype.map(Into::into))
     }
 
-    fn set_dataschema(&mut self, dataschema: Option<impl Into<Url>>) -> Option<Url> {
+    fn set_dataschema(&mut self, dataschema: Option<impl Into<Uri>>) -> Option<Uri> {
         std::mem::replace(&mut self.schemaurl, dataschema.map(Into::into))
     }
 }

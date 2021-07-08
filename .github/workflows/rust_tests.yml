@@ -53,14 +53,14 @@ jobs:
 
     # If glibc, compile and test all
     - uses: actions-rs/cargo@v1
-      name: "Build"
+      name: "Build glibc"
       if: matrix.target == 'x86_64-unknown-linux-gnu'
       with:
         command: build
         toolchain: ${{ matrix.toolchain }}
         args: --target ${{ matrix.target }} --all-features
     - uses: actions-rs/cargo@v1
-      name: "Test"
+      name: "Test glibc"
       if: matrix.target == 'x86_64-unknown-linux-gnu'
       with:
         command: test
@@ -129,3 +129,31 @@ jobs:
         command: build
         toolchain: ${{ matrix.toolchain }}
         args: --target ${{ matrix.target }} --manifest-path ./example-projects/warp-example/Cargo.toml
+
+  check_no_std:
+    name: Check no_std
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+      # Caching stuff
+      - uses: actions/cache@v2
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+          key: ${{ runner.os }}-cargo-no-std-deps-${{ hashFiles('**/Cargo.toml') }}
+      - uses: actions/cache@v2
+        with:
+          path: |
+            target/
+          key: ${{ runner.os }}-cargo-no-std-build-${{ hashFiles('**/Cargo.toml') }}
+      - name: Download cargo-nono
+        run: curl -LSfs https://japaric.github.io/trust/install.sh | sh -s -- --git hobofan/cargo-nono
+      - name: Run check
+        run: ./cargo-nono check

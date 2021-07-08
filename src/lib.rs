@@ -60,6 +60,8 @@ pub mod binding;
 pub mod event;
 pub mod message;
 
+pub mod test_data;
+
 pub use event::Data;
 pub use event::Event;
 pub use event::{AttributesReader, AttributesWriter};

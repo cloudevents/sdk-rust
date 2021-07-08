@@ -3,8 +3,7 @@ use cloudevents::{Event, EventBuilder, EventBuilderV10};
 use rstest::rstest;
 use serde_json::{json, Value};
 
-mod test_data;
-use test_data::*;
+use cloudevents::test_data::*;
 
 /// This test is a parametrized test that uses data from tests/test_data
 #[rstest(

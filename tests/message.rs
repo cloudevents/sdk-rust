@@ -1,9 +1,8 @@
-mod test_data;
 use cloudevents::message::{BinaryDeserializer, Result, StructuredDeserializer};
 
+use cloudevents::test_data::*;
 use cloudevents::{AttributesReader, EventBuilder, EventBuilderV03, EventBuilderV10};
 use std::convert::TryInto;
-use test_data::*;
 
 #[test]
 fn message_v03_roundtrip_structured() -> Result<()> {

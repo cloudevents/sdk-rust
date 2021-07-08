@@ -1,7 +1,6 @@
-mod test_data;
 use cloudevents::event::AttributeValue;
 use cloudevents::event::SpecVersion;
-use test_data::*;
+use cloudevents::test_data::*;
 
 #[test]
 fn iter_v10_test() {

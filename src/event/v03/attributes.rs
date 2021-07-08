@@ -220,7 +220,19 @@ impl crate::event::message::AttributesDeserializer for super::Attributes {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::test::fixtures;
     use chrono::NaiveDateTime;
+
+    #[test]
+    fn iter_v03_test() {
+        let in_event = fixtures::v03::full_json_data();
+        let mut iter_v03 = in_event.iter_attributes();
+
+        assert_eq!(
+            ("specversion", AttributeValue::SpecVersion(SpecVersion::V03)),
+            iter_v03.next().unwrap()
+        );
+    }
 
     #[test]
     fn iterator_test_v03() {

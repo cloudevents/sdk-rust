@@ -1,3 +1,6 @@
+pub mod fixtures;
+
+#[macro_export]
 macro_rules! assert_match_pattern (
     ($e:expr, $p:pat) => (
         match $e {

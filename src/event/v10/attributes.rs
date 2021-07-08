@@ -221,7 +221,19 @@ impl AttributesConverter for Attributes {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::test::fixtures;
     use chrono::NaiveDateTime;
+
+    #[test]
+    fn iter_v10_test() {
+        let in_event = fixtures::v10::full_no_data();
+        let mut iter_v10 = in_event.iter_attributes();
+
+        assert_eq!(
+            ("specversion", AttributeValue::SpecVersion(SpecVersion::V10)),
+            iter_v10.next().unwrap()
+        );
+    }
 
     #[test]
     fn iterator_test_v10() {

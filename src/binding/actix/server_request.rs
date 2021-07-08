@@ -156,23 +156,18 @@ mod tests {
     use super::*;
     use actix_web::test;
 
+    use crate::test::fixtures;
     use crate::{EventBuilder, EventBuilderV10};
     use serde_json::json;
-
     #[actix_rt::test]
     async fn test_request() {
-        let expected = EventBuilderV10::new()
-            .id("0001")
-            .ty("example.test")
-            .source("http://localhost/")
-            .extension("someint", "10")
-            .build()
-            .unwrap();
+        let mut expected = fixtures::v10::minimal();
+        expected.set_extension("someint", "10");
 
         let (req, payload) = test::TestRequest::post()
             .header("ce-specversion", "1.0")
             .header("ce-id", "0001")
-            .header("ce-type", "example.test")
+            .header("ce-type", "test_event.test_application")
             .header("ce-source", "http://localhost/")
             .header("ce-someint", "10")
             .to_http_parts();

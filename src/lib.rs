@@ -60,6 +60,7 @@ pub mod binding;
 pub mod event;
 pub mod message;
 
+#[cfg(feature = "test")]
 pub mod test_data;
 
 pub use event::Data;

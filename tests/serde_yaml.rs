@@ -2,8 +2,6 @@ use claim::*;
 use cloudevents::{Event, EventBuilder, EventBuilderV10};
 use serde_yaml;
 
-mod test_data;
-
 /// This test checks if the usage of serde_json::Value makes the Deserialize implementation incompatible with
 /// other Deserializers
 #[test]

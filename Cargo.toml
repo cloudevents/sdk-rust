@@ -21,6 +21,7 @@ actix = ["actix-web", "async-trait", "lazy_static", "bytes", "futures"]
 reqwest = ["reqwest-lib", "async-trait", "lazy_static", "bytes"]
 rdkafka = ["rdkafka-lib", "lazy_static", "bytes", "futures"]
 warp = ["warp-lib", "lazy_static", "bytes", "http", "hyper"]
+test = []
 
 [dependencies]
 serde = { version = "^1.0", features = ["derive"] }

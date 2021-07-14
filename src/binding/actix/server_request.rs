@@ -95,44 +95,6 @@ impl<'a> MessageDeserializer for HttpRequestDeserializer<'a> {
             Encoding::UNKNOWN
         }
     }
-
-    fn into_event(self) -> Result<Event> {
-        match self.encoding() {
-            Encoding::BINARY => BinaryDeserializer::into_event(self),
-            Encoding::STRUCTURED => StructuredDeserializer::into_event(self),
-            _ => Err(message::Error::WrongEncoding {}),
-        }
-    }
-
-    fn deserialize_to_binary<R: Sized, T: BinarySerializer<R>>(self, serializer: T) -> Result<R> {
-        if self.encoding() == Encoding::BINARY {
-            return self.deserialize_binary(serializer);
-        }
-
-        MessageDeserializer::into_event(self)?.deserialize_binary(serializer)
-    }
-
-    fn deserialize_to_structured<R: Sized, T: StructuredSerializer<R>>(
-        self,
-        serializer: T,
-    ) -> Result<R> {
-        if self.encoding() == Encoding::STRUCTURED {
-            return self.deserialize_structured(serializer);
-        }
-
-        MessageDeserializer::into_event(self)?.deserialize_structured(serializer)
-    }
-
-    fn deserialize_to<R: Sized, T: BinarySerializer<R> + StructuredSerializer<R>>(
-        self,
-        serializer: T,
-    ) -> Result<R> {
-        if self.encoding() == Encoding::STRUCTURED {
-            self.deserialize_structured(serializer)
-        } else {
-            self.deserialize_binary(serializer)
-        }
-    }
 }
 
 /// Method to transform an incoming [`HttpRequest`] to [`Event`].

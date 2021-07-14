@@ -17,7 +17,7 @@ categories = ["web-programming", "encoding", "data-structures"]
 name = "cloudevents"
 
 [features]
-actix = ["actix-web", "async-trait", "bytes", "futures"]
+actix = ["actix-web", "async-trait", "bytes", "futures", "http"]
 reqwest = ["reqwest-lib", "async-trait", "bytes"]
 rdkafka = ["rdkafka-lib", "bytes", "futures"]
 warp = ["warp-lib", "bytes", "http", "hyper"]

@@ -1,7 +1,9 @@
 use reqwest_lib as reqwest;
 
-use crate::binding::http::PREFIX;
-use crate::binding::{attribute_header, http::SPEC_VERSION_HEADER, CLOUDEVENTS_JSON_HEADER};
+use crate::binding::{
+    http::{header_prefix, SPEC_VERSION_HEADER},
+    CLOUDEVENTS_JSON_HEADER,
+};
 use crate::event::SpecVersion;
 use crate::message::{
     BinaryDeserializer, BinarySerializer, MessageAttributeValue, Result, StructuredSerializer,
@@ -27,13 +29,13 @@ impl BinarySerializer<RequestBuilder> for RequestSerializer {
     }
 
     fn set_attribute(mut self, name: &str, value: MessageAttributeValue) -> Result<Self> {
-        let key = &attribute_header(PREFIX, name);
+        let key = &header_prefix(name);
         self.req = self.req.header(key, value.to_string());
         Ok(self)
     }
 
     fn set_extension(mut self, name: &str, value: MessageAttributeValue) -> Result<Self> {
-        let key = &attribute_header(PREFIX, name);
+        let key = &header_prefix(name);
         self.req = self.req.header(key, value.to_string());
         Ok(self)
     }

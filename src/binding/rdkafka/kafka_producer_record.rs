@@ -1,8 +1,8 @@
 use rdkafka_lib as rdkafka;
 
-use crate::binding::kafka::PREFIX;
 use crate::binding::{
-    attribute_header, kafka::SPEC_VERSION_HEADER, CLOUDEVENTS_JSON_HEADER, CONTENT_TYPE,
+    kafka::{header_prefix, SPEC_VERSION_HEADER},
+    CLOUDEVENTS_JSON_HEADER, CONTENT_TYPE,
 };
 use crate::event::SpecVersion;
 use crate::message::{
@@ -51,13 +51,13 @@ impl BinarySerializer<MessageRecord> for MessageRecord {
     }
 
     fn set_attribute(mut self, name: &str, value: MessageAttributeValue) -> Result<Self> {
-        let key = &attribute_header(PREFIX, name);
+        let key = &header_prefix(name);
         self.headers = self.headers.add(key, &value.to_string());
         Ok(self)
     }
 
     fn set_extension(mut self, name: &str, value: MessageAttributeValue) -> Result<Self> {
-        let key = &attribute_header(PREFIX, name);
+        let key = &header_prefix(name);
         self.headers = self.headers.add(key, &value.to_string());
         Ok(self)
     }

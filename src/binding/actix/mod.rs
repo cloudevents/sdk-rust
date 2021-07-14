@@ -41,8 +41,6 @@
 
 #![deny(broken_intra_doc_links)]
 
-#[macro_use]
-mod headers;
 mod server_request;
 mod server_response;
 

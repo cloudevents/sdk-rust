@@ -1,20 +1,20 @@
 use warp_lib as warp;
 
-use crate::binding::http::PREFIX;
-use crate::binding::{attribute_header, http::SPEC_VERSION_HEADER, CLOUDEVENTS_JSON_HEADER};
+use crate::binding::{
+    http::{header_prefix, SPEC_VERSION_HEADER},
+    CLOUDEVENTS_JSON_HEADER,
+};
 use crate::event::SpecVersion;
 use crate::message::{
     BinaryDeserializer, BinarySerializer, Error, MessageAttributeValue, Result,
     StructuredSerializer,
 };
-use crate::Event;
+use crate::{str_to_header_value, Event};
 
-use warp::http::HeaderValue;
 use warp::hyper::Body;
 use warp::reply::Response;
 
 use http::response::Builder;
-use std::convert::TryFrom;
 
 pub struct ResponseSerializer {
     builder: Builder,
@@ -30,38 +30,23 @@ impl ResponseSerializer {
 
 impl BinarySerializer<Response> for ResponseSerializer {
     fn set_spec_version(mut self, spec_version: SpecVersion) -> Result<Self> {
-        self.builder = self.builder.header(
-            SPEC_VERSION_HEADER,
-            HeaderValue::try_from(spec_version.to_string()).map_err(|e| {
-                crate::message::Error::Other {
-                    source: Box::new(e),
-                }
-            })?,
-        );
+        self.builder = self
+            .builder
+            .header(SPEC_VERSION_HEADER, str_to_header_value!(spec_version)?);
         Ok(self)
     }
 
     fn set_attribute(mut self, name: &str, value: MessageAttributeValue) -> Result<Self> {
-        self.builder = self.builder.header(
-            &attribute_header(PREFIX, name),
-            HeaderValue::try_from(&value.to_string()).map_err(|e| {
-                crate::message::Error::Other {
-                    source: Box::new(e),
-                }
-            })?,
-        );
+        self.builder = self
+            .builder
+            .header(&header_prefix(name), str_to_header_value!(value)?);
         Ok(self)
     }
 
     fn set_extension(mut self, name: &str, value: MessageAttributeValue) -> Result<Self> {
-        self.builder = self.builder.header(
-            &attribute_header(PREFIX, name),
-            HeaderValue::try_from(&value.to_string()).map_err(|e| {
-                crate::message::Error::Other {
-                    source: Box::new(e),
-                }
-            })?,
-        );
+        self.builder = self
+            .builder
+            .header(&header_prefix(name), str_to_header_value!(value)?);
         Ok(self)
     }
 

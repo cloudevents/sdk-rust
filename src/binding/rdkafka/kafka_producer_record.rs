@@ -45,36 +45,25 @@ impl Default for MessageRecord {
 }
 
 impl BinarySerializer<MessageRecord> for MessageRecord {
-    fn set_spec_version(mut self, spec_version: SpecVersion) -> Result<Self> {
-        self.headers = self.headers.add(SPEC_VERSION_HEADER, spec_version.as_str());
-
+    fn set_spec_version(mut self, sv: SpecVersion) -> Result<Self> {
+        self.headers = self.headers.add(SPEC_VERSION_HEADER, &sv.to_string());
         Ok(self)
     }
 
     fn set_attribute(mut self, name: &str, value: MessageAttributeValue) -> Result<Self> {
-        self.headers = self.headers.add(
-            &attribute_header(PREFIX, name),
-            // TODO: return Option or Result
-            // .ok_or(crate::message::Error::UnknownAttribute {
-            //     name: String::from(name),
-            // })?
-            &value.to_string(),
-        );
-
+        let key = &attribute_header(PREFIX, name);
+        self.headers = self.headers.add(key, &value.to_string());
         Ok(self)
     }
 
     fn set_extension(mut self, name: &str, value: MessageAttributeValue) -> Result<Self> {
-        self.headers = self
-            .headers
-            .add(&attribute_header(PREFIX, name), &value.to_string());
-
+        let key = &attribute_header(PREFIX, name);
+        self.headers = self.headers.add(key, &value.to_string());
         Ok(self)
     }
 
     fn end_with_data(mut self, bytes: Vec<u8>) -> Result<MessageRecord> {
         self.payload = Some(bytes);
-
         Ok(self)
     }
 

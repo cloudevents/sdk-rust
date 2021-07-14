@@ -21,22 +21,20 @@ impl RequestSerializer {
 }
 
 impl BinarySerializer<RequestBuilder> for RequestSerializer {
-    fn set_spec_version(mut self, spec_version: SpecVersion) -> Result<Self> {
-        self.req = self.req.header(SPEC_VERSION_HEADER, spec_version.as_str());
+    fn set_spec_version(mut self, spec_ver: SpecVersion) -> Result<Self> {
+        self.req = self.req.header(SPEC_VERSION_HEADER, spec_ver.to_string());
         Ok(self)
     }
 
     fn set_attribute(mut self, name: &str, value: MessageAttributeValue) -> Result<Self> {
-        self.req = self
-            .req
-            .header(&attribute_header(PREFIX, name), value.to_string());
+        let key = &attribute_header(PREFIX, name);
+        self.req = self.req.header(key, value.to_string());
         Ok(self)
     }
 
     fn set_extension(mut self, name: &str, value: MessageAttributeValue) -> Result<Self> {
-        self.req = self
-            .req
-            .header(&attribute_header(PREFIX, name), value.to_string());
+        let key = &attribute_header(PREFIX, name);
+        self.req = self.req.header(key, value.to_string());
         Ok(self)
     }
 

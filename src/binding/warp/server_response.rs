@@ -1,7 +1,7 @@
 use warp_lib as warp;
 
-use super::headers;
-
+use crate::binding::http::PREFIX;
+use crate::binding::{attribute_header, http::SPEC_VERSION_HEADER, CLOUDEVENTS_JSON_HEADER};
 use crate::event::SpecVersion;
 use crate::message::{
     BinaryDeserializer, BinarySerializer, Error, MessageAttributeValue, Result,
@@ -13,10 +13,8 @@ use warp::http::HeaderValue;
 use warp::hyper::Body;
 use warp::reply::Response;
 
-use http::header::HeaderName;
 use http::response::Builder;
-
-use std::{convert::TryFrom, str::FromStr};
+use std::convert::TryFrom;
 
 pub struct ResponseSerializer {
     builder: Builder,
@@ -33,7 +31,7 @@ impl ResponseSerializer {
 impl BinarySerializer<Response> for ResponseSerializer {
     fn set_spec_version(mut self, spec_version: SpecVersion) -> Result<Self> {
         self.builder = self.builder.header(
-            headers::SPEC_VERSION_HEADER.clone(),
+            SPEC_VERSION_HEADER,
             HeaderValue::try_from(spec_version.to_string().as_str()).map_err(|e| {
                 crate::message::Error::Other {
                     source: Box::new(e),
@@ -45,7 +43,7 @@ impl BinarySerializer<Response> for ResponseSerializer {
 
     fn set_attribute(mut self, name: &str, value: MessageAttributeValue) -> Result<Self> {
         self.builder = self.builder.header(
-            headers::ATTRIBUTES_TO_HEADERS.get(name).unwrap().clone(),
+            &attribute_header(PREFIX, name),
             HeaderValue::try_from(value.to_string().as_str()).map_err(|e| {
                 crate::message::Error::Other {
                     source: Box::new(e),
@@ -57,7 +55,7 @@ impl BinarySerializer<Response> for ResponseSerializer {
 
     fn set_extension(mut self, name: &str, value: MessageAttributeValue) -> Result<Self> {
         self.builder = self.builder.header(
-            attribute_name_to_header!(name)?,
+            &attribute_header(PREFIX, name),
             HeaderValue::try_from(value.to_string().as_str()).map_err(|e| {
                 crate::message::Error::Other {
                     source: Box::new(e),
@@ -87,10 +85,7 @@ impl BinarySerializer<Response> for ResponseSerializer {
 impl StructuredSerializer<Response> for ResponseSerializer {
     fn set_structured_event(self, bytes: Vec<u8>) -> Result<Response> {
         self.builder
-            .header(
-                http::header::CONTENT_TYPE,
-                headers::CLOUDEVENTS_JSON_HEADER.clone(),
-            )
+            .header(http::header::CONTENT_TYPE, CLOUDEVENTS_JSON_HEADER)
             .body(Body::from(bytes))
             .map_err(|e| crate::message::Error::Other {
                 source: Box::new(e),

@@ -1,6 +1,9 @@
 use rdkafka_lib as rdkafka;
 
-use super::headers;
+use crate::binding::kafka::PREFIX;
+use crate::binding::{
+    attribute_header, kafka::SPEC_VERSION_HEADER, CLOUDEVENTS_JSON_HEADER, CONTENT_TYPE,
+};
 use crate::event::SpecVersion;
 use crate::message::{
     BinaryDeserializer, BinarySerializer, MessageAttributeValue, Result, StructuredSerializer,
@@ -43,22 +46,19 @@ impl Default for MessageRecord {
 
 impl BinarySerializer<MessageRecord> for MessageRecord {
     fn set_spec_version(mut self, spec_version: SpecVersion) -> Result<Self> {
-        self.headers = self
-            .headers
-            .add(headers::SPEC_VERSION_HEADER, spec_version.as_str());
+        self.headers = self.headers.add(SPEC_VERSION_HEADER, spec_version.as_str());
 
         Ok(self)
     }
 
     fn set_attribute(mut self, name: &str, value: MessageAttributeValue) -> Result<Self> {
         self.headers = self.headers.add(
-            &headers::ATTRIBUTES_TO_HEADERS
-                .get(name)
-                .ok_or(crate::message::Error::UnknownAttribute {
-                    name: String::from(name),
-                })?
-                .clone()[..],
-            &value.to_string()[..],
+            &attribute_header(PREFIX, name),
+            // TODO: return Option or Result
+            // .ok_or(crate::message::Error::UnknownAttribute {
+            //     name: String::from(name),
+            // })?
+            &value.to_string(),
         );
 
         Ok(self)
@@ -67,7 +67,7 @@ impl BinarySerializer<MessageRecord> for MessageRecord {
     fn set_extension(mut self, name: &str, value: MessageAttributeValue) -> Result<Self> {
         self.headers = self
             .headers
-            .add(&attribute_name_to_header!(name)[..], &value.to_string()[..]);
+            .add(&attribute_header(PREFIX, name), &value.to_string());
 
         Ok(self)
     }
@@ -85,9 +85,7 @@ impl BinarySerializer<MessageRecord> for MessageRecord {
 
 impl StructuredSerializer<MessageRecord> for MessageRecord {
     fn set_structured_event(mut self, bytes: Vec<u8>) -> Result<MessageRecord> {
-        self.headers = self
-            .headers
-            .add(headers::CONTENT_TYPE, headers::CLOUDEVENTS_JSON_HEADER);
+        self.headers = self.headers.add(CONTENT_TYPE, CLOUDEVENTS_JSON_HEADER);
 
         self.payload = Some(bytes);
 

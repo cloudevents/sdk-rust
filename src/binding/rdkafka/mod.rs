@@ -51,8 +51,6 @@
 
 #![deny(broken_intra_doc_links)]
 
-#[macro_use]
-mod headers;
 mod kafka_consumer_record;
 mod kafka_producer_record;
 

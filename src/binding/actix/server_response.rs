@@ -1,16 +1,21 @@
-use super::headers;
 use crate::event::SpecVersion;
 use crate::message::{
     BinaryDeserializer, BinarySerializer, MessageAttributeValue, Result, StructuredSerializer,
 };
 use crate::Event;
+use crate::{
+    binding::{
+        http::{header_prefix, SPEC_VERSION_HEADER},
+        CLOUDEVENTS_JSON_HEADER,
+    },
+    str_to_header_value,
+};
 use actix_web::dev::HttpResponseBuilder;
-use actix_web::http::{HeaderName, HeaderValue, StatusCode};
+use actix_web::http::StatusCode;
 use actix_web::HttpResponse;
 use async_trait::async_trait;
 use futures::future::LocalBoxFuture;
 use futures::FutureExt;
-use std::str::FromStr;
 
 /// Wrapper for [`HttpResponseBuilder`] that implements [`StructuredSerializer`] and [`BinarySerializer`].
 pub struct HttpResponseSerializer {
@@ -25,26 +30,20 @@ impl HttpResponseSerializer {
 
 impl BinarySerializer<HttpResponse> for HttpResponseSerializer {
     fn set_spec_version(mut self, spec_version: SpecVersion) -> Result<Self> {
-        self.builder.set_header(
-            headers::SPEC_VERSION_HEADER.clone(),
-            str_to_header_value!(spec_version.as_str())?,
-        );
+        self.builder
+            .set_header(SPEC_VERSION_HEADER, str_to_header_value!(spec_version)?);
         Ok(self)
     }
 
     fn set_attribute(mut self, name: &str, value: MessageAttributeValue) -> Result<Self> {
-        self.builder.set_header(
-            headers::ATTRIBUTES_TO_HEADERS.get(name).unwrap().clone(),
-            str_to_header_value!(value.to_string().as_str())?,
-        );
+        self.builder
+            .set_header(&header_prefix(name), str_to_header_value!(value)?);
         Ok(self)
     }
 
     fn set_extension(mut self, name: &str, value: MessageAttributeValue) -> Result<Self> {
-        self.builder.set_header(
-            attribute_name_to_header!(name)?,
-            str_to_header_value!(value.to_string().as_str())?,
-        );
+        self.builder
+            .set_header(&header_prefix(name), str_to_header_value!(value)?);
         Ok(self)
     }
 
@@ -63,7 +62,7 @@ impl StructuredSerializer<HttpResponse> for HttpResponseSerializer {
             .builder
             .set_header(
                 actix_web::http::header::CONTENT_TYPE,
-                headers::CLOUDEVENTS_JSON_HEADER.clone(),
+                CLOUDEVENTS_JSON_HEADER,
             )
             .body(bytes))
     }

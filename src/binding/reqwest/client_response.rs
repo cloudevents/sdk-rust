@@ -1,15 +1,15 @@
 use reqwest_lib as reqwest;
 
-use super::headers;
+use crate::binding::http::SPEC_VERSION_HEADER;
 use crate::event::SpecVersion;
 use crate::message::{
     BinaryDeserializer, BinarySerializer, Encoding, Error, MessageAttributeValue,
     MessageDeserializer, Result, StructuredDeserializer, StructuredSerializer,
 };
-use crate::{message, Event};
+use crate::{header_value_to_str, message, Event};
 use async_trait::async_trait;
 use bytes::Bytes;
-use reqwest::header::{HeaderMap, HeaderName};
+use reqwest::header::HeaderMap;
 use reqwest::Response;
 use std::convert::TryFrom;
 
@@ -32,18 +32,20 @@ impl BinaryDeserializer for ResponseDeserializer {
         }
 
         let spec_version = SpecVersion::try_from(
-            unwrap_optional_header!(self.headers, headers::SPEC_VERSION_HEADER).unwrap()?,
+            self.headers
+                .get(SPEC_VERSION_HEADER)
+                .map(|a| header_value_to_str!(a))
+                .unwrap()?,
         )?;
 
         visitor = visitor.set_spec_version(spec_version.clone())?;
 
         let attributes = spec_version.attribute_names();
 
-        for (hn, hv) in self
-            .headers
-            .iter()
-            .filter(|(hn, _)| headers::SPEC_VERSION_HEADER.ne(hn) && hn.as_str().starts_with("ce-"))
-        {
+        for (hn, hv) in self.headers.iter().filter(|(hn, _)| {
+            let key = hn.as_str();
+            SPEC_VERSION_HEADER.ne(key) && key.starts_with("ce-")
+        }) {
             let name = &hn.as_str()["ce-".len()..];
 
             if attributes.contains(&name) {
@@ -87,12 +89,13 @@ impl MessageDeserializer for ResponseDeserializer {
     fn encoding(&self) -> Encoding {
         match (
             #[allow(clippy::borrow_interior_mutable_const)]
-            unwrap_optional_header!(self.headers, reqwest::header::CONTENT_TYPE)
+            self.headers
+                .get(reqwest::header::CONTENT_TYPE)
+                .map(|a| header_value_to_str!(a))
                 .map(|r| r.ok())
                 .flatten()
                 .map(|e| e.starts_with("application/cloudevents+json")),
-            self.headers
-                .get::<&'static HeaderName>(&headers::SPEC_VERSION_HEADER),
+            self.headers.get(SPEC_VERSION_HEADER),
         ) {
             (Some(true), _) => Encoding::STRUCTURED,
             (_, Some(_)) => Encoding::BINARY,

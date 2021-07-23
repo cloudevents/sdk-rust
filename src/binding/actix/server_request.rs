@@ -1,11 +1,10 @@
-use super::headers;
+use crate::binding::http::SPEC_VERSION_HEADER;
 use crate::event::SpecVersion;
 use crate::message::{
     BinaryDeserializer, BinarySerializer, Encoding, MessageAttributeValue, MessageDeserializer,
     Result, StructuredDeserializer, StructuredSerializer,
 };
-use crate::{message, Event};
-use actix_web::http::HeaderName;
+use crate::{header_value_to_str, message, Event};
 use actix_web::web::{Bytes, BytesMut};
 use actix_web::{web, HttpMessage, HttpRequest};
 use async_trait::async_trait;
@@ -32,18 +31,21 @@ impl<'a> BinaryDeserializer for HttpRequestDeserializer<'a> {
         }
 
         let spec_version = SpecVersion::try_from(
-            unwrap_optional_header!(self.req.headers(), headers::SPEC_VERSION_HEADER).unwrap()?,
+            self.req
+                .headers()
+                .get(SPEC_VERSION_HEADER)
+                .map(|a| header_value_to_str!(a))
+                .unwrap()?,
         )?;
 
         visitor = visitor.set_spec_version(spec_version.clone())?;
 
         let attributes = spec_version.attribute_names();
 
-        for (hn, hv) in
-            self.req.headers().iter().filter(|(hn, _)| {
-                headers::SPEC_VERSION_HEADER.ne(hn) && hn.as_str().starts_with("ce-")
-            })
-        {
+        for (hn, hv) in self.req.headers().iter().filter(|(hn, _)| {
+            let key = hn.as_str();
+            SPEC_VERSION_HEADER.ne(key) && key.starts_with("ce-")
+        }) {
             let name = &hn.as_str()["ce-".len()..];
 
             if attributes.contains(&name) {
@@ -87,12 +89,7 @@ impl<'a> MessageDeserializer for HttpRequestDeserializer<'a> {
     fn encoding(&self) -> Encoding {
         if self.req.content_type() == "application/cloudevents+json" {
             Encoding::STRUCTURED
-        } else if self
-            .req
-            .headers()
-            .get::<&'static HeaderName>(&super::headers::SPEC_VERSION_HEADER)
-            .is_some()
-        {
+        } else if self.req.headers().get(SPEC_VERSION_HEADER).is_some() {
             Encoding::BINARY
         } else {
             Encoding::UNKNOWN

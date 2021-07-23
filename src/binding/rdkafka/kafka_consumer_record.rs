@@ -1,6 +1,6 @@
 use rdkafka_lib as rdkafka;
 
-use super::headers;
+use crate::binding::{kafka::SPEC_VERSION_HEADER, CLOUDEVENTS_JSON_HEADER, CONTENT_TYPE};
 use crate::event::SpecVersion;
 use crate::message::{
     BinaryDeserializer, BinarySerializer, Encoding, MessageAttributeValue, MessageDeserializer,
@@ -47,17 +47,18 @@ impl BinaryDeserializer for ConsumerRecordDeserializer {
         }
 
         let spec_version = SpecVersion::try_from(
-            str::from_utf8(&self.headers.remove(headers::SPEC_VERSION_HEADER).unwrap()[..])
-                .map_err(|e| crate::message::Error::Other {
+            str::from_utf8(&self.headers.remove(SPEC_VERSION_HEADER).unwrap()).map_err(|e| {
+                crate::message::Error::Other {
                     source: Box::new(e),
-                })?,
+                }
+            })?,
         )?;
 
         visitor = visitor.set_spec_version(spec_version.clone())?;
 
         let attributes = spec_version.attribute_names();
 
-        if let Some(hv) = self.headers.remove(headers::CONTENT_TYPE) {
+        if let Some(hv) = self.headers.remove(CONTENT_TYPE) {
             visitor = visitor.set_attribute(
                 "datacontenttype",
                 MessageAttributeValue::String(String::from_utf8(hv).map_err(|e| {
@@ -71,7 +72,7 @@ impl BinaryDeserializer for ConsumerRecordDeserializer {
         for (hn, hv) in self
             .headers
             .into_iter()
-            .filter(|(hn, _)| headers::SPEC_VERSION_HEADER != *hn && hn.starts_with("ce_"))
+            .filter(|(hn, _)| SPEC_VERSION_HEADER != *hn && hn.starts_with("ce_"))
         {
             let name = &hn["ce_".len()..];
 
@@ -120,9 +121,9 @@ impl MessageDeserializer for ConsumerRecordDeserializer {
                 .get("content-type")
                 .map(|s| String::from_utf8(s.to_vec()).ok())
                 .flatten()
-                .map(|s| s.starts_with(headers::CLOUDEVENTS_JSON_HEADER))
+                .map(|s| s.starts_with(CLOUDEVENTS_JSON_HEADER))
                 .unwrap_or(false),
-            self.headers.get(headers::SPEC_VERSION_HEADER),
+            self.headers.get(SPEC_VERSION_HEADER),
         ) {
             (true, _) => Encoding::STRUCTURED,
             (_, Some(_)) => Encoding::BINARY,

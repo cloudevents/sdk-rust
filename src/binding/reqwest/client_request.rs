@@ -1,13 +1,15 @@
 use reqwest_lib as reqwest;
 
-use super::headers;
+use crate::binding::{
+    http::{header_prefix, SPEC_VERSION_HEADER},
+    CLOUDEVENTS_JSON_HEADER,
+};
 use crate::event::SpecVersion;
 use crate::message::{
     BinaryDeserializer, BinarySerializer, MessageAttributeValue, Result, StructuredSerializer,
 };
 use crate::Event;
 use reqwest::RequestBuilder;
-use std::str::FromStr;
 
 /// Wrapper for [`RequestBuilder`] that implements [`StructuredSerializer`] & [`BinarySerializer`] traits.
 pub struct RequestSerializer {
@@ -21,25 +23,20 @@ impl RequestSerializer {
 }
 
 impl BinarySerializer<RequestBuilder> for RequestSerializer {
-    fn set_spec_version(mut self, spec_version: SpecVersion) -> Result<Self> {
-        self.req = self
-            .req
-            .header(headers::SPEC_VERSION_HEADER.clone(), spec_version.as_str());
+    fn set_spec_version(mut self, spec_ver: SpecVersion) -> Result<Self> {
+        self.req = self.req.header(SPEC_VERSION_HEADER, spec_ver.to_string());
         Ok(self)
     }
 
     fn set_attribute(mut self, name: &str, value: MessageAttributeValue) -> Result<Self> {
-        self.req = self.req.header(
-            headers::ATTRIBUTES_TO_HEADERS.get(name).unwrap().clone(),
-            value.to_string(),
-        );
+        let key = &header_prefix(name);
+        self.req = self.req.header(key, value.to_string());
         Ok(self)
     }
 
     fn set_extension(mut self, name: &str, value: MessageAttributeValue) -> Result<Self> {
-        self.req = self
-            .req
-            .header(attribute_name_to_header!(name)?, value.to_string());
+        let key = &header_prefix(name);
+        self.req = self.req.header(key, value.to_string());
         Ok(self)
     }
 
@@ -56,10 +53,7 @@ impl StructuredSerializer<RequestBuilder> for RequestSerializer {
     fn set_structured_event(self, bytes: Vec<u8>) -> Result<RequestBuilder> {
         Ok(self
             .req
-            .header(
-                reqwest::header::CONTENT_TYPE,
-                headers::CLOUDEVENTS_JSON_HEADER.clone(),
-            )
+            .header(reqwest::header::CONTENT_TYPE, CLOUDEVENTS_JSON_HEADER)
             .body(bytes))
     }
 }

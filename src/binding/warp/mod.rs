@@ -61,9 +61,6 @@
 //! warp::serve(routes).run(([127, 0, 0, 1], 3030));
 //! ```
 
-#[macro_use]
-mod headers;
-
 mod server_request;
 mod server_response;
 

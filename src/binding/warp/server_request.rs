@@ -1,13 +1,13 @@
-use super::headers;
 use bytes::Bytes;
-use http::{header::HeaderName, HeaderMap};
+use http::HeaderMap;
 
+use crate::binding::http::SPEC_VERSION_HEADER;
 use crate::event::SpecVersion;
+use crate::header_value_to_str;
 use crate::message::{
     BinaryDeserializer, BinarySerializer, Encoding, Error, MessageAttributeValue,
     MessageDeserializer, Result, StructuredDeserializer, StructuredSerializer,
 };
-
 use crate::{message, Event};
 use std::convert::TryFrom;
 
@@ -29,18 +29,20 @@ impl BinaryDeserializer for RequestDeserializer {
         }
 
         let spec_version = SpecVersion::try_from(
-            unwrap_optional_header!(self.headers, headers::SPEC_VERSION_HEADER).unwrap()?,
+            self.headers
+                .get(SPEC_VERSION_HEADER)
+                .map(|a| header_value_to_str!(a))
+                .unwrap()?,
         )?;
 
         visitor = visitor.set_spec_version(spec_version.clone())?;
 
         let attributes = spec_version.attribute_names();
 
-        for (hn, hv) in self
-            .headers
-            .iter()
-            .filter(|(hn, _)| headers::SPEC_VERSION_HEADER.ne(hn) && hn.as_str().starts_with("ce-"))
-        {
+        for (hn, hv) in self.headers.iter().filter(|(hn, _)| {
+            let key = hn.as_str();
+            SPEC_VERSION_HEADER.ne(key) && key.starts_with("ce-")
+        }) {
             let name = &hn.as_str()["ce-".len()..];
 
             if attributes.contains(&name) {
@@ -90,11 +92,7 @@ impl MessageDeserializer for RequestDeserializer {
             == "application/cloudevents+json"
         {
             Encoding::STRUCTURED
-        } else if self
-            .headers
-            .get::<&'static HeaderName>(&super::headers::SPEC_VERSION_HEADER)
-            .is_some()
-        {
+        } else if self.headers.contains_key(SPEC_VERSION_HEADER) {
             Encoding::BINARY
         } else {
             Encoding::UNKNOWN

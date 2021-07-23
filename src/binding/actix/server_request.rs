@@ -83,11 +83,11 @@ mod tests {
         let expected = fixtures::v10::minimal_string_extension();
 
         let (req, payload) = test::TestRequest::post()
-            .header("ce-specversion", "1.0")
-            .header("ce-id", "0001")
-            .header("ce-type", "test_event.test_application")
-            .header("ce-source", "http://localhost/")
-            .header("ce-someint", "10")
+            .insert_header(("ce-specversion", "1.0"))
+            .insert_header(("ce-id", "0001"))
+            .insert_header(("ce-type", "test_event.test_application"))
+            .insert_header(("ce-source", "http://localhost/"))
+            .insert_header(("ce-someint", "10"))
             .to_http_parts();
 
         let resp = req.to_event(web::Payload(payload)).await.unwrap();
@@ -99,16 +99,16 @@ mod tests {
         let expected = fixtures::v10::full_binary_json_data_string_extension();
 
         let (req, payload) = test::TestRequest::post()
-            .header("ce-specversion", "1.0")
-            .header("ce-id", "0001")
-            .header("ce-type", "test_event.test_application")
-            .header("ce-subject", "cloudevents-sdk")
-            .header("ce-source", "http://localhost/")
-            .header("ce-time", fixtures::time().to_rfc3339())
-            .header("ce-string_ex", "val")
-            .header("ce-int_ex", "10")
-            .header("ce-bool_ex", "true")
-            .header("content-type", "application/json")
+            .insert_header(("ce-specversion", "1.0"))
+            .insert_header(("ce-id", "0001"))
+            .insert_header(("ce-type", "test_event.test_application"))
+            .insert_header(("ce-subject", "cloudevents-sdk"))
+            .insert_header(("ce-source", "http://localhost/"))
+            .insert_header(("ce-time", fixtures::time().to_rfc3339()))
+            .insert_header(("ce-string_ex", "val"))
+            .insert_header(("ce-int_ex", "10"))
+            .insert_header(("ce-bool_ex", "true"))
+            .insert_header(("content-type", "application/json"))
             .set_json(&fixtures::json_data())
             .to_http_parts();
 
@@ -136,7 +136,7 @@ mod tests {
         let expected = fixtures::v10::full_json_data_string_extension();
 
         let (req, payload) = test::TestRequest::post()
-            .header("content-type", "application/cloudevents+json")
+            .insert_header(("content-type", "application/cloudevents+json"))
             .set_payload(bytes)
             .to_http_parts();
 

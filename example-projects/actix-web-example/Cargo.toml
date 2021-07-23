@@ -6,8 +6,8 @@ edition = "2018"
 
 [dependencies]
 cloudevents-sdk = { path = "../..", features = ["actix"] }
-actix-web = "^3"
-actix-cors = "^0.5"
+actix-web = "4.0.0-beta.8"
+actix-cors = "0.6.0-beta.2"
 serde_json = "^1.0"
 url = { version = "^2.1" }
 env_logger = "0.7.1"

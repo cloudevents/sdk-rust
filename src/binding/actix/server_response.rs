@@ -1,16 +1,12 @@
 use crate::binding::http::{Builder, Serializer};
 use crate::message::{BinaryDeserializer, Result};
 use crate::Event;
-use actix_web::dev::HttpResponseBuilder;
 use actix_web::http::StatusCode;
-use actix_web::HttpResponse;
-use async_trait::async_trait;
-use futures::future::LocalBoxFuture;
-use futures::FutureExt;
+use actix_web::{HttpRequest, HttpResponse, HttpResponseBuilder};
 
 impl Builder<HttpResponse> for HttpResponseBuilder {
     fn header(&mut self, key: &str, value: http::header::HeaderValue) {
-        self.set_header(key, value);
+        self.insert_header((key, value));
     }
     fn body(&mut self, bytes: Vec<u8>) -> Result<HttpResponse> {
         Ok(HttpResponseBuilder::body(self, bytes))
@@ -21,7 +17,7 @@ impl Builder<HttpResponse> for HttpResponseBuilder {
 }
 
 /// Method to fill an [`HttpResponseBuilder`] with an [`Event`].
-pub async fn event_to_response<T: Builder<HttpResponse> + 'static>(
+pub fn event_to_response<T: Builder<HttpResponse> + 'static>(
     event: Event,
     response: T,
 ) -> std::result::Result<HttpResponse, actix_web::error::Error> {
@@ -31,40 +27,29 @@ pub async fn event_to_response<T: Builder<HttpResponse> + 'static>(
 
 /// So that an actix-web handler may return an Event
 impl actix_web::Responder for Event {
-    type Error = actix_web::Error;
-    type Future = LocalBoxFuture<'static, std::result::Result<HttpResponse, Self::Error>>;
-
-    fn respond_to(self, _: &actix_web::HttpRequest) -> Self::Future {
-        async { HttpResponse::build(StatusCode::OK).event(self).await }.boxed_local()
+    fn respond_to(self, _: &HttpRequest) -> HttpResponse {
+        HttpResponse::build(StatusCode::OK).event(self).unwrap()
     }
 }
 
 /// Extension Trait for [`HttpResponseBuilder`] which acts as a wrapper for the function [`event_to_response()`].
 ///
 /// This trait is sealed and cannot be implemented for types outside of this crate.
-#[async_trait(?Send)]
 pub trait HttpResponseBuilderExt: private::Sealed {
     /// Fill this [`HttpResponseBuilder`] with an [`Event`].
-    async fn event(
-        self,
-        event: Event,
-    ) -> std::result::Result<HttpResponse, actix_web::error::Error>;
+    fn event(self, event: Event) -> std::result::Result<HttpResponse, actix_web::Error>;
 }
 
-#[async_trait(?Send)]
 impl HttpResponseBuilderExt for HttpResponseBuilder {
-    async fn event(
-        self,
-        event: Event,
-    ) -> std::result::Result<HttpResponse, actix_web::error::Error> {
-        event_to_response(event, self).await
+    fn event(self, event: Event) -> std::result::Result<HttpResponse, actix_web::Error> {
+        event_to_response(event, self)
     }
 }
 
 // Sealing the HttpResponseBuilderExt
 mod private {
     pub trait Sealed {}
-    impl Sealed for actix_web::dev::HttpResponseBuilder {}
+    impl Sealed for actix_web::HttpResponseBuilder {}
 }
 
 #[cfg(test)]
@@ -74,7 +59,6 @@ mod tests {
     use crate::test::fixtures;
     use actix_web::http::StatusCode;
     use actix_web::test;
-    use futures::TryStreamExt;
 
     #[actix_rt::test]
     async fn test_response() {
@@ -82,7 +66,6 @@ mod tests {
 
         let resp = HttpResponseBuilder::new(StatusCode::OK)
             .event(input)
-            .await
             .unwrap();
 
         assert_eq!(
@@ -115,9 +98,8 @@ mod tests {
     async fn test_response_with_full_data() {
         let input = fixtures::v10::full_binary_json_data_string_extension();
 
-        let mut resp = HttpResponseBuilder::new(StatusCode::OK)
+        let resp = HttpResponseBuilder::new(StatusCode::OK)
             .event(input)
-            .await
             .unwrap();
 
         assert_eq!(
@@ -153,9 +135,10 @@ mod tests {
             "10"
         );
 
-        let bytes = test::load_stream(resp.take_body().into_stream())
-            .await
-            .unwrap();
+        // let bytes = test::load_stream(resp.take_body().into_stream())
+        //     .await
+        //     .unwrap();
+        let bytes = test::load_body(resp.into_body()).await.unwrap();
         assert_eq!(fixtures::json_data_binary(), bytes.as_ref())
     }
 }

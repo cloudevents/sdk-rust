@@ -24,7 +24,7 @@
 //!
 //! #[get("/")]
 //! async fn get_event() -> Result<HttpResponse, actix_web::Error> {
-//!     Ok(HttpResponse::Ok()
+//!     HttpResponse::Ok()
 //!         .event(
 //!             EventBuilderV10::new()
 //!                 .id("0001")
@@ -34,8 +34,6 @@
 //!                 .build()
 //!                 .expect("No error while building the event"),
 //!         )
-//!         .await?
-//!     )
 //! }
 //! ```
 

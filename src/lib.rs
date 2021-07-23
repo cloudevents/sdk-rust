@@ -39,7 +39,7 @@
 //! - `actix`: Enables the [`binding::actix`] protocol binding module. This
 //! extends the [`actix_web::HttpRequest`] with a
 //! [`to_event`](binding::actix::HttpRequestExt::to_event) function, the
-//! [`actix_web::dev::HttpResponseBuilder`] with an
+//! [`actix_web::HttpResponseBuilder`] with an
 //! [`event`](binding::actix::HttpResponseBuilderExt::event) function,
 //! and implementations for [`actix_web::FromRequest`] and
 //! [`actix_web::Responder`] in order to take advantage of actix-web's

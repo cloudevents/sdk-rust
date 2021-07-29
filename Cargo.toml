@@ -18,7 +18,7 @@ name = "cloudevents"
 
 [features]
 actix = ["actix-web", "async-trait", "bytes", "futures", "http"]
-reqwest = ["reqwest-lib", "async-trait", "bytes"]
+reqwest = ["reqwest-lib", "async-trait", "bytes", "http"]
 rdkafka = ["rdkafka-lib", "bytes", "futures"]
 warp = ["warp-lib", "bytes", "http", "hyper"]
 

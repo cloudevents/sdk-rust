@@ -2,6 +2,8 @@
 
 #[cfg(feature = "actix")]
 pub mod actix;
+#[cfg(any(feature = "actix", feature = "warp", feature = "reqwest"))]
+pub mod http;
 #[cfg(feature = "rdkafka")]
 pub mod rdkafka;
 #[cfg(feature = "reqwest")]
@@ -14,14 +16,6 @@ pub(crate) mod kafka {
     pub static SPEC_VERSION_HEADER: &str = "ce_specversion";
     pub fn header_prefix(name: &str) -> String {
         super::header_prefix("ce_", name)
-    }
-}
-
-#[cfg(any(feature = "actix", feature = "warp", feature = "reqwest"))]
-pub(crate) mod http {
-    pub static SPEC_VERSION_HEADER: &str = "ce-specversion";
-    pub fn header_prefix(name: &str) -> String {
-        super::header_prefix("ce-", name)
     }
 }
 

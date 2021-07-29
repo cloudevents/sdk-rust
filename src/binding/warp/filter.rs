@@ -1,6 +1,6 @@
 use warp_lib as warp;
 
-use super::server_request::request_to_event;
+use crate::binding::http;
 
 use crate::Event;
 use warp::http::HeaderMap;
@@ -38,7 +38,7 @@ pub fn to_event() -> impl Filter<Extract = (Event,), Error = Rejection> + Copy {
 }
 
 async fn create_event(headers: HeaderMap, body: bytes::Bytes) -> Result<Event, Rejection> {
-    request_to_event(headers, body)
+    http::to_event(&headers, body.to_vec())
         .map_err(|error| warp::reject::custom(EventFilterError { error }))
 }
 

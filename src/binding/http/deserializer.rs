@@ -1,28 +1,27 @@
-use bytes::Bytes;
-use http::HeaderMap;
-
-use crate::binding::http::SPEC_VERSION_HEADER;
-use crate::event::SpecVersion;
-use crate::header_value_to_str;
-use crate::message::{
-    BinaryDeserializer, BinarySerializer, Encoding, Error, MessageAttributeValue,
-    MessageDeserializer, Result, StructuredDeserializer, StructuredSerializer,
+use super::{Headers, SPEC_VERSION_HEADER};
+use crate::{
+    binding::CLOUDEVENTS_JSON_HEADER,
+    event::SpecVersion,
+    header_value_to_str, message,
+    message::{
+        BinaryDeserializer, BinarySerializer, Encoding, MessageAttributeValue, MessageDeserializer,
+        Result, StructuredDeserializer, StructuredSerializer,
+    },
 };
-use crate::{message, Event};
 use std::convert::TryFrom;
 
-pub struct RequestDeserializer {
-    headers: HeaderMap,
-    body: Bytes,
+pub struct Deserializer<'a, T: Headers<'a>> {
+    headers: &'a T,
+    body: Vec<u8>,
 }
 
-impl RequestDeserializer {
-    pub fn new(headers: HeaderMap, body: Bytes) -> RequestDeserializer {
-        RequestDeserializer { headers, body }
+impl<'a, T: Headers<'a>> Deserializer<'a, T> {
+    pub fn new(headers: &'a T, body: Vec<u8>) -> Deserializer<'a, T> {
+        Deserializer { headers, body }
     }
 }
 
-impl BinaryDeserializer for RequestDeserializer {
+impl<'a, T: Headers<'a>> BinaryDeserializer for Deserializer<'a, T> {
     fn deserialize_binary<R: Sized, V: BinarySerializer<R>>(self, mut visitor: V) -> Result<R> {
         if self.encoding() != Encoding::BINARY {
             return Err(message::Error::WrongEncoding {});
@@ -58,7 +57,7 @@ impl BinaryDeserializer for RequestDeserializer {
             }
         }
 
-        if let Some(hv) = self.headers.get("content-type") {
+        if let Some(hv) = self.headers.get(http::header::CONTENT_TYPE) {
             visitor = visitor.set_attribute(
                 "datacontenttype",
                 MessageAttributeValue::String(String::from(header_value_to_str!(hv)?)),
@@ -66,40 +65,36 @@ impl BinaryDeserializer for RequestDeserializer {
         }
 
         if !self.body.is_empty() {
-            visitor.end_with_data(self.body.to_vec())
+            visitor.end_with_data(self.body)
         } else {
             visitor.end()
         }
     }
 }
 
-impl StructuredDeserializer for RequestDeserializer {
+impl<'a, T: Headers<'a>> StructuredDeserializer for Deserializer<'a, T> {
     fn deserialize_structured<R: Sized, V: StructuredSerializer<R>>(self, visitor: V) -> Result<R> {
         if self.encoding() != Encoding::STRUCTURED {
             return Err(message::Error::WrongEncoding {});
         }
-        visitor.set_structured_event(self.body.to_vec())
+        visitor.set_structured_event(self.body)
     }
 }
 
-impl MessageDeserializer for RequestDeserializer {
+impl<'a, T: Headers<'a>> MessageDeserializer for Deserializer<'a, T> {
     fn encoding(&self) -> Encoding {
         if self
             .headers
-            .get("content-type")
-            .map(|v| v.to_str().unwrap_or(""))
-            .unwrap_or("")
-            == "application/cloudevents+json"
+            .get(http::header::CONTENT_TYPE)
+            .and_then(|v| v.to_str().ok())
+            .filter(|&v| v.starts_with(CLOUDEVENTS_JSON_HEADER))
+            .is_some()
         {
             Encoding::STRUCTURED
-        } else if self.headers.contains_key(SPEC_VERSION_HEADER) {
+        } else if self.headers.get(SPEC_VERSION_HEADER).is_some() {
             Encoding::BINARY
         } else {
             Encoding::UNKNOWN
         }
     }
-}
-
-pub fn request_to_event(req: HeaderMap, bytes: bytes::Bytes) -> std::result::Result<Event, Error> {
-    MessageDeserializer::into_event(RequestDeserializer::new(req, bytes))
 }

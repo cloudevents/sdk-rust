@@ -1,99 +1,20 @@
-use crate::binding::http::SPEC_VERSION_HEADER;
-use crate::event::SpecVersion;
-use crate::message::{
-    BinaryDeserializer, BinarySerializer, Encoding, MessageAttributeValue, MessageDeserializer,
-    Result, StructuredDeserializer, StructuredSerializer,
-};
-use crate::{header_value_to_str, message, Event};
-use actix_web::web::{Bytes, BytesMut};
-use actix_web::{web, HttpMessage, HttpRequest};
+use crate::binding::http::{to_event, Headers};
+use crate::Event;
+use actix_web::web::BytesMut;
+use actix_web::{web, HttpRequest};
 use async_trait::async_trait;
 use futures::future::LocalBoxFuture;
 use futures::{FutureExt, StreamExt};
-use std::convert::TryFrom;
+use http::header::{AsHeaderName, HeaderName, HeaderValue};
 
-/// Wrapper for [`HttpRequest`] that implements [`MessageDeserializer`] trait.
-pub struct HttpRequestDeserializer<'a> {
-    req: &'a HttpRequest,
-    body: Bytes,
-}
-
-impl HttpRequestDeserializer<'_> {
-    pub fn new(req: &HttpRequest, body: Bytes) -> HttpRequestDeserializer {
-        HttpRequestDeserializer { req, body }
+/// Implement Headers for the actix HeaderMap
+impl<'a> Headers<'a> for actix_web::http::HeaderMap {
+    type Iterator = Box<dyn Iterator<Item = (&'a HeaderName, &'a HeaderValue)> + 'a>;
+    fn get<K: AsHeaderName>(&self, key: K) -> Option<&HeaderValue> {
+        self.get(key.as_str())
     }
-}
-
-impl<'a> BinaryDeserializer for HttpRequestDeserializer<'a> {
-    fn deserialize_binary<R: Sized, V: BinarySerializer<R>>(self, mut visitor: V) -> Result<R> {
-        if self.encoding() != Encoding::BINARY {
-            return Err(message::Error::WrongEncoding {});
-        }
-
-        let spec_version = SpecVersion::try_from(
-            self.req
-                .headers()
-                .get(SPEC_VERSION_HEADER)
-                .map(|a| header_value_to_str!(a))
-                .unwrap()?,
-        )?;
-
-        visitor = visitor.set_spec_version(spec_version.clone())?;
-
-        let attributes = spec_version.attribute_names();
-
-        for (hn, hv) in self.req.headers().iter().filter(|(hn, _)| {
-            let key = hn.as_str();
-            SPEC_VERSION_HEADER.ne(key) && key.starts_with("ce-")
-        }) {
-            let name = &hn.as_str()["ce-".len()..];
-
-            if attributes.contains(&name) {
-                visitor = visitor.set_attribute(
-                    name,
-                    MessageAttributeValue::String(String::from(header_value_to_str!(hv)?)),
-                )?
-            } else {
-                visitor = visitor.set_extension(
-                    name,
-                    MessageAttributeValue::String(String::from(header_value_to_str!(hv)?)),
-                )?
-            }
-        }
-
-        if let Some(hv) = self.req.headers().get("content-type") {
-            visitor = visitor.set_attribute(
-                "datacontenttype",
-                MessageAttributeValue::String(String::from(header_value_to_str!(hv)?)),
-            )?
-        }
-
-        if !self.body.is_empty() {
-            visitor.end_with_data(self.body.to_vec())
-        } else {
-            visitor.end()
-        }
-    }
-}
-
-impl<'a> StructuredDeserializer for HttpRequestDeserializer<'a> {
-    fn deserialize_structured<R: Sized, V: StructuredSerializer<R>>(self, visitor: V) -> Result<R> {
-        if self.encoding() != Encoding::STRUCTURED {
-            return Err(message::Error::WrongEncoding {});
-        }
-        visitor.set_structured_event(self.body.to_vec())
-    }
-}
-
-impl<'a> MessageDeserializer for HttpRequestDeserializer<'a> {
-    fn encoding(&self) -> Encoding {
-        if self.req.content_type() == "application/cloudevents+json" {
-            Encoding::STRUCTURED
-        } else if self.req.headers().get(SPEC_VERSION_HEADER).is_some() {
-            Encoding::BINARY
-        } else {
-            Encoding::UNKNOWN
-        }
+    fn iter(&'a self) -> Self::Iterator {
+        Box::new(self.iter())
     }
 }
 
@@ -106,8 +27,7 @@ pub async fn request_to_event(
     while let Some(item) = payload.next().await {
         bytes.extend_from_slice(&item?);
     }
-    MessageDeserializer::into_event(HttpRequestDeserializer::new(req, bytes.freeze()))
-        .map_err(actix_web::error::ErrorBadRequest)
+    to_event(req.headers(), bytes.to_vec()).map_err(actix_web::error::ErrorBadRequest)
 }
 
 /// So that an actix-web handler may take an Event parameter

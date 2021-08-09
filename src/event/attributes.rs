@@ -35,8 +35,8 @@ impl fmt::Display for AttributeValue<'_> {
         match self {
             AttributeValue::SpecVersion(s) => s.fmt(f),
             AttributeValue::String(s) => f.write_str(s),
-            AttributeValue::URI(s) => f.write_str(&s.as_str()),
-            AttributeValue::URIRef(s) => f.write_str(&s.as_str()),
+            AttributeValue::URI(s) => f.write_str(s.as_str()),
+            AttributeValue::URIRef(s) => f.write_str(s.as_str()),
             AttributeValue::Time(s) => f.write_str(&s.to_rfc3339()),
             AttributeValue::Boolean(b) => f.serialize_bool(**b),
             AttributeValue::Integer(i) => f.serialize_i64(**i),

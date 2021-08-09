@@ -235,7 +235,7 @@ mod tests {
 
         let mut event = EventBuilderV03::new()
             .id(id)
-            .source(source.clone())
+            .source(source.to_string())
             .ty(ty)
             .subject(subject)
             .time(time)

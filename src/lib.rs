@@ -46,6 +46,7 @@
 //! [Extractors] and [Responders]
 //! - `reqwest`: Enables the [`binding::reqwest`] protocol binding module.
 //! - `warp`: Enables the [`binding::warp`] protocol binding module.
+//! - `axum`: Enables the [`binding::axum`] protocol binding module.
 //! - `rdkafka`: Enables the [`binding::rdkafka`] protocol binding module to
 //! seamlessly consume/produce cloudevents within Kafka messages.
 //!

@@ -242,7 +242,7 @@ mod tests {
             .id("0001")
             .ty("example.test")
             .source("http://localhost")
-            .data("application/json", j.clone())
+            .data("application/json", j)
             .extension("someint", "10")
             .build()
             .unwrap();

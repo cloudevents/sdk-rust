@@ -2,7 +2,14 @@
 
 #[cfg(feature = "actix")]
 pub mod actix;
-#[cfg(any(feature = "actix", feature = "warp", feature = "reqwest"))]
+#[cfg(feature = "axum")]
+pub mod axum;
+#[cfg(any(
+    feature = "actix",
+    feature = "warp",
+    feature = "reqwest",
+    feature = "axum"
+))]
 pub mod http;
 #[cfg(feature = "rdkafka")]
 pub mod rdkafka;

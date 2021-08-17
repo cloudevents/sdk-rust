@@ -11,6 +11,15 @@ use crate::message::{
 use crate::Event;
 use reqwest::RequestBuilder;
 
+// TODO: Ideally, we'd only need to implement binding::http::Builder
+// for reqwest::RequestBuilder here, but because the latter is a
+// consuming builder, we'd need an intermediate struct similar to
+// warp's to adapt that interface. Unfortunately, the reqwest builder
+// doesn't implement the Default trait, so I can't use take() as
+// warp's Adapter does, and I've yet to come up with another
+// solution. So for now, we continue to implement BinarySerializer
+// directly in here.
+
 /// Wrapper for [`RequestBuilder`] that implements [`StructuredSerializer`] & [`BinarySerializer`] traits.
 pub struct RequestSerializer {
     req: RequestBuilder,

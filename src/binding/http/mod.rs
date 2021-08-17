@@ -7,6 +7,10 @@ use crate::{
 };
 use deserializer::Deserializer;
 pub use headers::Headers;
+mod serializer;
+
+pub use serializer::Builder;
+pub use serializer::Serializer;
 
 pub static SPEC_VERSION_HEADER: &str = "ce-specversion";
 

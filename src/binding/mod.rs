@@ -19,18 +19,6 @@ pub(crate) mod kafka {
     }
 }
 
-#[cfg(any(feature = "actix", feature = "warp"))]
-#[macro_export]
-macro_rules! str_to_header_value {
-    ($header_value:expr) => {
-        http::header::HeaderValue::from_str(&$header_value.to_string()).map_err(|e| {
-            crate::message::Error::Other {
-                source: Box::new(e),
-            }
-        })
-    };
-}
-
 pub(crate) static CLOUDEVENTS_JSON_HEADER: &str = "application/cloudevents+json";
 pub(crate) static CONTENT_TYPE: &str = "content-type";
 

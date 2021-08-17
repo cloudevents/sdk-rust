@@ -1,15 +1,6 @@
-use crate::event::SpecVersion;
-use crate::message::{
-    BinaryDeserializer, BinarySerializer, MessageAttributeValue, Result, StructuredSerializer,
-};
+use crate::binding::http::{Builder, Serializer};
+use crate::message::{BinaryDeserializer, Result};
 use crate::Event;
-use crate::{
-    binding::{
-        http::{header_prefix, SPEC_VERSION_HEADER},
-        CLOUDEVENTS_JSON_HEADER,
-    },
-    str_to_header_value,
-};
 use actix_web::dev::HttpResponseBuilder;
 use actix_web::http::StatusCode;
 use actix_web::HttpResponse;
@@ -17,63 +8,24 @@ use async_trait::async_trait;
 use futures::future::LocalBoxFuture;
 use futures::FutureExt;
 
-/// Wrapper for [`HttpResponseBuilder`] that implements [`StructuredSerializer`] and [`BinarySerializer`].
-pub struct HttpResponseSerializer {
-    builder: HttpResponseBuilder,
-}
-
-impl HttpResponseSerializer {
-    pub fn new(builder: HttpResponseBuilder) -> HttpResponseSerializer {
-        HttpResponseSerializer { builder }
+impl Builder<HttpResponse> for HttpResponseBuilder {
+    fn header(&mut self, key: &str, value: http::header::HeaderValue) {
+        self.set_header(key, value);
     }
-}
-
-impl BinarySerializer<HttpResponse> for HttpResponseSerializer {
-    fn set_spec_version(mut self, spec_version: SpecVersion) -> Result<Self> {
-        self.builder
-            .set_header(SPEC_VERSION_HEADER, str_to_header_value!(spec_version)?);
-        Ok(self)
+    fn body(&mut self, bytes: Vec<u8>) -> Result<HttpResponse> {
+        Ok(HttpResponseBuilder::body(self, bytes))
     }
-
-    fn set_attribute(mut self, name: &str, value: MessageAttributeValue) -> Result<Self> {
-        self.builder
-            .set_header(&header_prefix(name), str_to_header_value!(value)?);
-        Ok(self)
-    }
-
-    fn set_extension(mut self, name: &str, value: MessageAttributeValue) -> Result<Self> {
-        self.builder
-            .set_header(&header_prefix(name), str_to_header_value!(value)?);
-        Ok(self)
-    }
-
-    fn end_with_data(mut self, bytes: Vec<u8>) -> Result<HttpResponse> {
-        Ok(self.builder.body(bytes))
-    }
-
-    fn end(mut self) -> Result<HttpResponse> {
-        Ok(self.builder.finish())
-    }
-}
-
-impl StructuredSerializer<HttpResponse> for HttpResponseSerializer {
-    fn set_structured_event(mut self, bytes: Vec<u8>) -> Result<HttpResponse> {
-        Ok(self
-            .builder
-            .set_header(
-                actix_web::http::header::CONTENT_TYPE,
-                CLOUDEVENTS_JSON_HEADER,
-            )
-            .body(bytes))
+    fn finish(&mut self) -> Result<HttpResponse> {
+        Ok(HttpResponseBuilder::finish(self))
     }
 }
 
 /// Method to fill an [`HttpResponseBuilder`] with an [`Event`].
-pub async fn event_to_response(
+pub async fn event_to_response<T: Builder<HttpResponse> + 'static>(
     event: Event,
-    response: HttpResponseBuilder,
+    response: T,
 ) -> std::result::Result<HttpResponse, actix_web::error::Error> {
-    BinaryDeserializer::deserialize_binary(event, HttpResponseSerializer::new(response))
+    BinaryDeserializer::deserialize_binary(event, Serializer::new(response))
         .map_err(actix_web::error::ErrorBadRequest)
 }
 

@@ -26,6 +26,7 @@ mechanism to support various Protocol Bindings, each of which is
 enabled by a specific [feature flag]:
 
 * `actix`: Integration with [actix](https://actix.rs/).
+* `axum`: Integration with [axum](https://lib.rs/crates/axum).
 * `warp`: Integration with [warp](https://github.com/seanmonstar/warp/).
 * `reqwest`: Integration with [reqwest](https://github.com/seanmonstar/reqwest).
 * `rdkafka`: Integration with [rdkafka](https://fede1024.github.io/rust-rdkafka).
@@ -59,6 +60,7 @@ let event = EventBuilderV10::new()
 Checkout the examples using our integrations to learn how to send and receive events:
 
 * [Actix Web Example](example-projects/actix-web-example)
+* [Axum Example](example-projects/axum-example)
 * [Reqwest/WASM Example](example-projects/reqwest-wasm-example)
 * [Kafka Example](example-projects/rdkafka-example)
 * [Warp Example](example-projects/warp-example)

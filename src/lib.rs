@@ -29,7 +29,7 @@
 //! * The [`EventBuilder`] trait and implementations, to create [`Event`] instances
 //! * The implementation of [`serde::Serialize`] and [`serde::Deserialize`] for [`Event`] to serialize/deserialize CloudEvents to/from JSON
 //! * Traits and utilities in [`message`] to implement Protocol Bindings
-//! * Feature-guarded modules for various Protocol Binding implementations, e.g. actix, reqwest, warp, rdkafka
+//! * Feature-guarded modules for various Protocol Binding implementations, e.g. actix, axum, reqwest, warp, rdkafka
 //!
 //! ## Feature flags
 //!

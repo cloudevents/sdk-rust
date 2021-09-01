@@ -173,22 +173,12 @@ mod tests {
     use super::*;
     use crate::binding::rdkafka::kafka_producer_record::MessageRecord;
 
+    use crate::test::fixtures;
     use crate::{EventBuilder, EventBuilderV10};
-    use chrono::Utc;
-    use serde_json::json;
 
     #[test]
     fn test_binary_record() {
-        let time = Utc::now();
-
-        let expected = EventBuilderV10::new()
-            .id("0001")
-            .ty("example.test")
-            .time(time)
-            .source("http://localhost")
-            .extension("someint", "10")
-            .build()
-            .unwrap();
+        let expected = fixtures::v10::minimal_string_extension();
 
         // Since there is neither a way provided by rust-rdkafka to convert FutureProducer back into
         // OwnedMessage or BorrowedMessage, nor is there a way to create a BorrowedMessage struct,
@@ -198,9 +188,8 @@ mod tests {
         let message_record = MessageRecord::from_event(
             EventBuilderV10::new()
                 .id("0001")
-                .ty("example.test")
-                .time(time)
-                .source("http://localhost")
+                .ty("test_event.test_application")
+                .source("http://localhost/")
                 .extension("someint", "10")
                 .build()
                 .unwrap(),
@@ -222,30 +211,14 @@ mod tests {
 
     #[test]
     fn test_structured_record() {
-        let j = json!({"hello": "world"});
-
-        let expected = EventBuilderV10::new()
-            .id("0001")
-            .ty("example.test")
-            .source("http://localhost")
-            .data("application/json", j.clone())
-            .extension("someint", "10")
-            .build()
-            .unwrap();
+        let expected = fixtures::v10::full_json_data_string_extension();
 
         // Since there is neither a way provided by rust-rdkafka to convert FutureProducer back into
         // OwnedMessage or BorrowedMessage, nor is there a way to create a BorrowedMessage struct,
         // the test uses OwnedMessage instead, which consumes the message instead of borrowing it like
         // in the case of BorrowedMessage
 
-        let input = EventBuilderV10::new()
-            .id("0001")
-            .ty("example.test")
-            .source("http://localhost")
-            .data("application/json", j)
-            .extension("someint", "10")
-            .build()
-            .unwrap();
+        let input = expected.clone();
 
         let serialized_event =
             StructuredDeserializer::deserialize_structured(input, MessageRecord::new()).unwrap();

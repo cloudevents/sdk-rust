@@ -49,30 +49,19 @@ mod tests {
     use super::to_event;
     use warp::test;
 
-    use crate::{EventBuilder, EventBuilderV10};
-    use chrono::Utc;
-    use serde_json::json;
+    use crate::test::fixtures;
 
     #[tokio::test]
     async fn test_request() {
-        let time = Utc::now();
-        let expected = EventBuilderV10::new()
-            .id("0001")
-            .ty("example.test")
-            .source("http://localhost/")
-            .time(time)
-            .extension("someint", "10")
-            .build()
-            .unwrap();
+        let expected = fixtures::v10::minimal_string_extension();
 
         let result = test::request()
             .method("POST")
             .header("ce-specversion", "1.0")
             .header("ce-id", "0001")
-            .header("ce-type", "example.test")
+            .header("ce-type", "test_event.test_application")
             .header("ce-source", "http://localhost/")
             .header("ce-someint", "10")
-            .header("ce-time", time.to_rfc3339())
             .filter(&to_event())
             .await
             .unwrap();
@@ -82,8 +71,6 @@ mod tests {
 
     #[tokio::test]
     async fn test_bad_request() {
-        let time = Utc::now();
-
         let result = test::request()
             .method("POST")
             .header("ce-specversion", "BAD SPECIFICATION")
@@ -91,7 +78,7 @@ mod tests {
             .header("ce-type", "example.test")
             .header("ce-source", "http://localhost/")
             .header("ce-someint", "10")
-            .header("ce-time", time.to_rfc3339())
+            .header("ce-time", fixtures::time().to_rfc3339())
             .filter(&to_event())
             .await;
 
@@ -107,29 +94,21 @@ mod tests {
 
     #[tokio::test]
     async fn test_request_with_full_data() {
-        let time = Utc::now();
-        let j = json!({"hello": "world"});
-
-        let expected = EventBuilderV10::new()
-            .id("0001")
-            .ty("example.test")
-            .source("http://localhost")
-            .time(time)
-            .data("application/json", j.to_string().into_bytes())
-            .extension("someint", "10")
-            .build()
-            .unwrap();
+        let expected = fixtures::v10::full_binary_json_data_string_extension();
 
         let result = test::request()
             .method("POST")
             .header("ce-specversion", "1.0")
             .header("ce-id", "0001")
-            .header("ce-type", "example.test")
-            .header("ce-source", "http://localhost")
-            .header("ce-someint", "10")
-            .header("ce-time", time.to_rfc3339())
+            .header("ce-type", "test_event.test_application")
+            .header("ce-source", "http://localhost/")
+            .header("ce-subject", "cloudevents-sdk")
             .header("content-type", "application/json")
-            .json(&j)
+            .header("ce-string_ex", "val")
+            .header("ce-int_ex", "10")
+            .header("ce-bool_ex", "true")
+            .header("ce-time", &fixtures::time().to_rfc3339())
+            .json(&fixtures::json_data())
             .filter(&to_event())
             .await
             .unwrap();

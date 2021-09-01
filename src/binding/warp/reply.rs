@@ -31,18 +31,11 @@ pub fn from_event(event: Event) -> Response {
 
 #[cfg(test)]
 mod tests {
-    use crate::{EventBuilder, EventBuilderV10};
-    use serde_json::json;
+    use crate::test::fixtures;
 
     #[test]
     fn test_response() {
-        let input = EventBuilderV10::new()
-            .id("0001")
-            .ty("example.test")
-            .source("http://localhost/")
-            .extension("someint", "10")
-            .build()
-            .unwrap();
+        let input = fixtures::v10::minimal_string_extension();
 
         let resp = super::from_event(input);
 
@@ -60,7 +53,7 @@ mod tests {
         );
         assert_eq!(
             resp.headers().get("ce-type").unwrap().to_str().unwrap(),
-            "example.test"
+            "test_event.test_application"
         );
         assert_eq!(
             resp.headers().get("ce-source").unwrap().to_str().unwrap(),
@@ -74,16 +67,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_response_with_full_data() {
-        let j = json!({"hello": "world"});
-
-        let input = EventBuilderV10::new()
-            .id("0001")
-            .ty("example.test")
-            .source("http://localhost")
-            .data("application/json", j.clone())
-            .extension("someint", "10")
-            .build()
-            .unwrap();
+        let input = fixtures::v10::full_binary_json_data_string_extension();
 
         let resp = super::from_event(input);
 
@@ -101,11 +85,11 @@ mod tests {
         );
         assert_eq!(
             resp.headers().get("ce-type").unwrap().to_str().unwrap(),
-            "example.test"
+            "test_event.test_application"
         );
         assert_eq!(
             resp.headers().get("ce-source").unwrap().to_str().unwrap(),
-            "http://localhost"
+            "http://localhost/"
         );
         assert_eq!(
             resp.headers()
@@ -116,13 +100,13 @@ mod tests {
             "application/json"
         );
         assert_eq!(
-            resp.headers().get("ce-someint").unwrap().to_str().unwrap(),
+            resp.headers().get("ce-int_ex").unwrap().to_str().unwrap(),
             "10"
         );
 
         let (_, body) = resp.into_parts();
         let body = hyper::body::to_bytes(body).await.unwrap();
 
-        assert_eq!(j.to_string().as_bytes(), body);
+        assert_eq!(fixtures::json_data_binary(), body);
     }
 }

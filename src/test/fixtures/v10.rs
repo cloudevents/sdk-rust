@@ -12,6 +12,16 @@ pub fn minimal() -> Event {
         .unwrap()
 }
 
+pub fn minimal_string_extension() -> Event {
+    EventBuilderV10::new()
+        .id(id())
+        .source(source())
+        .ty(ty())
+        .extension("someint", "10")
+        .build()
+        .unwrap()
+}
+
 pub fn minimal_json() -> Value {
     json!({
         "specversion": "1.0",
@@ -76,6 +86,44 @@ pub fn full_json_data() -> Event {
             Url::parse(dataschema().as_ref()).unwrap(),
             json_data(),
         )
+        .build()
+        .unwrap()
+}
+
+pub fn full_json_data_string_extension() -> Event {
+    let (string_ext_name, string_ext_value) = string_extension();
+    let (bool_ext_name, bool_ext_value) = bool_extension();
+    let (int_ext_name, int_ext_value) = int_extension();
+
+    EventBuilderV10::new()
+        .id(id())
+        .source(source())
+        .ty(ty())
+        .subject(subject())
+        .time(time())
+        .extension(&string_ext_name, string_ext_value)
+        .extension(&bool_ext_name, bool_ext_value.to_string())
+        .extension(&int_ext_name, int_ext_value.to_string())
+        .data(json_datacontenttype(), json_data())
+        .build()
+        .unwrap()
+}
+
+pub fn full_binary_json_data_string_extension() -> Event {
+    let (string_ext_name, string_ext_value) = string_extension();
+    let (bool_ext_name, bool_ext_value) = bool_extension();
+    let (int_ext_name, int_ext_value) = int_extension();
+
+    EventBuilderV10::new()
+        .id(id())
+        .source(source())
+        .ty(ty())
+        .subject(subject())
+        .time(time())
+        .extension(&string_ext_name, string_ext_value)
+        .extension(&bool_ext_name, bool_ext_value.to_string())
+        .extension(&int_ext_name, int_ext_value.to_string())
+        .data(json_datacontenttype(), json_data().to_string().into_bytes())
         .build()
         .unwrap()
 }

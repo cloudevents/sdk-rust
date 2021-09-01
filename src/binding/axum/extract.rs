@@ -47,32 +47,21 @@ mod tests {
     use super::*;
     use axum::body::Body;
     use axum::http::{self, Request, StatusCode};
-    use chrono::Utc;
-    use serde_json::json;
 
-    use crate::{EventBuilder, EventBuilderV10};
+    use crate::test::fixtures;
 
     #[tokio::test]
     async fn axum_test_request() {
-        let time = Utc::now();
-        let expected = EventBuilderV10::new()
-            .id("0001")
-            .ty("example.test")
-            .source("http://localhost/")
-            .time(time)
-            .extension("someint", "10")
-            .build()
-            .unwrap();
+        let expected = fixtures::v10::minimal_string_extension();
 
         let mut request = RequestParts::new(
             Request::builder()
                 .method(http::Method::POST)
                 .header("ce-specversion", "1.0")
                 .header("ce-id", "0001")
-                .header("ce-type", "example.test")
+                .header("ce-type", "test_event.test_application")
                 .header("ce-source", "http://localhost/")
                 .header("ce-someint", "10")
-                .header("ce-time", time.to_rfc3339())
                 .body(Body::empty())
                 .unwrap(),
         );
@@ -84,8 +73,6 @@ mod tests {
 
     #[tokio::test]
     async fn axum_test_bad_request() {
-        let time = Utc::now();
-
         let mut request = RequestParts::new(
             Request::builder()
                 .method(http::Method::POST)
@@ -94,7 +81,7 @@ mod tests {
                 .header("ce-type", "example.test")
                 .header("ce-source", "http://localhost/")
                 .header("ce-someint", "10")
-                .header("ce-time", time.to_rfc3339())
+                .header("ce-time", fixtures::time().to_rfc3339())
                 .body(Body::empty())
                 .unwrap(),
         );
@@ -109,30 +96,22 @@ mod tests {
 
     #[tokio::test]
     async fn axum_test_request_with_full_data() {
-        let time = Utc::now();
-        let j = json!({"hello": "world"});
-
-        let expected = EventBuilderV10::new()
-            .id("0001")
-            .ty("example.test")
-            .source("http://localhost")
-            .time(time)
-            .data("application/json", j.to_string().into_bytes())
-            .extension("someint", "10")
-            .build()
-            .unwrap();
+        let expected = fixtures::v10::full_binary_json_data_string_extension();
 
         let mut request = RequestParts::new(
             Request::builder()
                 .method(http::Method::POST)
                 .header("ce-specversion", "1.0")
                 .header("ce-id", "0001")
-                .header("ce-type", "example.test")
-                .header("ce-source", "http://localhost")
-                .header("ce-someint", "10")
-                .header("ce-time", time.to_rfc3339())
+                .header("ce-type", "test_event.test_application")
+                .header("ce-source", "http://localhost/")
+                .header("ce-subject", "cloudevents-sdk")
                 .header("content-type", "application/json")
-                .body(Body::from(serde_json::to_vec(&j).unwrap()))
+                .header("ce-string_ex", "val")
+                .header("ce-int_ex", "10")
+                .header("ce-bool_ex", "true")
+                .header("ce-time", &fixtures::time().to_rfc3339())
+                .body(Body::from(fixtures::json_data_binary()))
                 .unwrap(),
         );
 

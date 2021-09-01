@@ -45,34 +45,21 @@ mod tests {
     use mockito::mock;
     use reqwest_lib as reqwest;
 
-    use crate::{EventBuilder, EventBuilderV10};
-    use chrono::Utc;
-    use serde_json::json;
+    use crate::test::fixtures;
 
     #[tokio::test]
     async fn test_response() {
-        let time = Utc::now();
         let url = mockito::server_url();
         let _m = mock("GET", "/")
             .with_status(200)
             .with_header("ce-specversion", "1.0")
             .with_header("ce-id", "0001")
-            .with_header("ce-type", "example.test")
-            .with_header("ce-source", "http://localhost")
+            .with_header("ce-type", "test_event.test_application")
+            .with_header("ce-source", "http://localhost/")
             .with_header("ce-someint", "10")
-            .with_header("ce-time", &time.to_rfc3339())
             .create();
 
-        let expected = EventBuilderV10::new()
-            .id("0001")
-            .ty("example.test")
-            //TODO this is required now because the message deserializer implictly set default values
-            // As soon as this defaulting doesn't happen anymore, we can remove it (Issues #40/#41)
-            .time(time)
-            .source("http://localhost")
-            .extension("someint", "10")
-            .build()
-            .unwrap();
+        let expected = fixtures::v10::minimal_string_extension();
 
         let client = reqwest::Client::new();
         let res = client
@@ -89,33 +76,23 @@ mod tests {
 
     #[tokio::test]
     async fn test_response_with_full_data() {
-        let time = Utc::now();
-        let j = json!({"hello": "world"});
-
         let url = mockito::server_url();
         let _m = mock("GET", "/")
             .with_status(200)
             .with_header("ce-specversion", "1.0")
             .with_header("ce-id", "0001")
-            .with_header("ce-type", "example.test")
+            .with_header("ce-type", "test_event.test_application")
             .with_header("ce-source", "http://localhost/")
+            .with_header("ce-subject", "cloudevents-sdk")
             .with_header("content-type", "application/json")
-            .with_header("ce-someint", "10")
-            .with_header("ce-time", &time.to_rfc3339())
-            .with_body(j.to_string())
+            .with_header("ce-string_ex", "val")
+            .with_header("ce-int_ex", "10")
+            .with_header("ce-bool_ex", "true")
+            .with_header("ce-time", &fixtures::time().to_rfc3339())
+            .with_body(fixtures::json_data().to_string())
             .create();
 
-        let expected = EventBuilderV10::new()
-            .id("0001")
-            .ty("example.test")
-            //TODO this is required now because the message deserializer implictly set default values
-            // As soon as this defaulting doesn't happen anymore, we can remove it (Issues #40/#41)
-            .time(time)
-            .source("http://localhost/")
-            .data("application/json", j.to_string().into_bytes())
-            .extension("someint", "10")
-            .build()
-            .unwrap();
+        let expected = fixtures::v10::full_binary_json_data_string_extension();
 
         let client = reqwest::Client::new();
         let res = client
@@ -132,20 +109,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_structured_response_with_full_data() {
-        let time = Utc::now();
-
-        let j = json!({"hello": "world"});
-        let expected = EventBuilderV10::new()
-            .id("0001")
-            .ty("example.test")
-            //TODO this is required now because the message deserializer implictly set default values
-            // As soon as this defaulting doesn't happen anymore, we can remove it (Issues #40/#41)
-            .time(time)
-            .source("http://localhost")
-            .data("application/json", j.clone())
-            .extension("someint", "10")
-            .build()
-            .unwrap();
+        let expected = fixtures::v10::full_json_data_string_extension();
 
         let url = mockito::server_url();
         let _m = mock("GET", "/")

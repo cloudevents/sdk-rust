@@ -77,12 +77,10 @@ mod tests {
     use actix_web::test;
 
     use crate::test::fixtures;
-    use crate::{EventBuilder, EventBuilderV10};
     use serde_json::json;
     #[actix_rt::test]
     async fn test_request() {
-        let mut expected = fixtures::v10::minimal();
-        expected.set_extension("someint", "10");
+        let expected = fixtures::v10::minimal_string_extension();
 
         let (req, payload) = test::TestRequest::post()
             .header("ce-specversion", "1.0")
@@ -98,25 +96,20 @@ mod tests {
 
     #[actix_rt::test]
     async fn test_request_with_full_data() {
-        let j = json!({"hello": "world"});
-
-        let expected = EventBuilderV10::new()
-            .id("0001")
-            .ty("example.test")
-            .source("http://localhost")
-            .data("application/json", j.to_string().into_bytes())
-            .extension("someint", "10")
-            .build()
-            .unwrap();
+        let expected = fixtures::v10::full_binary_json_data_string_extension();
 
         let (req, payload) = test::TestRequest::post()
             .header("ce-specversion", "1.0")
             .header("ce-id", "0001")
-            .header("ce-type", "example.test")
-            .header("ce-source", "http://localhost")
-            .header("ce-someint", "10")
+            .header("ce-type", "test_event.test_application")
+            .header("ce-subject", "cloudevents-sdk")
+            .header("ce-source", "http://localhost/")
+            .header("ce-time", fixtures::time().to_rfc3339())
+            .header("ce-string_ex", "val")
+            .header("ce-int_ex", "10")
+            .header("ce-bool_ex", "true")
             .header("content-type", "application/json")
-            .set_json(&j)
+            .set_json(&fixtures::json_data())
             .to_http_parts();
 
         let resp = req.to_event(web::Payload(payload)).await.unwrap();
@@ -125,26 +118,22 @@ mod tests {
 
     #[actix_rt::test]
     async fn test_structured_request_with_full_data() {
-        let j = json!({"hello": "world"});
         let payload = json!({
             "specversion": "1.0",
             "id": "0001",
-            "type": "example.test",
-            "source": "http://localhost",
-            "someint": "10",
+            "type": "test_event.test_application",
+            "subject": "cloudevents-sdk",
+            "source": "http://localhost/",
+            "time": fixtures::time().to_rfc3339(),
+            "string_ex": "val",
+            "int_ex": "10",
+            "bool_ex": "true",
             "datacontenttype": "application/json",
-            "data": j
+            "data": fixtures::json_data()
         });
         let bytes = serde_json::to_string(&payload).expect("Failed to serialize test data to json");
 
-        let expected = EventBuilderV10::new()
-            .id("0001")
-            .ty("example.test")
-            .source("http://localhost")
-            .data("application/json", j)
-            .extension("someint", "10")
-            .build()
-            .unwrap();
+        let expected = fixtures::v10::full_json_data_string_extension();
 
         let (req, payload) = test::TestRequest::post()
             .header("content-type", "application/cloudevents+json")

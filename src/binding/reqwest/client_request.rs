@@ -101,8 +101,7 @@ mod tests {
     use reqwest_lib as reqwest;
 
     use crate::message::StructuredDeserializer;
-    use crate::{EventBuilder, EventBuilderV10};
-    use serde_json::json;
+    use crate::test::fixtures;
 
     #[tokio::test]
     async fn test_request() {
@@ -110,19 +109,13 @@ mod tests {
         let m = mock("POST", "/")
             .match_header("ce-specversion", "1.0")
             .match_header("ce-id", "0001")
-            .match_header("ce-type", "example.test")
+            .match_header("ce-type", "test_event.test_application")
             .match_header("ce-source", "http://localhost/")
             .match_header("ce-someint", "10")
             .match_body(Matcher::Missing)
             .create();
 
-        let input = EventBuilderV10::new()
-            .id("0001")
-            .ty("example.test")
-            .source("http://localhost/")
-            .extension("someint", "10")
-            .build()
-            .unwrap();
+        let input = fixtures::v10::minimal_string_extension();
 
         let client = reqwest::Client::new();
         client
@@ -138,27 +131,22 @@ mod tests {
 
     #[tokio::test]
     async fn test_request_with_full_data() {
-        let j = json!({"hello": "world"});
-
         let url = mockito::server_url();
         let m = mock("POST", "/")
             .match_header("ce-specversion", "1.0")
             .match_header("ce-id", "0001")
-            .match_header("ce-type", "example.test")
-            .match_header("ce-source", "http://localhost/")
-            .match_header("content-type", "application/json")
-            .match_header("ce-someint", "10")
-            .match_body(Matcher::Exact(j.to_string()))
+            .with_header("ce-type", "test_event.test_application")
+            .with_header("ce-source", "http://localhost/")
+            .with_header("ce-subject", "cloudevents-sdk")
+            .with_header("content-type", "application/json")
+            .with_header("ce-string_ex", "val")
+            .with_header("ce-int_ex", "10")
+            .with_header("ce-bool_ex", "true")
+            .with_header("ce-time", &fixtures::time().to_rfc3339())
+            .match_body(Matcher::Exact(fixtures::json_data().to_string()))
             .create();
 
-        let input = EventBuilderV10::new()
-            .id("0001")
-            .ty("example.test")
-            .source("http://localhost/")
-            .data("application/json", j.clone())
-            .extension("someint", "10")
-            .build()
-            .unwrap();
+        let input = fixtures::v10::full_binary_json_data_string_extension();
 
         let client = reqwest::Client::new();
 
@@ -175,16 +163,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_structured_request_with_full_data() {
-        let j = json!({"hello": "world"});
-
-        let input = EventBuilderV10::new()
-            .id("0001")
-            .ty("example.test")
-            .source("http://localhost")
-            .data("application/json", j.clone())
-            .extension("someint", "10")
-            .build()
-            .unwrap();
+        let input = fixtures::v10::full_json_data_string_extension();
 
         let url = mockito::server_url();
         let m = mock("POST", "/")

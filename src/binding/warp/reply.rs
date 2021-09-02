@@ -1,6 +1,6 @@
 use warp_lib as warp;
 
-use super::server_response::event_to_response;
+use crate::binding::http::builder::adapter::to_response;
 
 use crate::Event;
 use http::StatusCode;
@@ -20,7 +20,7 @@ use warp::reply::Response;
 ///    .map(|| from_event(Event::default()));
 /// ```
 pub fn from_event(event: Event) -> Response {
-    match event_to_response(event) {
+    match to_response(event) {
         Ok(response) => response,
         Err(e) => warp::http::response::Response::builder()
             .status(StatusCode::INTERNAL_SERVER_ERROR)

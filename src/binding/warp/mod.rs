@@ -61,7 +61,5 @@
 //! warp::serve(routes).run(([127, 0, 0, 1], 3030));
 //! ```
 
-mod server_response;
-
 pub mod filter;
 pub mod reply;

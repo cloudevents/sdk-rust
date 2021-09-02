@@ -77,7 +77,6 @@
 
 pub mod extract;
 pub mod response;
-mod server_response;
 
 #[cfg(test)]
 mod tests {

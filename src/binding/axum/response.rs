@@ -3,7 +3,7 @@ use axum_lib as axum;
 use axum::{body::Body, http::Response, response::IntoResponse};
 use http::{header, StatusCode};
 
-use super::server_response::event_to_response;
+use crate::binding::http::builder::adapter::to_response;
 use crate::event::Event;
 
 impl IntoResponse for Event {
@@ -11,7 +11,7 @@ impl IntoResponse for Event {
     type BodyError = <Self::Body as axum::body::HttpBody>::Error;
 
     fn into_response(self) -> Response<Body> {
-        match event_to_response(self) {
+        match to_response(self) {
             Ok(resp) => resp,
             Err(err) => Response::builder()
                 .status(StatusCode::INTERNAL_SERVER_ERROR)

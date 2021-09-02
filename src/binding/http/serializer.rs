@@ -1,5 +1,6 @@
 use std::{cell::RefCell, rc::Rc};
 
+use crate::binding::http::builder::Builder;
 use crate::binding::{
     http::{header_prefix, SPEC_VERSION_HEADER},
     CLOUDEVENTS_JSON_HEADER,
@@ -15,12 +16,6 @@ macro_rules! str_to_header_value {
             }
         })
     };
-}
-
-pub trait Builder<R> {
-    fn header(&mut self, key: &str, value: http::header::HeaderValue);
-    fn body(&mut self, bytes: Vec<u8>) -> Result<R>;
-    fn finish(&mut self) -> Result<R>;
 }
 
 pub struct Serializer<T> {

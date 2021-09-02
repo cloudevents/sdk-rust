@@ -1,6 +1,5 @@
-use axum_lib as axum;
-
-use axum::{body::Body, http::Response};
+use http::Response;
+use hyper::body::Body;
 use std::cell::Cell;
 
 use crate::binding::http::{Builder, Serializer};
@@ -28,7 +27,7 @@ impl Builder<Response<Body>> for Adapter {
     }
 }
 
-pub fn event_to_response(event: Event) -> std::result::Result<Response<Body>, Error> {
+pub fn to_response(event: Event) -> std::result::Result<Response<Body>, Error> {
     BinaryDeserializer::deserialize_binary(
         event,
         Serializer::new(Adapter {

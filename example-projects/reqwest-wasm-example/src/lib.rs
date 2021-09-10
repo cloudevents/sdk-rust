@@ -1,6 +1,7 @@
 use cloudevents::binding::reqwest::RequestBuilderExt;
 use cloudevents::{EventBuilder, EventBuilderV10};
 use wasm_bindgen::prelude::*;
+use uuid::Uuid;
 
 #[wasm_bindgen]
 pub async fn run(
@@ -8,9 +9,11 @@ pub async fn run(
     ty: String,
     datacontenttype: String,
     data: String,
-) -> Result<(), String> {
+) -> Result<(), JsValue> {
     let event = EventBuilderV10::new()
+        .id(&Uuid::new_v4().to_hyphenated().to_string())
         .ty(ty)
+        .source("http://localhost/")
         .data(datacontenttype, data)
         .build()
         .unwrap();

@@ -4,8 +4,8 @@ import 'bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 import("./pkg").then(rustModule => {
-    $(document).ready(function () {
-        $("#send").click(function () {
+    $(function() {
+        $("#send").on("click", function () {
             let target = $("#event_target").val()
             let ty = $("#event_type").val()
             let dataContentType = $("#event_datacontenttype").val()

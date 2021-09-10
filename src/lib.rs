@@ -55,7 +55,7 @@
 //! [Responders]: https://actix.rs/docs/handlers/
 
 #![doc(html_root_url = "https://docs.rs/cloudevents-sdk/0.4.0")]
-#![deny(broken_intra_doc_links)]
+#![deny(rustdoc::broken_intra_doc_links)]
 
 pub mod binding;
 pub mod event;

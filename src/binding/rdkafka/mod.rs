@@ -49,7 +49,7 @@
 //! # }
 //! ```
 
-#![deny(broken_intra_doc_links)]
+#![deny(rustdoc::broken_intra_doc_links)]
 
 mod kafka_consumer_record;
 mod kafka_producer_record;

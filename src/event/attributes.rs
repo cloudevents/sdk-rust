@@ -268,7 +268,7 @@ pub(crate) fn default_hostname() -> Url {
     .unwrap()
 }
 
-#[cfg(target_arch = "wasm32")]
+#[cfg(all(target_arch = "wasm32", target_os = "unknown"))]
 pub(crate) fn default_hostname() -> Url {
     use std::str::FromStr;
 
@@ -280,4 +280,11 @@ pub(crate) fn default_hostname() -> Url {
             .as_str(),
     )
     .unwrap()
+}
+
+#[cfg(all(target_arch = "wasm32", target_os = "wasi"))]
+pub(crate) fn default_hostname() -> Url {
+    use std::str::FromStr;
+
+    Url::from_str("http://localhost").unwrap()
 }

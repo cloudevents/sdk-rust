@@ -5,6 +5,7 @@ pub mod actix;
 #[cfg(feature = "axum")]
 pub mod axum;
 #[cfg(any(
+    feature = "http-binding",
     feature = "actix",
     feature = "warp",
     feature = "reqwest",

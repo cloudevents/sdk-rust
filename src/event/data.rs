@@ -2,6 +2,7 @@ use serde_json::Value;
 use std::convert::TryFrom;
 use std::fmt;
 use std::fmt::Formatter;
+use std::str;
 
 /// Event [data attribute](https://github.com/cloudevents/spec/blob/master/spec.md#event-data) representation
 #[derive(PartialEq, Eq, Debug, Clone)]
@@ -81,7 +82,7 @@ impl TryFrom<Data> for String {
 impl fmt::Display for Data {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         match self {
-            Data::Binary(vec) => write!(f, "Binary data: {:?}", vec),
+            Data::Binary(vec) => write!(f, "Binary data: {:?}", str::from_utf8(vec).unwrap()),
             Data::String(s) => write!(f, "String data: {}", s),
             Data::Json(j) => write!(f, "Json data: {}", j),
         }

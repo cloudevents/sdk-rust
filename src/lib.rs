@@ -1,3 +1,4 @@
+#![feature(in_band_lifetimes)]
 //! This crate implements the [CloudEvents](https://cloudevents.io/) Spec for Rust.
 //!
 //! ```

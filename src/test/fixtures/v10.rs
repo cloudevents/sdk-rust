@@ -170,6 +170,28 @@ pub fn full_json_base64_data_json() -> Value {
     })
 }
 
+pub fn full_non_json_base64_data() -> Value {
+    match full_json_base64_data_json() {
+        Value::Object(mut m) => {
+            m.insert(
+                "data_base64".to_string(),
+                Value::String(base64::encode(b"hello world")),
+            );
+            Value::Object(m)
+        }
+        _ => Value::Null,
+    }
+}
+
+pub fn full_non_json_data() -> Event {
+    let mut event = full_json_data();
+    let value = full_non_json_base64_data();
+    if let Value::Object(m) = value {
+        event.set_data_unchecked(base64::decode(m["data_base64"].as_str().unwrap()).unwrap());
+    }
+    event
+}
+
 pub fn full_xml_string_data() -> Event {
     let (string_ext_name, string_ext_value) = string_extension();
     let (bool_ext_name, bool_ext_value) = bool_extension();

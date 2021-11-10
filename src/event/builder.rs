@@ -200,6 +200,10 @@ mod tests {
             fixtures::v10::full_json_base64_data_json(),
             fixtures::v10::full_json_data()
         ),
+        case::full_v10_with_non_json_base64_data(
+            fixtures::v10::full_non_json_base64_data(),
+            fixtures::v10::full_non_json_data()
+        ),
         case::full_v10_with_xml_string_data(
             fixtures::v10::full_xml_string_data_json(),
             fixtures::v10::full_xml_string_data()

@@ -1,5 +1,8 @@
 use super::Attributes;
 use crate::event::data::is_json_content_type;
+use crate::event::format::{
+    parse_data_base64, parse_data_base64_json, parse_data_json, parse_data_string,
+};
 use crate::event::{Data, ExtensionValue};
 use chrono::{DateTime, Utc};
 use serde::de::IntoDeserializer;
@@ -45,10 +48,10 @@ impl crate::event::format::EventFormatDeserializer for EventFormatDeserializer {
         let is_json = is_json_content_type(content_type);
 
         Ok(match (data, is_base64, is_json) {
-            (Some(d), false, true) => Some(Data::Json(parse_data_json!(d, E)?)),
-            (Some(d), false, false) => Some(Data::String(parse_data_string!(d, E)?)),
-            (Some(d), true, true) => Some(Data::Json(parse_json_data_base64!(d, E)?)),
-            (Some(d), true, false) => Some(Data::Binary(parse_data_base64!(d, E)?)),
+            (Some(d), false, true) => Some(Data::Json(parse_data_json(d)?)),
+            (Some(d), false, false) => Some(Data::String(parse_data_string(d)?)),
+            (Some(d), true, true) => Some(Data::Json(parse_data_base64_json(d)?)),
+            (Some(d), true, false) => Some(Data::Binary(parse_data_base64(d)?)),
             (None, _, _) => None,
         })
     }

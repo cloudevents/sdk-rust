@@ -48,33 +48,23 @@ macro_rules! extract_field {
     };
 }
 
-macro_rules! parse_data_json {
-    ($in:ident, $error:ty) => {
-        serde_json::Value::deserialize($in.into_deserializer()).map_err(<$error>::custom)
-    };
+pub fn parse_data_json<E: serde::de::Error>(v: Value) -> Result<Value, E> {
+    Value::deserialize(v.into_deserializer()).map_err(E::custom)
 }
 
-macro_rules! parse_data_string {
-    ($in:ident, $error:ty) => {
-        parse_field!($in, String, $error)
-    };
+pub fn parse_data_string<E: serde::de::Error>(v: Value) -> Result<String, E> {
+    parse_field!(v, String, E)
 }
 
-macro_rules! parse_json_data_base64 {
-    ($in:ident, $error:ty) => {{
-        let data = parse_data_base64!($in, $error)?;
-        serde_json::from_slice(&data).map_err(<$error>::custom)
-    }};
+pub fn parse_data_base64<E: serde::de::Error>(v: Value) -> Result<Vec<u8>, E> {
+    parse_field!(v, String, E).and_then(|s| {
+        base64::decode(&s).map_err(|e| E::custom(format_args!("decode error `{}`", e)))
+    })
 }
 
-macro_rules! parse_data_base64 {
-    ($in:ident, $error:ty) => {
-        parse_field!($in, String, $error).and_then(|s| {
-            base64::decode(&s).map_err(|e| {
-                <$error>::invalid_value(serde::de::Unexpected::Str(&s), &e.to_string().as_str())
-            })
-        })
-    };
+pub fn parse_data_base64_json<E: serde::de::Error>(v: Value) -> Result<Value, E> {
+    let data = parse_data_base64(v)?;
+    serde_json::from_slice(&data).map_err(E::custom)
 }
 
 pub(crate) trait EventFormatDeserializer {

@@ -1,5 +1,8 @@
 use super::Attributes;
 use crate::event::data::is_json_content_type;
+use crate::event::format::{
+    parse_data_base64, parse_data_base64_json, parse_data_json, parse_data_string,
+};
 use crate::event::{Data, ExtensionValue};
 use chrono::{DateTime, Utc};
 use serde::de::IntoDeserializer;
@@ -40,16 +43,13 @@ impl crate::event::format::EventFormatDeserializer for EventFormatDeserializer {
         let is_json = is_json_content_type(content_type);
 
         Ok(match (data, data_base64, is_json) {
-            (Some(d), None, true) => Some(Data::Json(parse_data_json!(d, E)?)),
-            (Some(d), None, false) => Some(Data::String(parse_data_string!(d, E)?)),
-            (None, Some(d), true) => {
-                let dc = d.to_owned();
-                match parse_json_data_base64!(dc, E) {
-                    Ok(x) => Some(Data::Json(x)),
-                    Err(_) => Some(Data::Binary(parse_data_base64!(d, E)?)),
-                }
-            }
-            (None, Some(d), false) => Some(Data::Binary(parse_data_base64!(d, E)?)),
+            (Some(d), None, true) => Some(Data::Json(parse_data_json(d)?)),
+            (Some(d), None, false) => Some(Data::String(parse_data_string(d)?)),
+            (None, Some(d), true) => match parse_data_base64_json::<E>(d.to_owned()) {
+                Ok(x) => Some(Data::Json(x)),
+                Err(_) => Some(Data::Binary(parse_data_base64(d)?)),
+            },
+            (None, Some(d), false) => Some(Data::Binary(parse_data_base64(d)?)),
             (Some(_), Some(_), _) => {
                 return Err(E::custom("Cannot have both data and data_base64 field"))
             }

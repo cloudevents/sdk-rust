@@ -1,0 +1,15 @@
+[package]
+name = "poem-example"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+cloudevents-sdk = { path = "../..", features = ["poem"] }
+tokio = { version = "1.13", features = ["macros", "rt-multi-thread"] }
+tracing = "0.1"
+poem = { version = "1.0.23" }
+tracing-subscriber = "0.2"
+
+[dev-dependencies]
+chrono = { version = "0.4", features = ["serde"] }
+serde_json = "1.0"

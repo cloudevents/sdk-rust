@@ -8,6 +8,7 @@ use warp::Filter;
 use warp::Rejection;
 
 #[derive(Debug)]
+#[allow(dead_code)]
 pub struct EventFilterError {
     error: crate::message::Error,
 }

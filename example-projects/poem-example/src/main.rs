@@ -1,22 +1,41 @@
-use cloudevents::Event;
+use cloudevents::{Event, EventBuilder, EventBuilderV10};
+use poem::error::InternalServerError;
 use poem::listener::TcpListener;
 use poem::middleware::Tracing;
-use poem::{get, handler, Endpoint, EndpointExt, Response, Route, Server};
+use poem::{get, handler, Endpoint, EndpointExt, Response, Result, Route, Server};
+use serde_json::json;
 
 #[handler]
-async fn index_get() -> &'static str {
-    "hello from cloudevents server"
+async fn get_event() -> Result<Event> {
+    let event = EventBuilderV10::new()
+        .id("1")
+        .source("url://example_response/")
+        .ty("example.ce")
+        .data(
+            "application/json",
+            json!({
+                "name": "John Doe",
+                "age": 43,
+                "phones": [
+                    "+44 1234567",
+                    "+44 2345678"
+                ]
+            }),
+        )
+        .build()
+        .map_err(InternalServerError)?;
+    Ok(event)
 }
 
 #[handler]
-async fn index_post(event: Event) -> Event {
+async fn post_event(event: Event) -> Event {
     tracing::debug!("received cloudevent {}", &event);
     event
 }
 
 fn echo_app() -> impl Endpoint<Output = Response> {
     Route::new()
-        .at("/", get(index_get).post(index_post))
+        .at("/", get(get_event).post(post_event))
         .with(Tracing)
 }
 

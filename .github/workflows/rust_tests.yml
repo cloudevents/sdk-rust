@@ -137,3 +137,12 @@ jobs:
         command: build
         toolchain: ${{ matrix.toolchain }}
         args: --target ${{ matrix.target }} --manifest-path ./example-projects/axum-example/Cargo.toml
+
+    - uses: actions-rs/cargo@v1
+      name: "Build poem-example"
+      if: matrix.target == 'x86_64-unknown-linux-gnu' && matrix.toolchain == 'stable'
+      with:
+        command: build
+        toolchain: ${{ matrix.toolchain }}
+        args: --target ${{ matrix.target }} --manifest-path ./example-projects/poem-example/Cargo.toml
+

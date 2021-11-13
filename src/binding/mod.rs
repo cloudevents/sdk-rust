@@ -9,9 +9,12 @@ pub mod axum;
     feature = "actix",
     feature = "warp",
     feature = "reqwest",
-    feature = "axum"
+    feature = "axum",
+    feature = "poem"
 ))]
 pub mod http;
+#[cfg(feature = "poem")]
+pub mod poem;
 #[cfg(feature = "rdkafka")]
 pub mod rdkafka;
 #[cfg(feature = "reqwest")]

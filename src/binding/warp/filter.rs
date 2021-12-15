@@ -45,12 +45,11 @@ async fn create_event(headers: HeaderMap, body: bytes::Bytes) -> Result<Event, R
 
 #[cfg(test)]
 mod tests {
-    use warp_lib as warp;
-
     use super::to_event;
-    use warp::test;
-
     use crate::test::fixtures;
+    use std::convert::TryInto;
+    use warp::test;
+    use warp_lib as warp;
 
     #[tokio::test]
     async fn test_request() {
@@ -113,6 +112,12 @@ mod tests {
             .filter(&to_event())
             .await
             .unwrap();
+
+        let mut event = result.clone();
+        let (_datacontenttype, _dataschema, data) = event.take_data();
+        let actual_payload: Vec<u8> = data.unwrap().try_into().unwrap();
+        let expected_payload: Vec<u8> = serde_json::to_vec(&fixtures::json_data()).unwrap();
+        assert_eq!(expected_payload, actual_payload);
 
         assert_eq!(expected, result);
     }

@@ -60,7 +60,7 @@ impl TryFrom<Data> for Vec<u8> {
 
     fn try_from(value: Data) -> Result<Self, Self::Error> {
         match value {
-            Data::Binary(v) => Ok(serde_json::from_slice(&v)?),
+            Data::Binary(v) => Ok(v),
             Data::Json(v) => Ok(serde_json::to_vec(&v)?),
             Data::String(s) => Ok(s.into_bytes()),
         }

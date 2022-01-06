@@ -46,7 +46,7 @@ async fn main() -> Result<(), std::io::Error> {
     }
     tracing_subscriber::fmt::init();
 
-    let server = Server::new(TcpListener::bind("127.0.0.1:8080")).await?;
+    let server = Server::new(TcpListener::bind("127.0.0.1:8080"));
     server.run(echo_app()).await
 }
 
@@ -79,7 +79,7 @@ mod tests {
             .header("content-type", "application/json")
             .body(Body::from_json(&j).unwrap());
 
-        let resp: Response = app.call(request).await;
+        let resp: Response = app.call(request).await.unwrap();
         assert_eq!(
             resp.headers()
                 .get("ce-specversion")

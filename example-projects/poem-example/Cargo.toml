@@ -7,7 +7,7 @@ edition = "2021"
 cloudevents-sdk = { path = "../..", features = ["poem"] }
 tokio = { version = "1.13", features = ["macros", "rt-multi-thread"] }
 tracing = "0.1"
-poem = { version = "=1.0.23" }
+poem = { version = "1" }
 tracing-subscriber = "0.2"
 serde_json = "1.0"
 

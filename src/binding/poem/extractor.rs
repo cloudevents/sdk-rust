@@ -1,43 +1,20 @@
 use async_trait::async_trait;
-use poem_lib::error::ReadBodyError;
+use poem_lib::error::ResponseError;
 use poem_lib::http::StatusCode;
-use poem_lib::{FromRequest, IntoResponse, Request, RequestBody, Response};
+use poem_lib::{FromRequest, Request, RequestBody, Result};
 
 use crate::binding::http::to_event;
 use crate::Event;
 
-#[derive(Debug)]
-pub enum ParseEventError {
-    ReadBody(ReadBodyError),
-    ParseEvent(crate::message::Error),
-}
-
-impl From<ReadBodyError> for ParseEventError {
-    fn from(err: ReadBodyError) -> Self {
-        ParseEventError::ReadBody(err)
-    }
-}
-
-impl From<crate::message::Error> for ParseEventError {
-    fn from(err: crate::message::Error) -> Self {
-        ParseEventError::ParseEvent(err)
-    }
-}
-
-impl IntoResponse for ParseEventError {
-    fn into_response(self) -> Response {
-        match self {
-            ParseEventError::ReadBody(err) => err.into_response(),
-            ParseEventError::ParseEvent(err) => (StatusCode::BAD_REQUEST, err.to_string()).into(),
-        }
+impl ResponseError for crate::message::Error {
+    fn status(&self) -> StatusCode {
+        StatusCode::BAD_REQUEST
     }
 }
 
 #[async_trait]
 impl<'a> FromRequest<'a> for Event {
-    type Error = ParseEventError;
-
-    async fn from_request(req: &'a Request, body: &mut RequestBody) -> Result<Self, Self::Error> {
+    async fn from_request(req: &'a Request, body: &mut RequestBody) -> Result<Self> {
         Ok(to_event(req.headers(), body.take()?.into_vec().await?)?)
     }
 }
@@ -79,12 +56,9 @@ mod tests {
             .finish();
 
         let (req, mut body) = req.split();
-        let resp = Event::from_request(&req, &mut body).await.into_response();
+        let resp = Event::from_request(&req, &mut body).await.err().unwrap();
         assert_eq!(resp.status(), StatusCode::BAD_REQUEST);
-        assert_eq!(
-            resp.into_body().into_string().await.unwrap(),
-            "Invalid specversion BAD SPECIFICATION"
-        );
+        assert_eq!(resp.to_string(), "Invalid specversion BAD SPECIFICATION");
     }
 
     #[tokio::test]

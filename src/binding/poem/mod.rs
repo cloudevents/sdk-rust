@@ -55,5 +55,3 @@
 
 mod extractor;
 mod response;
-
-pub use extractor::ParseEventError;

@@ -1,14 +1,14 @@
 use crate::binding::http::{to_event, Headers};
 use crate::Event;
+use actix_web::dev::Payload;
 use actix_web::web::BytesMut;
 use actix_web::{web, HttpRequest};
 use async_trait::async_trait;
-use futures::future::LocalBoxFuture;
-use futures::{FutureExt, StreamExt};
+use futures::{future::LocalBoxFuture, FutureExt, StreamExt};
 use http::header::{AsHeaderName, HeaderName, HeaderValue};
 
 /// Implement Headers for the actix HeaderMap
-impl<'a> Headers<'a> for actix_web::http::HeaderMap {
+impl<'a> Headers<'a> for actix_http::header::HeaderMap {
     type Iterator = Box<dyn Iterator<Item = (&'a HeaderName, &'a HeaderValue)> + 'a>;
     fn get<K: AsHeaderName>(&self, key: K) -> Option<&HeaderValue> {
         self.get(key.as_str())
@@ -32,14 +32,18 @@ pub async fn request_to_event(
 
 /// So that an actix-web handler may take an Event parameter
 impl actix_web::FromRequest for Event {
-    type Config = ();
     type Error = actix_web::Error;
     type Future = LocalBoxFuture<'static, std::result::Result<Self, Self::Error>>;
 
-    fn from_request(r: &HttpRequest, p: &mut actix_web::dev::Payload) -> Self::Future {
-        let payload = web::Payload(p.take());
+    fn from_request(r: &HttpRequest, p: &mut Payload) -> Self::Future {
         let request = r.to_owned();
-        async move { request_to_event(&request, payload).await }.boxed_local()
+        bytes::Bytes::from_request(&request, p)
+            .map(move |bytes| match bytes {
+                Ok(b) => to_event(request.headers(), b.to_vec())
+                    .map_err(actix_web::error::ErrorBadRequest),
+                Err(e) => Err(e),
+            })
+            .boxed_local()
     }
 }
 
@@ -74,10 +78,18 @@ mod private {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use actix_web::test;
+    use actix_web::{test, FromRequest};
 
     use crate::test::fixtures;
     use serde_json::json;
+
+    async fn to_event(req: &HttpRequest, mut payload: Payload) -> Event {
+        web::Payload::from_request(&req, &mut payload)
+            .then(|p| req.to_event(p.unwrap()))
+            .await
+            .unwrap()
+    }
+
     #[actix_rt::test]
     async fn test_request() {
         let expected = fixtures::v10::minimal_string_extension();
@@ -90,8 +102,7 @@ mod tests {
             .insert_header(("ce-someint", "10"))
             .to_http_parts();
 
-        let resp = req.to_event(web::Payload(payload)).await.unwrap();
-        assert_eq!(expected, resp);
+        assert_eq!(expected, to_event(&req, payload).await);
     }
 
     #[actix_rt::test]
@@ -112,8 +123,7 @@ mod tests {
             .set_json(&fixtures::json_data())
             .to_http_parts();
 
-        let resp = req.to_event(web::Payload(payload)).await.unwrap();
-        assert_eq!(expected, resp);
+        assert_eq!(expected, to_event(&req, payload).await);
     }
 
     #[actix_rt::test]
@@ -140,7 +150,6 @@ mod tests {
             .set_payload(bytes)
             .to_http_parts();
 
-        let resp = req.to_event(web::Payload(payload)).await.unwrap();
-        assert_eq!(expected, resp);
+        assert_eq!(expected, to_event(&req, payload).await);
     }
 }

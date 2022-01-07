@@ -27,6 +27,7 @@ pub fn event_to_response<T: Builder<HttpResponse> + 'static>(
 
 /// So that an actix-web handler may return an Event
 impl actix_web::Responder for Event {
+    type Body = actix_web::body::BoxBody;
     fn respond_to(self, _: &HttpRequest) -> HttpResponse {
         HttpResponse::build(StatusCode::OK).event(self).unwrap()
     }
@@ -135,10 +136,7 @@ mod tests {
             "10"
         );
 
-        // let bytes = test::load_stream(resp.take_body().into_stream())
-        //     .await
-        //     .unwrap();
-        let bytes = test::load_body(resp.into_body()).await.unwrap();
-        assert_eq!(fixtures::json_data_binary(), bytes.as_ref())
+        let sr = test::TestRequest::default().to_srv_response(resp);
+        assert_eq!(fixtures::json_data_binary(), test::read_body(sr).await);
     }
 }

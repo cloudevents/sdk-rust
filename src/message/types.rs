@@ -47,8 +47,8 @@ impl fmt::Display for MessageAttributeValue {
             MessageAttributeValue::Integer(i) => write!(f, "{}", i),
             MessageAttributeValue::String(s) => write!(f, "{}", s),
             MessageAttributeValue::Binary(v) => write!(f, "{}", base64::encode(v)),
-            MessageAttributeValue::Uri(u) => write!(f, "{}", u.to_string()),
-            MessageAttributeValue::UriRef(u) => write!(f, "{}", u.to_string()),
+            MessageAttributeValue::Uri(u) => write!(f, "{}", u),
+            MessageAttributeValue::UriRef(u) => write!(f, "{}", u),
             MessageAttributeValue::DateTime(d) => write!(f, "{}", d.to_rfc3339()),
         }
     }

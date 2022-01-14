@@ -47,7 +47,7 @@ http = { version = "0.2", optional = true }
 hyper = { version = "^0.14", optional = true }
 axum-lib = { version = "^0.2", optional = true, package = "axum" }
 http-body = { version = "^0.4", optional = true }
-poem-lib = { version = "1", optional = true, package = "poem" }
+poem-lib = { version = "=1.2.34", optional = true, package = "poem" }
 
 [target."cfg(not(target_arch = \"wasm32\"))".dependencies]
 hostname = "^0.3"

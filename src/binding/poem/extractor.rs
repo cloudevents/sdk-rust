@@ -57,7 +57,7 @@ mod tests {
 
         let (req, mut body) = req.split();
         let resp = Event::from_request(&req, &mut body).await.err().unwrap();
-        assert_eq!(resp.status(), StatusCode::BAD_REQUEST);
+        assert_eq!(resp.as_response().status(), StatusCode::BAD_REQUEST);
         assert_eq!(resp.to_string(), "Invalid specversion BAD SPECIFICATION");
     }
 

@@ -8,14 +8,13 @@
 //! ```
 //! use axum_lib as axum;
 //! use axum::{
-//!     handler::{get, post},
-//!     routing::BoxRoute,
+//!     routing::{get, post},
 //!     Router,
 //! };
 //! use cloudevents::Event;
 //! use http::StatusCode;
 //!
-//! fn app() -> Router<BoxRoute> {
+//! fn app() -> Router {
 //!     Router::new()
 //!         .route("/", get(|| async { "hello from cloudevents server" }))
 //!         .route(
@@ -25,7 +24,6 @@
 //!                 (StatusCode::OK, event)
 //!             }),
 //!         )
-//!         .boxed()
 //! }
 //!
 //! ```
@@ -35,15 +33,14 @@
 //! ```
 //! use axum_lib as axum;
 //! use axum::{
-//!     handler::{get, post},
-//!     routing::BoxRoute,
+//!     routing::{get, post},
 //!     Router,
 //! };
 //! use cloudevents::{Event, EventBuilder, EventBuilderV10};
 //! use http::StatusCode;
 //! use serde_json::json;
 //!
-//! fn app() -> Router<BoxRoute> {
+//! fn app() -> Router {
 //!     Router::new()
 //!         .route("/", get(|| async { "hello from cloudevents server" }))
 //!         .route(
@@ -70,7 +67,6 @@
 //!                 Ok::<Event, (StatusCode, String)>(event)
 //!             }),
 //!         )
-//!         .boxed()
 //! }
 //!
 //! ```
@@ -85,9 +81,8 @@ mod tests {
 
     use axum::{
         body::Body,
-        handler::{get, post},
         http::{self, Request, StatusCode},
-        routing::BoxRoute,
+        routing::{get, post},
         Router,
     };
     use chrono::Utc;
@@ -96,7 +91,7 @@ mod tests {
 
     use crate::Event;
 
-    fn echo_app() -> Router<BoxRoute> {
+    fn echo_app() -> Router {
         Router::new()
             .route("/", get(|| async { "hello from cloudevents server" }))
             .route(
@@ -106,7 +101,6 @@ mod tests {
                     (StatusCode::OK, event)
                 }),
             )
-            .boxed()
     }
 
     #[tokio::test]

@@ -36,8 +36,8 @@ snafu = "^0.6"
 bitflags = "^1.2"
 
 # runtime optional deps
-actix-web = { version = "=4.0.0-beta.20", default-features = false, optional = true }
-actix-http = { version = "=3.0.0-beta.18", default-features = false, optional = true }
+actix-web = { version = "=4.0.0-beta.21", default-features = false, optional = true }
+actix-http = { version = "=3.0.0-beta.19", default-features = false, optional = true }
 reqwest-lib = { version = "^0.11", default-features = false, features = ["rustls-tls"], optional = true, package = "reqwest" }
 rdkafka-lib = { version = "^0.28", features = ["cmake-build"], optional = true, package = "rdkafka" }
 warp-lib = { version = "^0.3", optional = true, package = "warp" }

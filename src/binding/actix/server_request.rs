@@ -1,14 +1,14 @@
 use crate::binding::http::{to_event, Headers};
 use crate::Event;
+use actix_web::dev::Payload;
 use actix_web::web::BytesMut;
 use actix_web::{web, HttpRequest};
 use async_trait::async_trait;
-use futures::future::LocalBoxFuture;
-use futures::{FutureExt, StreamExt};
+use futures::{future::LocalBoxFuture, FutureExt, StreamExt};
 use http::header::{AsHeaderName, HeaderName, HeaderValue};
 
 /// Implement Headers for the actix HeaderMap
-impl<'a> Headers<'a> for actix_web::http::HeaderMap {
+impl<'a> Headers<'a> for actix_http::header::HeaderMap {
     type Iterator = Box<dyn Iterator<Item = (&'a HeaderName, &'a HeaderValue)> + 'a>;
     fn get<K: AsHeaderName>(&self, key: K) -> Option<&HeaderValue> {
         self.get(key.as_str())
@@ -32,14 +32,18 @@ pub async fn request_to_event(
 
 /// So that an actix-web handler may take an Event parameter
 impl actix_web::FromRequest for Event {
-    type Config = ();
     type Error = actix_web::Error;
     type Future = LocalBoxFuture<'static, std::result::Result<Self, Self::Error>>;
 
-    fn from_request(r: &HttpRequest, p: &mut actix_web::dev::Payload) -> Self::Future {
-        let payload = web::Payload(p.take());
+    fn from_request(r: &HttpRequest, p: &mut Payload) -> Self::Future {
         let request = r.to_owned();
-        async move { request_to_event(&request, payload).await }.boxed_local()
+        bytes::Bytes::from_request(&request, p)
+            .map(move |bytes| match bytes {
+                Ok(b) => to_event(request.headers(), b.to_vec())
+                    .map_err(actix_web::error::ErrorBadRequest),
+                Err(e) => Err(e),
+            })
+            .boxed_local()
     }
 }
 
@@ -74,24 +78,31 @@ mod private {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use actix_web::test;
+    use actix_web::{test, FromRequest};
 
     use crate::test::fixtures;
     use serde_json::json;
+
+    async fn to_event(req: &HttpRequest, mut payload: Payload) -> Event {
+        web::Payload::from_request(&req, &mut payload)
+            .then(|p| req.to_event(p.unwrap()))
+            .await
+            .unwrap()
+    }
+
     #[actix_rt::test]
     async fn test_request() {
         let expected = fixtures::v10::minimal_string_extension();
 
         let (req, payload) = test::TestRequest::post()
-            .header("ce-specversion", "1.0")
-            .header("ce-id", "0001")
-            .header("ce-type", "test_event.test_application")
-            .header("ce-source", "http://localhost/")
-            .header("ce-someint", "10")
+            .insert_header(("ce-specversion", "1.0"))
+            .insert_header(("ce-id", "0001"))
+            .insert_header(("ce-type", "test_event.test_application"))
+            .insert_header(("ce-source", "http://localhost/"))
+            .insert_header(("ce-someint", "10"))
             .to_http_parts();
 
-        let resp = req.to_event(web::Payload(payload)).await.unwrap();
-        assert_eq!(expected, resp);
+        assert_eq!(expected, to_event(&req, payload).await);
     }
 
     #[actix_rt::test]
@@ -99,21 +110,20 @@ mod tests {
         let expected = fixtures::v10::full_binary_json_data_string_extension();
 
         let (req, payload) = test::TestRequest::post()
-            .header("ce-specversion", "1.0")
-            .header("ce-id", "0001")
-            .header("ce-type", "test_event.test_application")
-            .header("ce-subject", "cloudevents-sdk")
-            .header("ce-source", "http://localhost/")
-            .header("ce-time", fixtures::time().to_rfc3339())
-            .header("ce-string_ex", "val")
-            .header("ce-int_ex", "10")
-            .header("ce-bool_ex", "true")
-            .header("content-type", "application/json")
+            .insert_header(("ce-specversion", "1.0"))
+            .insert_header(("ce-id", "0001"))
+            .insert_header(("ce-type", "test_event.test_application"))
+            .insert_header(("ce-subject", "cloudevents-sdk"))
+            .insert_header(("ce-source", "http://localhost/"))
+            .insert_header(("ce-time", fixtures::time().to_rfc3339()))
+            .insert_header(("ce-string_ex", "val"))
+            .insert_header(("ce-int_ex", "10"))
+            .insert_header(("ce-bool_ex", "true"))
+            .insert_header(("content-type", "application/json"))
             .set_json(&fixtures::json_data())
             .to_http_parts();
 
-        let resp = req.to_event(web::Payload(payload)).await.unwrap();
-        assert_eq!(expected, resp);
+        assert_eq!(expected, to_event(&req, payload).await);
     }
 
     #[actix_rt::test]
@@ -136,11 +146,10 @@ mod tests {
         let expected = fixtures::v10::full_json_data_string_extension();
 
         let (req, payload) = test::TestRequest::post()
-            .header("content-type", "application/cloudevents+json")
+            .insert_header(("content-type", "application/cloudevents+json"))
             .set_payload(bytes)
             .to_http_parts();
 
-        let resp = req.to_event(web::Payload(payload)).await.unwrap();
-        assert_eq!(expected, resp);
+        assert_eq!(expected, to_event(&req, payload).await);
     }
 }

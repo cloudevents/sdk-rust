@@ -21,22 +21,17 @@ where
     type Rejection = (StatusCode, String);
 
     async fn from_request(req: &mut RequestParts<B>) -> Result<Self, Self::Rejection> {
-        let headers = req.headers().cloned().ok_or(0).map_err(|_| {
-            (
-                StatusCode::BAD_REQUEST,
-                "unexpected empty headers".to_string(),
-            )
-        })?;
-
         let req_body = req
             .take_body()
             .ok_or(0)
             .map_err(|_| (StatusCode::BAD_REQUEST, "unexpected empty body".to_string()))?;
-
         let buf = body::to_bytes(req_body)
             .await
-            .map_err(|e| (StatusCode::BAD_REQUEST, format!("{}", e.into())))?;
-        to_event(&headers, buf.to_vec()).map_err(|e| (StatusCode::BAD_REQUEST, format!("{}", e)))
+            .map_err(|e| (StatusCode::BAD_REQUEST, format!("{}", e.into())))?
+            .to_vec();
+        let headers = req.headers();
+
+        to_event(headers, buf).map_err(|e| (StatusCode::BAD_REQUEST, format!("{}", e)))
     }
 }
 

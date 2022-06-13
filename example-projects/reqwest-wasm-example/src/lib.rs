@@ -11,7 +11,7 @@ pub async fn run(
     data: String,
 ) -> Result<(), JsValue> {
     let event = EventBuilderV10::new()
-        .id(&Uuid::new_v4().to_hyphenated().to_string())
+        .id(&Uuid::new_v4().hyphenated().to_string())
         .ty(ty)
         .source("http://localhost/")
         .data(datacontenttype, data)

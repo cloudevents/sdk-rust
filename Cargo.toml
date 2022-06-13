@@ -19,7 +19,7 @@ name = "cloudevents"
 [features]
 http-binding = ["async-trait", "bytes", "futures", "http"]
 actix = ["actix-web", "actix-http", "async-trait", "bytes", "futures", "http"]
-reqwest = ["reqwest-lib", "async-trait", "bytes", "http"]
+reqwest = ["reqwest-lib", "async-trait", "bytes", "http", "uuid/js"]
 rdkafka = ["rdkafka-lib", "bytes", "futures"]
 warp = ["warp-lib", "bytes", "http", "hyper"]
 axum = ["bytes", "http", "hyper", "axum-lib", "http-body", "async-trait"]
@@ -35,6 +35,7 @@ url = { version = "^2.1", features = ["serde"] }
 snafu = "^0.6"
 bitflags = "^1.2"
 uuid = { version = "1", features = ["v4"] }
+
 # runtime optional deps
 actix-web = { version = "4", optional = true }
 actix-http = { version = "3", optional = true }

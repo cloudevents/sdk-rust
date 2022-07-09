@@ -21,6 +21,8 @@ pub mod rdkafka;
 pub mod reqwest;
 #[cfg(feature = "warp")]
 pub mod warp;
+#[cfg(feature = "nats")]
+pub mod nats;
 
 #[cfg(feature = "rdkafka")]
 pub(crate) mod kafka {

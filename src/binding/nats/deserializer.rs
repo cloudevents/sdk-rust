@@ -16,7 +16,7 @@ impl StructuredDeserializer for nats::Message {
 
 /// Trait implemented by [`nats::Message`] to enable convenient deserialization to [`Event`]
 ///
-/// Trait sealed https://rust-lang.github.io/api-guidelines/future-proofing.html#sealed-traits-protect-against-downstream-implementations-c-sealed
+/// Trait sealed <https://rust-lang.github.io/api-guidelines/future-proofing.html#sealed-traits-protect-against-downstream-implementations-c-sealed>
 pub trait MessageExt: private::Sealed {
     fn to_event(&self) -> Result<Event>;
 }

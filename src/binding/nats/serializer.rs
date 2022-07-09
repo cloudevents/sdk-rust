@@ -5,7 +5,7 @@ use crate::{
 
 /// Helper struct containing text data bytes of JSON serialized [Event]
 ///
-/// Implements [`AsRef`] so it can be directly passed to [`nats::Connection`] methods as payload.
+/// Implements [`AsRef`] so it can be directly passed to [`nats::Connection`](https://docs.rs/nats/latest/nats/struct.Connection.html) methods as payload.
 pub struct NatsCloudEvent {
     pub payload: Vec<u8>,
 }

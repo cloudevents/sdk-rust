@@ -1,5 +1,5 @@
 //! This module provides bindings between [cloudevents-sdk](https://docs.rs/cloudevents-sdk) and [nats](https://docs.rs/nats)
-//! 
+//!
 //! Deserialize [nats::Message] into [Event]
 //! ```rust
 //!     let nc = nats::connect("localhost:4222").unwrap();
@@ -8,11 +8,11 @@
 //!     let cloud_event = nats_message.to_event().unwrap();
 //!     println!("{}", evt.to_string());
 //! ```
-//! 
+//!
 //! Serialize [Event] into [NatsCloudEvent] and publish to nats subject
 //! ```rust
 //!     let nc = nats::connect("localhost:4222").unwrap();
-//! 
+//!
 //!     let event = EventBuilderV10::new()
 //!         .id("123".to_string())
 //!         .ty("example.test")
@@ -20,11 +20,11 @@
 //!         .data("application/json", json!({"hello": "world"}))
 //!         .build()
 //!         .unwrap();
-//! 
+//!
 //!     nc.publish("whatever.subject.you.like", NatsCloudEvent::from_event(event).unwrap());
 //! ```
-mod serializer;
 mod deserializer;
+mod serializer;
 
+pub use deserializer::MessageExt;
 pub use serializer::NatsCloudEvent;
-pub use deserializer::{MessageExt};

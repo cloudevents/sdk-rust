@@ -13,6 +13,8 @@ pub mod axum;
     feature = "poem"
 ))]
 pub mod http;
+#[cfg(feature = "nats")]
+pub mod nats;
 #[cfg(feature = "poem")]
 pub mod poem;
 #[cfg(feature = "rdkafka")]
@@ -21,8 +23,6 @@ pub mod rdkafka;
 pub mod reqwest;
 #[cfg(feature = "warp")]
 pub mod warp;
-#[cfg(feature = "nats")]
-pub mod nats;
 
 #[cfg(feature = "rdkafka")]
 pub(crate) mod kafka {

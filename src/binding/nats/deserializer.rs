@@ -1,6 +1,5 @@
-
 use crate::{
-    message::{Result, StructuredDeserializer },
+    message::{Result, StructuredDeserializer},
     Event,
 };
 

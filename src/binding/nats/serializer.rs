@@ -1,5 +1,5 @@
 use crate::{
-    message::{Result, Error},
+    message::{Error, Result},
     Event,
 };
 
@@ -20,8 +20,7 @@ impl NatsCloudEvent {
     pub fn from_event(event: Event) -> Result<Self> {
         match serde_json::to_vec(&event) {
             Ok(payload) => Ok(Self { payload }),
-            Err(e) => Err(Error::SerdeJsonError { source: e })
+            Err(e) => Err(Error::SerdeJsonError { source: e }),
         }
     }
 }
-

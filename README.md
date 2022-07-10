@@ -15,7 +15,7 @@ Note: This project is WIP under active development, hence all APIs are considere
 | JSON Event Format             | ✓ | ✓ |
 | Kafka Protocol Binding        | ✓ | ✓ |
 | MQTT Protocol Binding         | ✕ | ✕ |
-| NATS Protocol Binding         | ✕ | ✕ |
+| NATS Protocol Binding         | ✓ | ✓ |
 | Web hook                      | ✕ | ✕ |
 
 ## Crate Structure
@@ -30,6 +30,7 @@ enabled by a specific [feature flag]:
 * `warp`: Integration with [warp](https://github.com/seanmonstar/warp/).
 * `reqwest`: Integration with [reqwest](https://github.com/seanmonstar/reqwest).
 * `rdkafka`: Integration with [rdkafka](https://fede1024.github.io/rust-rdkafka).
+* `nats`: Integration with [nats](https://github.com/nats-io/nats.rs)
 
 This crate is continuously tested to work with GNU libc, WASM and musl
 toolchains.
@@ -64,6 +65,7 @@ Checkout the examples using our integrations to learn how to send and receive ev
 * [Reqwest/WASM Example](example-projects/reqwest-wasm-example)
 * [Kafka Example](example-projects/rdkafka-example)
 * [Warp Example](example-projects/warp-example)
+* [NATS Example](example-projects/nats-example)
 
 ## Development & Contributing
 

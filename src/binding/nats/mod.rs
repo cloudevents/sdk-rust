@@ -1,6 +1,6 @@
 //! This module provides bindings between [cloudevents-sdk](https://docs.rs/cloudevents-sdk) and [nats](https://docs.rs/nats)
 //! ## Examples
-//! Deserialize [nats::Message](https://docs.rs/nats/latest/nats/struct.Message.html) into [Event](https://docs.rs/cloudevents-sdk/latest/cloudevents/event/struct.Event.html)
+//! Deserialize [nats::Message](https://docs.rs/nats/0.21.0/nats/struct.Message.html) into [Event](https://docs.rs/cloudevents-sdk/latest/cloudevents/event/struct.Event.html)
 //! ```
 //!     use nats_lib as nats;
 //!     use cloudevents::binding::nats::MessageExt;
@@ -16,7 +16,7 @@
 //! ```
 //!
 //! Serialize [Event](https://docs.rs/cloudevents-sdk/latest/cloudevents/event/struct.Event.html) into [NatsCloudEvent] and publish to nats subject
-//! ```rust
+//! ```
 //!     use nats_lib as nats;
 //!     use cloudevents::binding::nats::NatsCloudEvent;
 //!     use cloudevents::{EventBuilder, EventBuilderV10, Event};

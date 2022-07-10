@@ -44,8 +44,24 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_structured_deserialize() {
+    fn test_structured_deserialize_v10() {
         let expected = fixtures::v10::full_json_data_string_extension();
+
+        let nats_message = nats::Message::new(
+            "not_relevant",
+            None,
+            json!(expected.clone()).to_string().as_bytes().to_vec(),
+            None,
+        );
+
+        let actual = nats_message.to_event().unwrap();
+
+        assert_eq!(expected, actual)
+    }
+
+    #[test]
+    fn test_structured_deserialize_v03() {
+        let expected = fixtures::v03::full_json_data();
 
         let nats_message = nats::Message::new(
             "not_relevant",

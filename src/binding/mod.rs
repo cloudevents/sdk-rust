@@ -13,6 +13,8 @@ pub mod axum;
     feature = "poem"
 ))]
 pub mod http;
+#[cfg(feature = "nats")]
+pub mod nats;
 #[cfg(feature = "poem")]
 pub mod poem;
 #[cfg(feature = "rdkafka")]

@@ -25,7 +25,7 @@ warp = ["warp-lib", "bytes", "http", "hyper"]
 axum = ["bytes", "http", "hyper", "axum-lib", "http-body", "async-trait"]
 poem = ["bytes", "http", "poem-lib", "hyper", "async-trait"]
 nats = ["nats-lib"]
-fe2o3-amqp = ["fe2o3-amqp-lib"]
+fe2o3-amqp = ["fe2o3-amqp-lib", "fe2o3-amqp-types"]
 
 [dependencies]
 serde = { version = "^1.0", features = ["derive"] }
@@ -54,6 +54,7 @@ http-body = { version = "^0.4", optional = true }
 poem-lib = { version = "=1.2.34", optional = true, package = "poem" }
 nats-lib = { version = "0.21.0", optional = true, package = "nats" }
 fe2o3-amqp-lib = { version = "0.4.0", optional = true, package = "fe2o3-amqp" }
+fe2o3-amqp-types = { version = "0.3.3", optional = true }
 
 [target."cfg(not(target_arch = \"wasm32\"))".dependencies]
 hostname = "^0.3"

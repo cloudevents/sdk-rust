@@ -1,5 +1,6 @@
 //! Implements AMQP 1.0 binding for CloudEvents
 
+use std::collections::HashMap;
 use std::convert::TryFrom;
 
 use fe2o3_amqp_lib::types::messaging::{
@@ -7,9 +8,13 @@ use fe2o3_amqp_lib::types::messaging::{
 };
 use fe2o3_amqp_lib::types::primitives::{Binary, SimpleValue, Symbol, Timestamp, Value};
 
-use crate::event::{AttributeValue, Attributes};
+use crate::event::{AttributeValue, Attributes, ExtensionValue};
 use crate::message::{Error, MessageAttributeValue};
-use crate::{Event};
+use crate::{Event, AttributesReader, Data};
+
+use self::extensions::ExtensionsHandler;
+
+pub mod extensions;
 
 /// Type alias for an AMQP 1.0 message
 ///
@@ -20,19 +25,36 @@ pub type AmqpMessage = Message<Value>;
 
 pub type AmqpBody = Body<Value>;
 
+pub type Extensions = HashMap<String, ExtensionValue>;
+
 pub struct AmqpCloudEvent {
-    properties: Properties,
+    content_type: Option<Symbol>,
     application_properties: ApplicationProperties,
     body: AmqpBody,
 }
 
+impl AmqpCloudEvent {
+    pub fn with_extensions_handler<F>(handler: F) -> ExtensionsHandler<F>
+    where
+        F: FnOnce(Extensions) -> AmqpMessage
+    {
+        ExtensionsHandler::new(handler)
+    }
+
+    pub fn from_event(event: Event) -> Result<Self, Error> {
+        Self::try_from(event)
+    }
+}
+
 impl From<AmqpCloudEvent> for AmqpMessage {
     fn from(event: AmqpCloudEvent) -> Self {
+        let mut properties = Properties::default();
+        properties.content_type = event.content_type;
         Message {
             header: None,
             delivery_annotations: None,
             message_annotations: None,
-            properties: Some(event.properties),
+            properties: Some(properties),
             application_properties: Some(event.application_properties),
             body: event.body,
             footer: None,
@@ -48,12 +70,13 @@ impl TryFrom<AmqpMessage> for AmqpCloudEvent {
             Body::Data(data) => Body::Data(data),
             _ => return Err(Error::WrongEncoding {}),
         };
-        let properties = value.properties.ok_or(Error::WrongEncoding {})?;
+        let content_type = value.properties.ok_or(Error::WrongEncoding {})?
+            .content_type.take();
         let application_properties = value
             .application_properties
             .ok_or(Error::WrongEncoding {})?;
         Ok(Self {
-            properties,
+            content_type,
             application_properties,
             body,
         })
@@ -140,41 +163,46 @@ impl From<MessageAttributeValue> for Value {
 impl TryFrom<Event> for AmqpCloudEvent {
     type Error = Error;
 
-    fn try_from(mut event: Event) -> Result<Self, Self::Error> {
-        let mut properties = Properties::default();
-        properties.content_type = match &mut event.attributes {
-            Attributes::V03(attributes) => attributes.datacontenttype.take(),
-            Attributes::V10(attributes) => attributes.datacontenttype.take(),
-        }.map(Symbol::from);
-
-        let mut application_properties = ApplicationProperties::default();
-        for (key, value) in event.attributes.iter() {
-            if key == "datacontenttype" {
-                continue;
-            } else {
-                let key = format!("cloudEvents:{}", key);
-                application_properties.insert(key, SimpleValue::from(value));
-            }
-        }
-
-        let body = match event.data {
-            Some(data) => match data {
-                crate::Data::Binary(data) => Body::Data(AmqpData(Binary::from(data))),
-                crate::Data::String(val) => Body::Data(AmqpData(Binary::from(val))),
-                crate::Data::Json(val) => {
-                    let bytes = serde_json::to_vec(&val)?;
-                    Body::Data(AmqpData(Binary::from(bytes)))
-                },
-            },
-            None => AmqpBody::Nothing,
-        };
+    fn try_from(event: Event) -> Result<Self, Self::Error> {
+        let (content_type, application_properties) = from_event_attributes(event.attributes);
+        let body = from_event_data(event.data)?;
 
         Ok(Self {
-            properties,
+            content_type,
             application_properties,
             body,
         })
     }
+}
+
+fn from_event_attributes(attributes: Attributes) -> (Option<Symbol>, ApplicationProperties) {
+    let content_type = attributes.datacontenttype().map(Symbol::from);
+
+    let mut application_properties = ApplicationProperties::default();
+    for (key, value) in attributes.iter() {
+        if key == "datacontenttype" {
+            continue;
+        } else {
+            let key = format!("cloudEvents:{}", key);
+            application_properties.insert(key, SimpleValue::from(value));
+        }
+    }
+    (content_type, application_properties)
+}
+
+fn from_event_data(data: Option<Data>) -> Result<AmqpBody, Error> {
+    let body = match data {
+        Some(data) => match data {
+            crate::Data::Binary(data) => Body::Data(AmqpData(Binary::from(data))),
+            crate::Data::String(val) => Body::Data(AmqpData(Binary::from(val))),
+            crate::Data::Json(val) => {
+                let bytes = serde_json::to_vec(&val)?;
+                Body::Data(AmqpData(Binary::from(bytes)))
+            },
+        },
+        None => AmqpBody::Nothing,
+    };
+    Ok(body)
 }
 
 // impl BinarySerializer<AmqpCloudEvent> for AmqpCloudEvent {

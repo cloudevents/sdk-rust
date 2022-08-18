@@ -157,8 +157,10 @@ impl EventMessage {
 
 impl From<EventMessage> for AmqpMessage {
     fn from(event: EventMessage) -> Self {
-        let mut properties = Properties::default();
-        properties.content_type = event.content_type;
+        let properties = Properties {
+            content_type: event.content_type,
+            ..Default::default()
+        };
         Message {
             header: None,
             delivery_annotations: None,
@@ -173,7 +175,7 @@ impl From<EventMessage> for AmqpMessage {
 
 impl From<AmqpMessage> for EventMessage {
     fn from(message: AmqpMessage) -> Self {
-        let content_type = message.properties.map(|p| p.content_type).flatten();
+        let content_type = message.properties.and_then(|p| p.content_type);
         Self {
             content_type,
             application_properties: message.application_properties,
@@ -223,9 +225,9 @@ impl<'a> From<AttributeValue<'a>> for Value {
 impl From<MessageAttributeValue> for SimpleValue {
     fn from(value: MessageAttributeValue) -> Self {
         match value {
-            MessageAttributeValue::String(s) => SimpleValue::String(String::from(s)),
+            MessageAttributeValue::String(s) => SimpleValue::String(s),
             MessageAttributeValue::Uri(uri) => SimpleValue::String(String::from(uri.as_str())),
-            MessageAttributeValue::UriRef(uri) => SimpleValue::String(uri.clone()),
+            MessageAttributeValue::UriRef(uri) => SimpleValue::String(uri),
             MessageAttributeValue::Boolean(val) => SimpleValue::Bool(val),
             MessageAttributeValue::Integer(val) => SimpleValue::Long(val),
             MessageAttributeValue::DateTime(datetime) => {
@@ -241,9 +243,9 @@ impl From<MessageAttributeValue> for SimpleValue {
 impl From<MessageAttributeValue> for Value {
     fn from(value: MessageAttributeValue) -> Self {
         match value {
-            MessageAttributeValue::String(s) => Value::String(String::from(s)),
+            MessageAttributeValue::String(s) => Value::String(s),
             MessageAttributeValue::Uri(uri) => Value::String(String::from(uri.as_str())),
-            MessageAttributeValue::UriRef(uri) => Value::String(uri.clone()),
+            MessageAttributeValue::UriRef(uri) => Value::String(uri),
             MessageAttributeValue::Boolean(val) => Value::Bool(val),
             MessageAttributeValue::Integer(val) => Value::Long(val),
             MessageAttributeValue::DateTime(datetime) => {

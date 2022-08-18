@@ -35,9 +35,9 @@ async fn send_binary_event(sender: &mut Sender, i: usize, value: serde_json::Val
 async fn send_structured_event(sender: &mut Sender, i: usize, value: serde_json::Value) -> Result<()> {
     let event = EventBuilderV10::new()
         .id(i.to_string())
-        .ty("example.test")
-        .source("localhost")
-        .extension("ext-name", "AMQP")
+        .ty(EXAMPLE_TYPE)
+        .source(EXAMPLE_SOURCE)
+        .extension(EXTENSION_NAME, EXTENSION_VALUE)
         .data("application/json", value)
         .build()?;
     let event_message = EventMessage::from_structured_event(event)?;

@@ -1,4 +1,73 @@
-//! Implements AMQP 1.0 binding for CloudEvents
+//! This module integrated the [cloudevents-sdk](https://docs.rs/cloudevents-sdk) with 
+//! [fe2o3-amqp](https://docs.rs/fe2o3-amqp/) to easily send and receiver CloudEvents
+//! 
+//! To send CloudEvents
+//! 
+//! ```rust
+//! use fe2o3_amqp::{Connection, Sender, Session};
+//! use cloudevents::{EventBuilderV10, binding::fe2o3_amqp::{EventMessage, AmqpMessage}};
+//! 
+//! // You need a running AMQP 1.0 broker to try out this example.
+//! // With docker: docker run -it --rm -e ARTEMIS_USERNAME=guest -e ARTEMIS_PASSWORD=guest -p 5672:5672 vromero/activemq-artemis
+//! 
+//! #[tokio::main]
+//! async fn main() {
+//! let mut connection =
+//! Connection::open("cloudevents-sdk-rust", "amqp://guest:guest@localhost:5672")
+//!     .await
+//!     .unwrap();
+//! let mut session = Session::begin(&mut connection).await.unwrap();
+//! let mut sender = Sender::attach(&mut session, "sender", "q1").await.unwrap();
+//! 
+//! let event = EventBuilderV10::new()
+//!     .id(i.to_string())
+//!     .ty("example.test")
+//!     .source("localhost")
+//!     .extension("ext-name", "AMQP")
+//!     .data("application/json", value)
+//!     .build()
+//!     .unwrap();
+//! 
+//! let event_message = EventMessage::from_binary_event(event).unwrap();
+//! let message = AmqpMessage::from(event_message);
+//! sender.send(message).await.unwrap()
+//!     .accepted_or("not accepted").unwrap();
+//! 
+//! sender.close().await.unwrap();
+//! session.end().await.unwrap();
+//! connection.close().await.unwrap();
+//! }
+//! ```
+//! 
+//! To receiver CloudEvents
+//! 
+//! ```rust
+//! use fe2o3_amqp::{Connection, Receiver, Session};
+//! use cloudevents::{EventBuilderV10, binding::fe2o3_amqp::{EventMessage, AmqpMessage}};
+//! 
+//! // You need a running AMQP 1.0 broker to try out this example.
+//! // With docker: docker run -it --rm -e ARTEMIS_USERNAME=guest -e ARTEMIS_PASSWORD=guest -p 5672:5672 vromero/activemq-artemis
+//! 
+//! #[tokio::main]
+//! async fn main() {
+//! let mut connection =
+//! Connection::open("cloudevents-sdk-rust", "amqp://guest:guest@localhost:5672")
+//!     .await
+//!     .unwrap();
+//! let mut session = Session::begin(&mut connection).await.unwrap();
+//! let mut receiver = Receiver::attach(&mut session, "receiver", "q1").await.unwrap();
+//! 
+//! let delivery = receiver.recv().await.unwrap();
+//! receiver.accept(&delivery).await.unwrap();
+//! 
+//! let event_message = EventMessage::from(delivery.into_message());
+//! let event = MessageDeserializer::into_event(event_message).unwrap();
+//! 
+//! sender.close().await.unwrap();
+//! session.end().await.unwrap();
+//! connection.close().await.unwrap();
+//! }
+//! ```
 
 use std::convert::TryFrom;
 

@@ -4,8 +4,8 @@ use std::collections::HashMap;
 use std::convert::TryFrom;
 
 use chrono::{TimeZone, Utc};
-use fe2o3_amqp_lib::types::messaging::{ApplicationProperties, Body, Message, Properties};
-use fe2o3_amqp_lib::types::primitives::{Binary, SimpleValue, Symbol, Timestamp, Value};
+use fe2o3_amqp_types::messaging::{ApplicationProperties, Body, Message, Properties};
+use fe2o3_amqp_types::primitives::{Binary, SimpleValue, Symbol, Timestamp, Value};
 
 use crate::event::{AttributeValue, ExtensionValue};
 use crate::message::{BinaryDeserializer, Error, MessageAttributeValue, StructuredDeserializer};

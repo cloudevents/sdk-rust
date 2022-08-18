@@ -3,18 +3,24 @@
 use std::collections::HashMap;
 use std::convert::TryFrom;
 
-use fe2o3_amqp_lib::types::messaging::{
-    ApplicationProperties, Body, Data as AmqpData, Message, Properties,
-};
+use chrono::{DateTime, Utc, TimeZone};
+use fe2o3_amqp_lib::types::messaging::{ApplicationProperties, Body, Message, Properties};
 use fe2o3_amqp_lib::types::primitives::{Binary, SimpleValue, Symbol, Timestamp, Value};
 
-use crate::event::{AttributeValue, Attributes, ExtensionValue};
+use crate::event::{AttributeValue, ExtensionValue, UriReference};
 use crate::message::{Error, MessageAttributeValue};
-use crate::{Event, AttributesReader, Data};
+use crate::Event;
 
-use self::extensions::ExtensionsHandler;
+use self::constants::{
+    prefixed, DATACONTENTTYPE, DATASCHEMA, ID, SOURCE, SPECVERSION, SUBJECT, TIME, TYPE,
+};
 
-pub mod extensions;
+const ATTRIBUTE_PREFIX: &str = "cloudEvents:";
+
+pub mod deserializer;
+pub mod serializer;
+
+mod constants;
 
 /// Type alias for an AMQP 1.0 message
 ///
@@ -27,6 +33,10 @@ pub type AmqpBody = Body<Value>;
 
 pub type Extensions = HashMap<String, ExtensionValue>;
 
+/// The receiver of the event can distinguish between the two modes by inspecting the content-type
+/// message property field. If the value is prefixed with the CloudEvents media type
+/// application/cloudevents, indicating the use of a known event format, the receiver uses
+/// structured mode, otherwise it defaults to binary mode.
 pub struct AmqpCloudEvent {
     content_type: Option<Symbol>,
     application_properties: ApplicationProperties,
@@ -34,15 +44,8 @@ pub struct AmqpCloudEvent {
 }
 
 impl AmqpCloudEvent {
-    pub fn with_extensions_handler<F>(handler: F) -> ExtensionsHandler<F>
-    where
-        F: FnOnce(Extensions) -> AmqpMessage
-    {
-        ExtensionsHandler::new(handler)
-    }
-
     pub fn from_event(event: Event) -> Result<Self, Error> {
-        Self::try_from(event)
+        todo!()
     }
 }
 
@@ -59,27 +62,6 @@ impl From<AmqpCloudEvent> for AmqpMessage {
             body: event.body,
             footer: None,
         }
-    }
-}
-
-impl TryFrom<AmqpMessage> for AmqpCloudEvent {
-    type Error = Error;
-
-    fn try_from(value: AmqpMessage) -> Result<Self, Self::Error> {
-        let body = match value.body {
-            Body::Data(data) => Body::Data(data),
-            _ => return Err(Error::WrongEncoding {}),
-        };
-        let content_type = value.properties.ok_or(Error::WrongEncoding {})?
-            .content_type.take();
-        let application_properties = value
-            .application_properties
-            .ok_or(Error::WrongEncoding {})?;
-        Ok(Self {
-            content_type,
-            application_properties,
-            body,
-        })
     }
 }
 
@@ -157,94 +139,62 @@ impl From<MessageAttributeValue> for Value {
     }
 }
 
-/// The `BinarySerializer`/`StructuredSerializer` traits are not implemented because 
-/// "datacontenttype" needs special treatment in AMQP. However, `StructureSerializer` doesn't
-/// provide access to "datacontenttype"
-impl TryFrom<Event> for AmqpCloudEvent {
+impl TryFrom<SimpleValue> for MessageAttributeValue {
     type Error = Error;
 
-    fn try_from(event: Event) -> Result<Self, Self::Error> {
-        let (content_type, application_properties) = from_event_attributes(event.attributes);
-        let body = from_event_data(event.data)?;
-
-        Ok(Self {
-            content_type,
-            application_properties,
-            body,
-        })
-    }
-}
-
-fn from_event_attributes(attributes: Attributes) -> (Option<Symbol>, ApplicationProperties) {
-    let content_type = attributes.datacontenttype().map(Symbol::from);
-
-    let mut application_properties = ApplicationProperties::default();
-    for (key, value) in attributes.iter() {
-        if key == "datacontenttype" {
-            continue;
-        } else {
-            let key = format!("cloudEvents:{}", key);
-            application_properties.insert(key, SimpleValue::from(value));
+    fn try_from(value: SimpleValue) -> Result<Self, Self::Error> {
+        match value {
+            SimpleValue::Bool(val) => Ok(MessageAttributeValue::Boolean(val)),
+            SimpleValue::Long(val) => Ok(MessageAttributeValue::Integer(val)),
+            SimpleValue::Timestamp(val) => {
+                let datetime = Utc.timestamp_millis(val.into_inner());
+                Ok(MessageAttributeValue::DateTime(datetime))
+            },
+            SimpleValue::Binary(val) => Ok(MessageAttributeValue::Binary(val.into_vec())),
+            SimpleValue::String(val) => Ok(MessageAttributeValue::String(val)),
+            _ => Err(Error::WrongEncoding {  })
         }
     }
-    (content_type, application_properties)
 }
 
-fn from_event_data(data: Option<Data>) -> Result<AmqpBody, Error> {
-    let body = match data {
-        Some(data) => match data {
-            crate::Data::Binary(data) => Body::Data(AmqpData(Binary::from(data))),
-            crate::Data::String(val) => Body::Data(AmqpData(Binary::from(val))),
-            crate::Data::Json(val) => {
-                let bytes = serde_json::to_vec(&val)?;
-                Body::Data(AmqpData(Binary::from(bytes)))
+impl<'a> TryFrom<(&'a str, SimpleValue)> for MessageAttributeValue {
+    type Error = Error;
+
+    fn try_from((key, value): (&'a str, SimpleValue)) -> Result<Self, Self::Error> {
+        match key {
+            // String
+            ID | prefixed::ID 
+            // String
+            | SPECVERSION | prefixed::SPECVERSION 
+            // String
+            | TYPE | prefixed::TYPE
+            // String
+            | DATACONTENTTYPE 
+            // String
+            | SUBJECT | prefixed::SUBJECT => {
+                let val = String::try_from(value).map_err(|_| Error::WrongEncoding {})?;
+                Ok(MessageAttributeValue::String(val))
             },
-        },
-        None => AmqpBody::Nothing,
-    };
-    Ok(body)
+            // URI-reference
+            SOURCE | prefixed::SOURCE => {
+                let val = String::try_from(value).map_err(|_| Error::WrongEncoding {})?;
+                Ok(MessageAttributeValue::UriRef(val))
+            },
+            // URI
+            DATASCHEMA | prefixed::DATASCHEMA => {
+                let val = String::try_from(value).map_err(|_| Error::WrongEncoding {  })?;
+                let url_val = url::Url::parse(&val)?;
+                Ok(MessageAttributeValue::Uri(url_val))
+            }
+            // Timestamp
+            TIME | prefixed::TIME => {
+                let val = Timestamp::try_from(value).map_err(|_| Error::WrongEncoding {  })?;
+                let datetime = Utc.timestamp_millis(val.into_inner());
+                Ok(MessageAttributeValue::DateTime(datetime))
+            }
+            _ => {
+                MessageAttributeValue::try_from(value)
+            }
+        }
+    }
 }
-
-// impl BinarySerializer<AmqpCloudEvent> for AmqpCloudEvent {
-//     fn set_spec_version(mut self, spec_version: SpecVersion) -> crate::message::Result<Self> {
-//         let key = String::from("cloudEvents:specversion");
-//         let value = String::from(spec_version.as_str());
-//         self.application_properties.insert(key, SimpleValue::from(value));
-//         Ok(self)
-//     }
-
-//     fn set_attribute(mut self, name: &str, value: MessageAttributeValue) -> crate::message::Result<Self> {
-//         if name == "datacontenttype" {
-//             self.properties.content_type = match value {
-//                 MessageAttributeValue::String(s) => Some(Symbol::from(s)),
-//                 _ => return Err(Error::WrongEncoding {  })
-//             }
-//         } else {
-//             let key = format!("cloudEvents:{}", name);
-//             let value = SimpleValue::from(value);
-//             self.application_properties.insert(key, value);
-//         }
-
-//         Ok(self)
-//     }
-
-//     fn set_extension(self, name: &str, value: MessageAttributeValue) -> crate::message::Result<Self> {
-//         todo!()
-//     }
-
-//     fn end_with_data(mut self, bytes: Vec<u8>) -> crate::message::Result<Self> {
-//         let data = Binary::from(bytes);
-//         self.body = Body::Data(AmqpData(data));
-//         Ok(self)
-//     }
-
-//     fn end(self) -> crate::message::Result<Self> {
-//         Ok(self)
-//     }
-// }
-
-// impl StructuredSerializer<AmqpCloudEvent> for AmqpCloudEvent {
-//     fn set_structured_event(self, bytes: Vec<u8>) -> crate::message::Result<Self> {
-//         todo!()
-//     }
-// }

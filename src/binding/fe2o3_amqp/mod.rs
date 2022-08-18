@@ -37,13 +37,13 @@ pub type Extensions = HashMap<String, ExtensionValue>;
 /// message property field. If the value is prefixed with the CloudEvents media type
 /// application/cloudevents, indicating the use of a known event format, the receiver uses
 /// structured mode, otherwise it defaults to binary mode.
-pub struct AmqpBinding {
+pub struct EventMessage {
     content_type: Option<Symbol>,
     application_properties: Option<ApplicationProperties>,
     body: AmqpBody,
 }
 
-impl AmqpBinding {
+impl EventMessage {
     fn new() -> Self {
         Self {
             content_type: None,
@@ -52,17 +52,19 @@ impl AmqpBinding {
         }
     }
 
+    /// Create an [`EventMessage`] from an event using a binary serializer
     pub fn from_binary_event(event: Event) -> Result<Self, Error> {
         BinaryDeserializer::deserialize_binary(event, Self::new())
     }
 
+    /// Create an [`EventMessage`] from an event using a structured serializer
     pub fn from_structured_event(event: Event) -> Result<Self, Error> {
         StructuredDeserializer::deserialize_structured(event, Self::new())
     }
 }
 
-impl From<AmqpBinding> for AmqpMessage {
-    fn from(event: AmqpBinding) -> Self {
+impl From<EventMessage> for AmqpMessage {
+    fn from(event: EventMessage) -> Self {
         let mut properties = Properties::default();
         properties.content_type = event.content_type;
         Message {
@@ -77,7 +79,7 @@ impl From<AmqpBinding> for AmqpMessage {
     }
 }
 
-impl From<AmqpMessage> for AmqpBinding {
+impl From<AmqpMessage> for EventMessage {
     fn from(message: AmqpMessage) -> Self {
         let content_type = message.properties.map(|p| p.content_type).flatten();
         Self {

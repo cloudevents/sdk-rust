@@ -13,10 +13,10 @@ use crate::{
 
 use super::{
     constants::{prefixed, DATACONTENTTYPE},
-    AmqpBinding, ATTRIBUTE_PREFIX,
+    EventMessage, ATTRIBUTE_PREFIX,
 };
 
-impl BinaryDeserializer for AmqpBinding {
+impl BinaryDeserializer for EventMessage {
     fn deserialize_binary<R: Sized, V: BinarySerializer<R>>(
         mut self,
         mut serializer: V,
@@ -74,7 +74,7 @@ impl BinaryDeserializer for AmqpBinding {
     }
 }
 
-impl StructuredDeserializer for AmqpBinding {
+impl StructuredDeserializer for EventMessage {
     fn deserialize_structured<R: Sized, V: StructuredSerializer<R>>(
         self,
         serializer: V,
@@ -89,7 +89,7 @@ impl StructuredDeserializer for AmqpBinding {
     }
 }
 
-impl MessageDeserializer for AmqpBinding {
+impl MessageDeserializer for EventMessage {
     fn encoding(&self) -> Encoding {
         match self
             .content_type

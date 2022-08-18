@@ -8,18 +8,18 @@ use cloudevents::{
     EventBuilderV10,
 };
 use fe2o3_amqp::{types::messaging::Message, Connection, Receiver, Sender, Session};
-use serde_json::json;
+use serde_json::{json, from_slice, from_str};
 
 type BoxError = Box<dyn std::error::Error>;
 type Result<T> = std::result::Result<T, BoxError>;
 
-async fn send_event(sender: &mut Sender, i: usize) -> Result<()> {
+async fn send_event(sender: &mut Sender, i: usize, value: serde_json::Value) -> Result<()> {
     let event = EventBuilderV10::new()
         .id(i.to_string())
         .ty("example.test")
         .source("localhost")
         .extension("ext-name", "AMQP")
-        .data("application/json", json!({"hello": "world"}))
+        .data("application/json", value)
         .build()?;
     let event_message = EventMessage::from_binary_event(event)?;
     let message = Message::from(event_message);
@@ -28,9 +28,7 @@ async fn send_event(sender: &mut Sender, i: usize) -> Result<()> {
 }
 
 async fn recv_event(receiver: &mut Receiver) -> Result<Event> {
-    use fe2o3_amqp::types::primitives::Value;
-
-    let delivery = receiver.recv::<Value>().await?;
+    let delivery = receiver.recv().await?;
     receiver.accept(&delivery).await?;
 
     let event_message = EventMessage::from(delivery.into_message());
@@ -50,9 +48,16 @@ async fn main() {
         .await
         .unwrap();
 
-    send_event(&mut sender, 1).await.unwrap();
+    let expected = json!({"hello": "world"});
+    send_event(&mut sender, 1, expected.clone()).await.unwrap();
     let event = recv_event(&mut receiver).await.unwrap();
-    println!("{:?}", event);
+    let data: serde_json::Value = match event.data().unwrap() {
+        cloudevents::Data::Binary(bytes) => from_slice(bytes).unwrap(),
+        cloudevents::Data::String(s) => from_str(s).unwrap(),
+        cloudevents::Data::Json(value) => value.clone(),
+    };
+
+    assert_eq!(data, expected);
 
     sender.close().await.unwrap();
     receiver.close().await.unwrap();

@@ -3,7 +3,7 @@
 //! You need a running AMQP 1.0 broker to try out this example.
 //! With docker: docker run -it --rm -e ARTEMIS_USERNAME=guest -e ARTEMIS_PASSWORD=guest -p 5672:5672 vromero/activemq-artemis
 
-use cloudevents::{binding::fe2o3_amqp::EventMessage, message::BinaryDeserializer, Event, EventBuilderV10, EventBuilder};
+use cloudevents::{binding::fe2o3_amqp::EventMessage, Event, EventBuilderV10, EventBuilder, message::MessageDeserializer};
 use fe2o3_amqp::{Connection, Sender, Receiver, types::messaging::Message, Session};
 use serde_json::json;
 
@@ -17,7 +17,7 @@ async fn send_event(sender: &mut Sender, i: usize) -> Result<()> {
         .source("localhost")
         .data("application/json", json!({"hello": "world"}))
         .build()?;
-    let event_message = EventMessage::from_binary_event(event)?;
+    let event_message = EventMessage::from_structured_event(event)?;
     let message = Message::from(event_message);
     sender.send(message).await?
         .accepted_or("not accepted")?;
@@ -31,7 +31,7 @@ async fn recv_event(receiver: &mut Receiver) -> Result<Event> {
     receiver.accept(&delivery).await?;
 
     let event_message = EventMessage::from(delivery.into_message());
-    let event = event_message.into_event()?;
+    let event = MessageDeserializer::into_event(event_message)?;
     Ok(event)
 }
 

@@ -1,15 +1,13 @@
 //! Implements AMQP 1.0 binding for CloudEvents
 
-use std::collections::HashMap;
 use std::convert::TryFrom;
 
 use chrono::{Utc, TimeZone};
-use fe2o3_amqp_lib::types::messaging::{ApplicationProperties, Body, Message, Properties};
-use fe2o3_amqp_lib::types::primitives::{Binary, SimpleValue, Symbol, Timestamp, Value};
+use fe2o3_amqp_lib::types::messaging::{Body, Message};
+use fe2o3_amqp_lib::types::primitives::{Binary, SimpleValue, Timestamp, Value};
 
-use crate::event::{AttributeValue, ExtensionValue};
+use crate::event::{AttributeValue};
 use crate::message::{Error, MessageAttributeValue};
-use crate::Event;
 
 use self::constants::{
     prefixed, DATACONTENTTYPE, DATASCHEMA, ID, SOURCE, SPECVERSION, SUBJECT, TIME, TYPE,
@@ -27,43 +25,8 @@ mod constants;
 /// The generic parameter can be anything that implements `Serialize` and `Deserialize` but is of
 /// no importance because all CloudEvents are using the `Body::Data` as the body section type. For
 /// convenience, this type alias chose `Value` as the value of the generic parameter
-pub type AmqpMessage = Message<Value>;
-
-pub type AmqpBody = Body<Value>;
-
-pub type Extensions = HashMap<String, ExtensionValue>;
-
-/// The receiver of the event can distinguish between the two modes by inspecting the content-type
-/// message property field. If the value is prefixed with the CloudEvents media type
-/// application/cloudevents, indicating the use of a known event format, the receiver uses
-/// structured mode, otherwise it defaults to binary mode.
-pub struct AmqpCloudEvent {
-    content_type: Option<Symbol>,
-    application_properties: ApplicationProperties,
-    body: AmqpBody,
-}
-
-impl AmqpCloudEvent {
-    pub fn from_event(event: Event) -> Result<Self, Error> {
-        todo!()
-    }
-}
-
-impl From<AmqpCloudEvent> for AmqpMessage {
-    fn from(event: AmqpCloudEvent) -> Self {
-        let mut properties = Properties::default();
-        properties.content_type = event.content_type;
-        Message {
-            header: None,
-            delivery_annotations: None,
-            message_annotations: None,
-            properties: Some(properties),
-            application_properties: Some(event.application_properties),
-            body: event.body,
-            footer: None,
-        }
-    }
-}
+type AmqpMessage = Message<Value>;
+type AmqpBody = Body<Value>;
 
 impl<'a> From<AttributeValue<'a>> for SimpleValue {
     fn from(value: AttributeValue) -> Self {

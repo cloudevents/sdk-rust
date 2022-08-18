@@ -13,10 +13,10 @@ use crate::{
 
 use super::{
     constants::{prefixed, DATACONTENTTYPE},
-    AmqpCloudEvent, ATTRIBUTE_PREFIX,
+    ATTRIBUTE_PREFIX, AmqpMessage,
 };
 
-impl BinaryDeserializer for AmqpCloudEvent {
+impl BinaryDeserializer for AmqpMessage {
     fn deserialize_binary<R: Sized, V: BinarySerializer<R>>(
         mut self,
         mut serializer: V,
@@ -27,6 +27,8 @@ impl BinaryDeserializer for AmqpCloudEvent {
         let spec_version = {
             let value = self
                 .application_properties
+                .as_mut()
+                .ok_or(Error::WrongEncoding {  })?
                 .remove(prefixed::SPECVERSION)
                 .ok_or(Error::WrongEncoding {})
                 .map(|val| match val {
@@ -38,23 +40,24 @@ impl BinaryDeserializer for AmqpCloudEvent {
         serializer = serializer.set_spec_version(spec_version.clone())?;
 
         // datacontenttype
-        serializer = match self.content_type {
-            Some(Symbol(content_type)) => serializer
+        serializer = match self.properties.map(|p| p.content_type) {
+            Some(Some(Symbol(content_type))) => serializer
                 .set_attribute(DATACONTENTTYPE, MessageAttributeValue::String(content_type))?,
-            None => serializer,
+            _ => serializer,
         };
 
         // remaining attributes
         let attributes = spec_version.attribute_names();
-
-        for (key, value) in self.application_properties.0.into_iter() {
-            if let Some(key) = key.strip_prefix(ATTRIBUTE_PREFIX) {
-                if attributes.contains(&key) {
-                    let value = MessageAttributeValue::try_from((key, value))?;
-                    serializer = serializer.set_attribute(key, value)?;
-                } else {
-                    let value = MessageAttributeValue::try_from(value)?;
-                    serializer = serializer.set_extension(key, value)?;
+        if let Some(application_properties) = self.application_properties {
+            for (key, value) in application_properties.0.into_iter() {
+                if let Some(key) = key.strip_prefix(ATTRIBUTE_PREFIX) {
+                    if attributes.contains(&key) {
+                        let value = MessageAttributeValue::try_from((key, value))?;
+                        serializer = serializer.set_attribute(key, value)?;
+                    } else {
+                        let value = MessageAttributeValue::try_from(value)?;
+                        serializer = serializer.set_extension(key, value)?;
+                    }
                 }
             }
         }
@@ -70,7 +73,7 @@ impl BinaryDeserializer for AmqpCloudEvent {
     }
 }
 
-impl StructuredDeserializer for AmqpCloudEvent {
+impl StructuredDeserializer for AmqpMessage {
     fn deserialize_structured<R: Sized, V: StructuredSerializer<R>>(
         self,
         serializer: V,
@@ -86,12 +89,14 @@ impl StructuredDeserializer for AmqpCloudEvent {
     }
 }
 
-impl MessageDeserializer for AmqpCloudEvent {
+impl MessageDeserializer for AmqpMessage {
     fn encoding(&self) -> Encoding {
         match self
-            .content_type
+            .properties
             .as_ref()
-            .map(|s| s.starts_with(CLOUDEVENTS_JSON_HEADER))
+            .map(|p| p.content_type.as_ref()
+                .map(|s| s.starts_with(CLOUDEVENTS_JSON_HEADER))
+            ).flatten()
         {
             Some(true) => Encoding::STRUCTURED,
             Some(false) => Encoding::BINARY,

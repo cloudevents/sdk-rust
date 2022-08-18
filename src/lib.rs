@@ -1,3 +1,5 @@
+#![cfg_attr(docsrs, feature(doc_cfg))] // Show feature gate in doc
+
 //! This crate implements the [CloudEvents](https://cloudevents.io/) Spec for Rust.
 //!
 //! ```

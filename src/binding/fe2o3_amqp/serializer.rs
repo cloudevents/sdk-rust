@@ -60,7 +60,7 @@ impl BinarySerializer<EventMessage> for EventMessage {
         name: &str,
         value: MessageAttributeValue,
     ) -> crate::message::Result<Self> {
-        let key = name.to_string();
+        let key = header_prefix(ATTRIBUTE_PREFIX, name);
         let value = SimpleValue::from(value);
         self.application_properties
             .get_or_insert(ApplicationProperties::default())

@@ -1,5 +1,3 @@
-#![cfg_attr(docsrs, feature(doc_cfg))] // Show feature gate in doc
-
 //! This crate implements the [CloudEvents](https://cloudevents.io/) Spec for Rust.
 //!
 //! ```
@@ -58,6 +56,7 @@
 
 #![doc(html_root_url = "https://docs.rs/cloudevents-sdk/0.5.0")]
 #![deny(rustdoc::broken_intra_doc_links)]
+#![cfg_attr(docsrs, feature(doc_cfg))] // Show feature gate in doc
 
 pub mod binding;
 pub mod event;

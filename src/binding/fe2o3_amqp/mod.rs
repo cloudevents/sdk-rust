@@ -1,15 +1,15 @@
-//! This module integrated the [cloudevents-sdk](https://docs.rs/cloudevents-sdk) with 
+//! This module integrated the [cloudevents-sdk](https://docs.rs/cloudevents-sdk) with
 //! [fe2o3-amqp](https://docs.rs/fe2o3-amqp/) to easily send and receive CloudEvents
-//! 
+//!
 //! To send CloudEvents
-//! 
+//!
 //! ```rust
 //! use fe2o3_amqp::{Connection, Sender, Session};
 //! use cloudevents::{EventBuilderV10, binding::fe2o3_amqp::{EventMessage, AmqpMessage}};
-//! 
+//!
 //! // You need a running AMQP 1.0 broker to try out this example.
 //! // With docker: docker run -it --rm -e ARTEMIS_USERNAME=guest -e ARTEMIS_PASSWORD=guest -p 5672:5672 vromero/activemq-artemis
-//! 
+//!
 //! #[tokio::main]
 //! async fn main() {
 //!     let mut connection =
@@ -38,16 +38,16 @@
 //!     connection.close().await.unwrap();
 //! }
 //! ```
-//! 
+//!
 //! To receiver CloudEvents
-//! 
+//!
 //! ```rust
 //! use fe2o3_amqp::{Connection, Receiver, Session};
 //! use cloudevents::{EventBuilderV10, binding::fe2o3_amqp::{EventMessage, AmqpMessage}};
-//! 
+//!
 //! // You need a running AMQP 1.0 broker to try out this example.
 //! // With docker: docker run -it --rm -e ARTEMIS_USERNAME=guest -e ARTEMIS_PASSWORD=guest -p 5672:5672 vromero/activemq-artemis
-//! 
+//!
 //! #[tokio::main]
 //! async fn main() {
 //!     let mut connection =
@@ -75,7 +75,7 @@ use chrono::{TimeZone, Utc};
 use fe2o3_amqp_types::messaging::{ApplicationProperties, Body, Message, Properties};
 use fe2o3_amqp_types::primitives::{Binary, SimpleValue, Symbol, Timestamp, Value};
 
-use crate::event::{AttributeValue};
+use crate::event::AttributeValue;
 use crate::message::{BinaryDeserializer, Error, MessageAttributeValue, StructuredDeserializer};
 use crate::Event;
 
@@ -106,25 +106,25 @@ pub type AmqpBody = Body<Value>;
 
 /// This struct contains the necessary fields required for AMQP 1.0 binding.
 /// It provides conversion between [`Event`] and [`AmqpMessage`]
-/// 
+///
 /// # Examples
-/// 
+///
 /// ## [`Event`] -> [`AmqpMessage`] in binary content mode
-/// 
+///
 /// ```rust
 /// let event_message = EventMessage::from_binary_event(event).unwrap();
 /// let amqp_message = AmqpMessage:from(event_message);
 /// ```
-/// 
+///
 /// ## [`Event`] -> [`AmqpMessage`] in structured content mode
-/// 
+///
 /// ```rust
 /// let event_message = EventMessage::from_structured_event(event).unwrap();
 /// let amqp_message = AmqpMessage:from(event_message);
 /// ```
-/// 
+///
 /// ## [`AmqpMessage`] -> [`Event`]
-/// 
+///
 /// ```rust
 /// let event_message = EventMessage::from(amqp_message);
 /// let event = MessageDeserializer::into_event(event_message).unwrap();

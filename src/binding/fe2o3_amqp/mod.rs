@@ -1,13 +1,12 @@
 //! Implements AMQP 1.0 binding for CloudEvents
 
-use std::collections::HashMap;
 use std::convert::TryFrom;
 
 use chrono::{TimeZone, Utc};
 use fe2o3_amqp_types::messaging::{ApplicationProperties, Body, Message, Properties};
 use fe2o3_amqp_types::primitives::{Binary, SimpleValue, Symbol, Timestamp, Value};
 
-use crate::event::{AttributeValue, ExtensionValue};
+use crate::event::{AttributeValue};
 use crate::message::{BinaryDeserializer, Error, MessageAttributeValue, StructuredDeserializer};
 use crate::Event;
 
@@ -29,9 +28,12 @@ mod constants;
 /// convenience, this type alias chose `Value` as the value of the generic parameter
 pub type AmqpMessage = Message<Value>;
 
+/// Type alias for an AMQP 1.0 Body
+///
+/// The generic parameter can be anything that implements `Serialize` and `Deserialize` but is of
+/// no importance because all CloudEvents are using the `Body::Data` as the body section type. For
+/// convenience, this type alias chose `Value` as the value of the generic parameter
 pub type AmqpBody = Body<Value>;
-
-pub type Extensions = HashMap<String, ExtensionValue>;
 
 /// The receiver of the event can distinguish between the two modes by inspecting the content-type
 /// message property field. If the value is prefixed with the CloudEvents media type

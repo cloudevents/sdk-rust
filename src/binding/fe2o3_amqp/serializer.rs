@@ -1,6 +1,7 @@
 use fe2o3_amqp_types::primitives::{SimpleValue, Symbol, Binary};
 use fe2o3_amqp_types::messaging::{Data as AmqpData};
 
+use crate::binding::header_prefix;
 use crate::message::StructuredSerializer;
 use crate::{message::{BinarySerializer, MessageAttributeValue, Error}, event::SpecVersion};
 
@@ -29,7 +30,7 @@ impl BinarySerializer<AmqpCloudEvent> for AmqpCloudEvent {
         } else {
             // CloudEvent attributes are prefixed with "cloudEvents:" for use in the
             // application-properties section
-            let key = format!("{}:{}", ATTRIBUTE_PREFIX, name);
+            let key = header_prefix(ATTRIBUTE_PREFIX, name);
             let value = SimpleValue::from(value);
             self.application_properties.insert(key, value);
         }
@@ -44,7 +45,7 @@ impl BinarySerializer<AmqpCloudEvent> for AmqpCloudEvent {
     // how receivers are to interpret messages if the copied values differ from the cloud-event
     // serialized values.
     fn set_extension(mut self, name: &str, value: MessageAttributeValue) -> crate::message::Result<Self> {
-        let key = format!("{}:{}", ATTRIBUTE_PREFIX, name);
+        let key = header_prefix(ATTRIBUTE_PREFIX, name);
         let value = SimpleValue::from(value);
         self.application_properties.insert(key, value);
         Ok(self)

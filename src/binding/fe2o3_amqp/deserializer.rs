@@ -59,6 +59,9 @@ impl BinaryDeserializer for EventMessage {
                         let value = MessageAttributeValue::try_from(value)?;
                         serializer = serializer.set_extension(key, value)?;
                     }
+                } else {
+                    let value = MessageAttributeValue::try_from(value)?;
+                    serializer = serializer.set_extension(&key, value)?;
                 }
             }
         }

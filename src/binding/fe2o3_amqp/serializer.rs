@@ -9,9 +9,9 @@ use crate::{
 };
 
 use super::constants::DATACONTENTTYPE;
-use super::{AmqpBody, AmqpCloudEvent, ATTRIBUTE_PREFIX};
+use super::{AmqpBody, AmqpBinding, ATTRIBUTE_PREFIX};
 
-impl BinarySerializer<AmqpCloudEvent> for AmqpCloudEvent {
+impl BinarySerializer<AmqpBinding> for AmqpBinding {
     fn set_spec_version(mut self, spec_version: SpecVersion) -> crate::message::Result<Self> {
         let key = String::from("cloudEvents:specversion");
         let value = String::from(spec_version.as_str());
@@ -79,7 +79,7 @@ impl BinarySerializer<AmqpCloudEvent> for AmqpCloudEvent {
     }
 }
 
-impl StructuredSerializer<AmqpCloudEvent> for AmqpCloudEvent {
+impl StructuredSerializer<AmqpBinding> for AmqpBinding {
     fn set_structured_event(mut self, bytes: Vec<u8>) -> crate::message::Result<Self> {
         self.content_type = Some(Symbol::from("application/cloudevents+json; charset=utf-8"));
         self.body = AmqpBody::Data(AmqpData(Binary::from(bytes)));

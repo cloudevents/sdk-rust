@@ -7,14 +7,17 @@ pub mod actix;
 #[cfg(feature = "axum")]
 pub mod axum;
 
-#[cfg_attr(docsrs, doc(cfg(any(
-    feature = "http-binding",
-    feature = "actix",
-    feature = "warp",
-    feature = "reqwest",
-    feature = "axum",
-    feature = "poem"
-))))]
+#[cfg_attr(
+    docsrs,
+    doc(cfg(any(
+        feature = "http-binding",
+        feature = "actix",
+        feature = "warp",
+        feature = "reqwest",
+        feature = "axum",
+        feature = "poem"
+    )))
+)]
 #[cfg(any(
     feature = "http-binding",
     feature = "actix",

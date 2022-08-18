@@ -4,10 +4,10 @@
 //! With docker: docker run -it --rm -e ARTEMIS_USERNAME=guest -e ARTEMIS_PASSWORD=guest -p 5672:5672 vromero/activemq-artemis
 
 use cloudevents::{
-    binding::fe2o3_amqp::EventMessage, message::MessageDeserializer, Event, EventBuilder,
+    binding::fe2o3_amqp::{EventMessage, AmqpMessage}, message::MessageDeserializer, Event, EventBuilder,
     EventBuilderV10, AttributesReader, event::ExtensionValue,
 };
-use fe2o3_amqp::{types::messaging::Message, Connection, Receiver, Sender, Session};
+use fe2o3_amqp::{Connection, Receiver, Sender, Session};
 use serde_json::{json, from_slice, from_str};
 
 type BoxError = Box<dyn std::error::Error>;
@@ -27,7 +27,7 @@ async fn send_binary_event(sender: &mut Sender, i: usize, value: serde_json::Val
         .data("application/json", value)
         .build()?;
     let event_message = EventMessage::from_binary_event(event)?;
-    let message = Message::from(event_message);
+    let message = AmqpMessage::from(event_message);
     sender.send(message).await?.accepted_or("not accepted")?;
     Ok(())
 }
@@ -41,7 +41,7 @@ async fn send_structured_event(sender: &mut Sender, i: usize, value: serde_json:
         .data("application/json", value)
         .build()?;
     let event_message = EventMessage::from_structured_event(event)?;
-    let message = Message::from(event_message);
+    let message = AmqpMessage::from(event_message);
     sender.send(message).await?.accepted_or("not accepted")?;
     Ok(())
 }

@@ -4,6 +4,8 @@
 pub mod actix;
 #[cfg(feature = "axum")]
 pub mod axum;
+#[cfg(feature = "fe2o3-amqp")]
+pub mod fe2o3_amqp;
 #[cfg(any(
     feature = "http-binding",
     feature = "actix",
@@ -23,8 +25,6 @@ pub mod rdkafka;
 pub mod reqwest;
 #[cfg(feature = "warp")]
 pub mod warp;
-#[cfg(feature = "fe2o3-amqp")]
-pub mod fe2o3_amqp;
 
 #[cfg(feature = "rdkafka")]
 pub(crate) mod kafka {

@@ -1,4 +1,3 @@
-
 // Required
 pub(super) const ID: &str = "id";
 pub(super) const SOURCE: &str = "source";

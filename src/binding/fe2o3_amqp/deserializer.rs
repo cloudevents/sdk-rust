@@ -27,6 +27,8 @@ impl BinaryDeserializer for AmqpCloudEvent {
         let spec_version = {
             let value = self
                 .application_properties
+                .as_mut()
+                .ok_or(Error::WrongEncoding {})?
                 .remove(prefixed::SPECVERSION)
                 .ok_or(Error::WrongEncoding {})
                 .map(|val| match val {
@@ -47,14 +49,16 @@ impl BinaryDeserializer for AmqpCloudEvent {
         // remaining attributes
         let attributes = spec_version.attribute_names();
 
-        for (key, value) in self.application_properties.0.into_iter() {
-            if let Some(key) = key.strip_prefix(ATTRIBUTE_PREFIX) {
-                if attributes.contains(&key) {
-                    let value = MessageAttributeValue::try_from((key, value))?;
-                    serializer = serializer.set_attribute(key, value)?;
-                } else {
-                    let value = MessageAttributeValue::try_from(value)?;
-                    serializer = serializer.set_extension(key, value)?;
+        if let Some(application_properties) = self.application_properties {
+            for (key, value) in application_properties.0.into_iter() {
+                if let Some(key) = key.strip_prefix(ATTRIBUTE_PREFIX) {
+                    if attributes.contains(&key) {
+                        let value = MessageAttributeValue::try_from((key, value))?;
+                        serializer = serializer.set_attribute(key, value)?;
+                    } else {
+                        let value = MessageAttributeValue::try_from(value)?;
+                        serializer = serializer.set_extension(key, value)?;
+                    }
                 }
             }
         }
@@ -79,8 +83,7 @@ impl StructuredDeserializer for AmqpCloudEvent {
         let bytes = match self.body {
             Body::Data(data) => data.0.into_vec(),
             Body::Nothing => vec![],
-            Body::Sequence(_) 
-            | Body::Value(_) => return Err(Error::WrongEncoding {  }),
+            Body::Sequence(_) | Body::Value(_) => return Err(Error::WrongEncoding {}),
         };
         serializer.set_structured_event(bytes)
     }

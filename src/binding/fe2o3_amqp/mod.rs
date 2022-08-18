@@ -3,12 +3,12 @@
 use std::collections::HashMap;
 use std::convert::TryFrom;
 
-use chrono::{Utc, TimeZone};
+use chrono::{TimeZone, Utc};
 use fe2o3_amqp_lib::types::messaging::{ApplicationProperties, Body, Message, Properties};
 use fe2o3_amqp_lib::types::primitives::{Binary, SimpleValue, Symbol, Timestamp, Value};
 
 use crate::event::{AttributeValue, ExtensionValue};
-use crate::message::{Error, MessageAttributeValue};
+use crate::message::{BinaryDeserializer, Error, MessageAttributeValue};
 use crate::Event;
 
 use self::constants::{
@@ -39,13 +39,21 @@ pub type Extensions = HashMap<String, ExtensionValue>;
 /// structured mode, otherwise it defaults to binary mode.
 pub struct AmqpCloudEvent {
     content_type: Option<Symbol>,
-    application_properties: ApplicationProperties,
+    application_properties: Option<ApplicationProperties>,
     body: AmqpBody,
 }
 
 impl AmqpCloudEvent {
-    pub fn from_event(event: Event) -> Result<Self, Error> {
-        todo!()
+    fn new() -> Self {
+        Self {
+            content_type: None,
+            application_properties: None,
+            body: Body::Nothing,
+        }
+    }
+
+    pub fn from_binary_event(event: Event) -> Result<Self, Error> {
+        BinaryDeserializer::deserialize_binary(event, Self::new())
     }
 }
 
@@ -58,9 +66,20 @@ impl From<AmqpCloudEvent> for AmqpMessage {
             delivery_annotations: None,
             message_annotations: None,
             properties: Some(properties),
-            application_properties: Some(event.application_properties),
+            application_properties: event.application_properties,
             body: event.body,
             footer: None,
+        }
+    }
+}
+
+impl From<AmqpMessage> for AmqpCloudEvent {
+    fn from(message: AmqpMessage) -> Self {
+        let content_type = message.properties.map(|p| p.content_type).flatten();
+        Self {
+            content_type,
+            application_properties: message.application_properties,
+            body: message.body,
         }
     }
 }
@@ -149,10 +168,10 @@ impl TryFrom<SimpleValue> for MessageAttributeValue {
             SimpleValue::Timestamp(val) => {
                 let datetime = Utc.timestamp_millis(val.into_inner());
                 Ok(MessageAttributeValue::DateTime(datetime))
-            },
+            }
             SimpleValue::Binary(val) => Ok(MessageAttributeValue::Binary(val.into_vec())),
             SimpleValue::String(val) => Ok(MessageAttributeValue::String(val)),
-            _ => Err(Error::WrongEncoding {  })
+            _ => Err(Error::WrongEncoding {}),
         }
     }
 }
@@ -163,13 +182,13 @@ impl<'a> TryFrom<(&'a str, SimpleValue)> for MessageAttributeValue {
     fn try_from((key, value): (&'a str, SimpleValue)) -> Result<Self, Self::Error> {
         match key {
             // String
-            ID | prefixed::ID 
+            ID | prefixed::ID
             // String
-            | SPECVERSION | prefixed::SPECVERSION 
+            | SPECVERSION | prefixed::SPECVERSION
             // String
             | TYPE | prefixed::TYPE
             // String
-            | DATACONTENTTYPE 
+            | DATACONTENTTYPE
             // String
             | SUBJECT | prefixed::SUBJECT => {
                 let val = String::try_from(value).map_err(|_| Error::WrongEncoding {})?;

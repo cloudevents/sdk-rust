@@ -3,11 +3,11 @@
 use std::collections::HashMap;
 use std::convert::TryFrom;
 
-use chrono::{DateTime, Utc, TimeZone};
+use chrono::{Utc, TimeZone};
 use fe2o3_amqp_lib::types::messaging::{ApplicationProperties, Body, Message, Properties};
 use fe2o3_amqp_lib::types::primitives::{Binary, SimpleValue, Symbol, Timestamp, Value};
 
-use crate::event::{AttributeValue, ExtensionValue, UriReference};
+use crate::event::{AttributeValue, ExtensionValue};
 use crate::message::{Error, MessageAttributeValue};
 use crate::Event;
 

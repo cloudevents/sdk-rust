@@ -12,7 +12,7 @@ use crate::{
 };
 
 use super::{
-    constants::{self, prefixed, DATACONTENTTYPE},
+    constants::{prefixed, DATACONTENTTYPE},
     AmqpCloudEvent, ATTRIBUTE_PREFIX,
 };
 

@@ -1,11 +1,25 @@
 //! Provides protocol binding implementations for [`crate::Event`].
 
+#[cfg_attr(docsrs, doc(cfg(feature = "actix")))]
 #[cfg(feature = "actix")]
 pub mod actix;
+#[cfg_attr(docsrs, doc(cfg(feature = "axum")))]
 #[cfg(feature = "axum")]
 pub mod axum;
 #[cfg(feature = "fe2o3-amqp")]
 pub mod fe2o3_amqp;
+
+#[cfg_attr(
+    docsrs,
+    doc(cfg(any(
+        feature = "http-binding",
+        feature = "actix",
+        feature = "warp",
+        feature = "reqwest",
+        feature = "axum",
+        feature = "poem"
+    )))
+)]
 #[cfg(any(
     feature = "http-binding",
     feature = "actix",
@@ -15,14 +29,19 @@ pub mod fe2o3_amqp;
     feature = "poem"
 ))]
 pub mod http;
+#[cfg_attr(docsrs, doc(cfg(feature = "nats")))]
 #[cfg(feature = "nats")]
 pub mod nats;
+#[cfg_attr(docsrs, doc(cfg(feature = "poem")))]
 #[cfg(feature = "poem")]
 pub mod poem;
+#[cfg_attr(docsrs, doc(cfg(feature = "rdkafka")))]
 #[cfg(feature = "rdkafka")]
 pub mod rdkafka;
+#[cfg_attr(docsrs, doc(cfg(feature = "reqwest")))]
 #[cfg(feature = "reqwest")]
 pub mod reqwest;
+#[cfg_attr(docsrs, doc(cfg(feature = "warp")))]
 #[cfg(feature = "warp")]
 pub mod warp;
 

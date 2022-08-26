@@ -4,14 +4,17 @@
 //! To send CloudEvents
 //!
 //! ```rust
+//! use serde_json::json;
 //! use fe2o3_amqp::{Connection, Sender, Session};
-//! use cloudevents::{EventBuilderV10, binding::fe2o3_amqp::{EventMessage, AmqpMessage}};
+//! use cloudevents::{
+//!     EventBuilder, EventBuilderV10, 
+//!     binding::fe2o3_amqp::{EventMessage, AmqpMessage}
+//! };
 //!
 //! // You need a running AMQP 1.0 broker to try out this example.
 //! // With docker: docker run -it --rm -e ARTEMIS_USERNAME=guest -e ARTEMIS_PASSWORD=guest -p 5672:5672 vromero/activemq-artemis
 //!
-//! #[tokio::main]
-//! async fn main() {
+//! # async fn send_event() {
 //!     let mut connection =
 //!         Connection::open("cloudevents-sdk-rust", "amqp://guest:guest@localhost:5672")
 //!             .await
@@ -20,11 +23,11 @@
 //!     let mut sender = Sender::attach(&mut session, "sender", "q1").await.unwrap();
 //!     
 //!     let event = EventBuilderV10::new()
-//!         .id(i.to_string())
+//!         .id("1")
 //!         .ty("example.test")
 //!         .source("localhost")
 //!         .extension("ext-name", "AMQP")
-//!         .data("application/json", value)
+//!         .data("application/json", json!({"hello": "world"}))
 //!         .build()
 //!         .unwrap();
 //!     
@@ -36,20 +39,22 @@
 //!     sender.close().await.unwrap();
 //!     session.end().await.unwrap();
 //!     connection.close().await.unwrap();
-//! }
+//! # }
 //! ```
 //!
 //! To receiver CloudEvents
 //!
 //! ```rust
 //! use fe2o3_amqp::{Connection, Receiver, Session};
-//! use cloudevents::{EventBuilderV10, binding::fe2o3_amqp::{EventMessage, AmqpMessage}};
+//! use cloudevents::{
+//!     EventBuilderV10, message::MessageDeserializer,
+//!     binding::fe2o3_amqp::{EventMessage, AmqpMessage}
+//! };
 //!
 //! // You need a running AMQP 1.0 broker to try out this example.
 //! // With docker: docker run -it --rm -e ARTEMIS_USERNAME=guest -e ARTEMIS_PASSWORD=guest -p 5672:5672 vromero/activemq-artemis
 //!
-//! #[tokio::main]
-//! async fn main() {
+//! # async fn receive_event() {
 //!     let mut connection =
 //!         Connection::open("cloudevents-sdk-rust", "amqp://guest:guest@localhost:5672")
 //!             .await
@@ -60,13 +65,14 @@
 //!     let delivery = receiver.recv().await.unwrap();
 //!     receiver.accept(&delivery).await.unwrap();
 //!     
-//!     let event_message = EventMessage::from(delivery.into_message());
+//!     let message: AmqpMessage = delivery.into_message();
+//!     let event_message = EventMessage::from(message);
 //!     let event = MessageDeserializer::into_event(event_message).unwrap();
 //!     
-//!     sender.close().await.unwrap();
+//!     receiver.close().await.unwrap();
 //!     session.end().await.unwrap();
 //!     connection.close().await.unwrap();
-//! }
+//! # }
 //! ```
 
 use std::convert::TryFrom;
@@ -112,22 +118,57 @@ pub type AmqpBody = Body<Value>;
 /// ## [`Event`] -> [`AmqpMessage`] in binary content mode
 ///
 /// ```rust
+/// use serde_json::json;
+/// use fe2o3_amqp_types::messaging::Message;
+/// use cloudevents::{EventBuilder, EventBuilderV10, binding::fe2o3_amqp::EventMessage};
+/// 
+/// let event = EventBuilderV10::new()
+///     .id("1")
+///     .ty("example.test")
+///     .source("localhost")
+///     .extension("ext-name", "AMQP")
+///     .data("application/json", json!({"hello": "world"}))
+///     .build()
+///     .unwrap();
 /// let event_message = EventMessage::from_binary_event(event).unwrap();
-/// let amqp_message = AmqpMessage:from(event_message);
+/// let amqp_message = Message::from(event_message);
 /// ```
 ///
 /// ## [`Event`] -> [`AmqpMessage`] in structured content mode
 ///
 /// ```rust
+/// use serde_json::json;
+/// use fe2o3_amqp_types::messaging::Message;
+/// use cloudevents::{EventBuilder, EventBuilderV10, binding::fe2o3_amqp::EventMessage};
+/// 
+/// let event = EventBuilderV10::new()
+///     .id("1")
+///     .ty("example.test")
+///     .source("localhost")
+///     .extension("ext-name", "AMQP")
+///     .data("application/json", json!({"hello": "world"}))
+///     .build()
+///     .unwrap();
 /// let event_message = EventMessage::from_structured_event(event).unwrap();
-/// let amqp_message = AmqpMessage:from(event_message);
+/// let amqp_message = Message::from(event_message);
 /// ```
 ///
 /// ## [`AmqpMessage`] -> [`Event`]
 ///
 /// ```rust
-/// let event_message = EventMessage::from(amqp_message);
-/// let event = MessageDeserializer::into_event(event_message).unwrap();
+/// use fe2o3_amqp::Receiver;
+/// use cloudevents::{
+///     message::MessageDeserializer,
+///     binding::fe2o3_amqp::{AmqpMessage, EventMessage}
+/// };
+/// 
+/// # async fn receive_event(receiver: &mut Receiver) {
+///     let delivery = receiver.recv().await.unwrap();
+///     receiver.accept(&delivery).await.unwrap();
+///     let amqp_message: AmqpMessage = delivery.into_message();
+///     let event_message = EventMessage::from(amqp_message);
+///     let event = MessageDeserializer::into_event(event_message).unwrap();
+/// # }
 /// ```
 pub struct EventMessage {
     pub content_type: Option<Symbol>,

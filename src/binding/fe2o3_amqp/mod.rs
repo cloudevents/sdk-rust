@@ -7,7 +7,7 @@
 //! use serde_json::json;
 //! use fe2o3_amqp::{Connection, Sender, Session};
 //! use cloudevents::{
-//!     EventBuilder, EventBuilderV10, 
+//!     EventBuilder, EventBuilderV10,
 //!     binding::fe2o3_amqp::{EventMessage, AmqpMessage}
 //! };
 //!
@@ -121,7 +121,7 @@ pub type AmqpBody = Body<Value>;
 /// use serde_json::json;
 /// use fe2o3_amqp_types::messaging::Message;
 /// use cloudevents::{EventBuilder, EventBuilderV10, binding::fe2o3_amqp::EventMessage};
-/// 
+///
 /// let event = EventBuilderV10::new()
 ///     .id("1")
 ///     .ty("example.test")
@@ -140,7 +140,7 @@ pub type AmqpBody = Body<Value>;
 /// use serde_json::json;
 /// use fe2o3_amqp_types::messaging::Message;
 /// use cloudevents::{EventBuilder, EventBuilderV10, binding::fe2o3_amqp::EventMessage};
-/// 
+///
 /// let event = EventBuilderV10::new()
 ///     .id("1")
 ///     .ty("example.test")
@@ -161,7 +161,7 @@ pub type AmqpBody = Body<Value>;
 ///     message::MessageDeserializer,
 ///     binding::fe2o3_amqp::{AmqpMessage, EventMessage}
 /// };
-/// 
+///
 /// # async fn receive_event(receiver: &mut Receiver) {
 ///     let delivery = receiver.recv().await.unwrap();
 ///     receiver.accept(&delivery).await.unwrap();

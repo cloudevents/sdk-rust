@@ -181,7 +181,7 @@ impl EventMessage {
         Self {
             content_type: None,
             application_properties: None,
-            body: Body::Nothing,
+            body: Body::Empty,
         }
     }
 

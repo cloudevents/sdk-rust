@@ -7,6 +7,6 @@ edition = "2021"
 
 [dependencies]
 cloudevents-sdk = { path = "../..", features = ["fe2o3-amqp"] }
-fe2o3-amqp = "0.4.0"
+fe2o3-amqp = "0.5.1"
 tokio = { version = "1", features = ["macros", "net", "rt", "rt-multi-thread"] }
 serde_json = "1"

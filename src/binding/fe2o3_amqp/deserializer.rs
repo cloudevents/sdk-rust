@@ -68,7 +68,7 @@ impl BinaryDeserializer for EventMessage {
                 let bytes = data.0.into_vec();
                 serializer.end_with_data(bytes)
             }
-            Body::Nothing => serializer.end(),
+            Body::Empty => serializer.end(),
             Body::Sequence(_) | Body::Value(_) => Err(Error::WrongEncoding {}),
         }
     }
@@ -82,7 +82,7 @@ impl StructuredDeserializer for EventMessage {
         use fe2o3_amqp_types::messaging::Body;
         let bytes = match self.body {
             Body::Data(data) => data.0.into_vec(),
-            Body::Nothing => vec![],
+            Body::Empty => vec![],
             Body::Sequence(_) | Body::Value(_) => return Err(Error::WrongEncoding {}),
         };
         serializer.set_structured_event(bytes)

@@ -68,16 +68,19 @@ impl<S: serde::Serializer> crate::event::format::EventFormatSerializer<S, Attrib
         extensions: &HashMap<String, ExtensionValue>,
         serializer: S,
     ) -> Result<<S as Serializer>::Ok, <S as Serializer>::Error> {
-        let num =
-            3 + if attributes.datacontenttype.is_some() {
-                1
-            } else {
-                0
-            } + if attributes.schemaurl.is_some() { 1 } else { 0 }
-                + if attributes.subject.is_some() { 1 } else { 0 }
-                + if attributes.time.is_some() { 1 } else { 0 }
-                + if data.is_some() { 1 } else { 0 }
-                + extensions.len();
+        let num = 4
+            + [
+                attributes.datacontenttype.is_some(),
+                attributes.schemaurl.is_some(),
+                attributes.subject.is_some(),
+                attributes.time.is_some(),
+                data.is_some(),
+            ]
+            .iter()
+            .filter(|&b| *b)
+            .count()
+            + extensions.len();
+
         let mut state = serializer.serialize_map(Some(num))?;
         state.serialize_entry("specversion", "0.3")?;
         state.serialize_entry("id", &attributes.id)?;

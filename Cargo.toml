@@ -69,6 +69,7 @@ rstest = "0.6"
 claim = "0.3.1"
 version-sync = "0.9.2"
 serde_yaml = "0.8"
+rmp-serde = "1"
 
 # runtime dev-deps
 actix-rt = { version = "^2" }

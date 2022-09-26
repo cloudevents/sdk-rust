@@ -200,6 +200,13 @@ mod tests {
     }
 
     #[test]
+    fn message_v03_msgpack() {
+        let buff = rmp_serde::to_vec(&fixtures::v03::full_json_data()).unwrap();
+        let event = rmp_serde::from_slice::<Event>(buff.as_slice()).unwrap();
+        assert_eq!(event, fixtures::v03::full_json_data(),);
+    }
+
+    #[test]
     fn message_v10_roundtrip_structured() -> Result<()> {
         assert_eq!(
             fixtures::v10::full_json_data(),
@@ -230,5 +237,12 @@ mod tests {
             BinaryDeserializer::into_event(fixtures::v10::full_json_data())?
         );
         Ok(())
+    }
+
+    #[test]
+    fn message_v10_msgpack() {
+        let buff = rmp_serde::to_vec(&fixtures::v10::full_json_data()).unwrap();
+        let event = rmp_serde::from_slice::<Event>(buff.as_slice()).unwrap();
+        assert_eq!(event, fixtures::v10::full_json_data(),);
     }
 }

@@ -33,7 +33,7 @@
 //! use futures::StreamExt;
 //!
 //! # async fn consume(consumer: StreamConsumer<DefaultConsumerContext>) -> Result<(), Box<dyn std::error::Error>> {
-//! let mut message_stream = consumer.start();
+//! let mut message_stream = consumer.stream();
 //!
 //! while let Some(message) = message_stream.next().await {
 //!     match message {

@@ -26,8 +26,8 @@ impl ConsumerRecordDeserializer {
             // TODO create an error variant for invalid headers
             .ok_or(crate::message::Error::WrongEncoding {})?;
         for i in 0..headers.count() {
-            let header = headers.get(i).unwrap();
-            hm.insert(header.0.to_string(), Vec::from(header.1));
+            let header = headers.get(i);
+            hm.insert(header.key.to_string(), Vec::from(header.value.unwrap()));
         }
         Ok(hm)
     }

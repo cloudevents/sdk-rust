@@ -58,7 +58,7 @@ pub fn parse_data_string<E: serde::de::Error>(v: Value) -> Result<String, E> {
 
 pub fn parse_data_base64<E: serde::de::Error>(v: Value) -> Result<Vec<u8>, E> {
     parse_field!(v, String, E).and_then(|s| {
-        base64::decode(&s).map_err(|e| E::custom(format_args!("decode error `{}`", e)))
+        base64::decode(s).map_err(|e| E::custom(format_args!("decode error `{}`", e)))
     })
 }
 

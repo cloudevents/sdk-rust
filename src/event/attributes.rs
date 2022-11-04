@@ -259,8 +259,7 @@ pub(crate) fn default_hostname() -> Url {
             "http://{}",
             hostname::get()
                 .ok()
-                .map(|s| s.into_string().ok())
-                .flatten()
+                .and_then(|s| s.into_string().ok())
                 .unwrap_or_else(|| "localhost".to_string())
         )
         .as_ref(),

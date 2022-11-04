@@ -67,7 +67,7 @@ macro_rules! header_value_to_str {
     ($header_value:expr) => {
         $header_value
             .to_str()
-            .map_err(|e| crate::message::Error::Other {
+            .map_err(|e| $crate::message::Error::Other {
                 source: Box::new(e),
             })
     };

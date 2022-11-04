@@ -120,7 +120,7 @@ pub fn full_json_base64_data_json() -> Value {
         "datacontenttype": json_datacontenttype(),
         "schemaurl": dataschema(),
         "datacontentencoding": "base64",
-        "data": base64::encode(&json_data_binary())
+        "data": base64::encode(json_data_binary())
     })
 }
 

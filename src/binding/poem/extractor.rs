@@ -76,7 +76,7 @@ mod tests {
             .header("ce-string_ex", "val")
             .header("ce-int_ex", "10")
             .header("ce-bool_ex", "true")
-            .header("ce-time", &fixtures::time().to_rfc3339())
+            .header("ce-time", fixtures::time().to_rfc3339())
             .body(fixtures::json_data_binary());
         let (req, mut body) = req.split();
         let result = Event::from_request(&req, &mut body).await.unwrap();

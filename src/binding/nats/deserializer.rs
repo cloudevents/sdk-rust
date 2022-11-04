@@ -50,7 +50,7 @@ mod tests {
         let nats_message = nats::Message::new(
             "not_relevant",
             None,
-            json!(expected.clone()).to_string().as_bytes().to_vec(),
+            json!(expected).to_string().as_bytes(),
             None,
         );
 
@@ -66,7 +66,7 @@ mod tests {
         let nats_message = nats::Message::new(
             "not_relevant",
             None,
-            json!(expected.clone()).to_string().as_bytes().to_vec(),
+            json!(expected).to_string().as_bytes(),
             None,
         );
 

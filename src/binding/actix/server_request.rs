@@ -84,7 +84,7 @@ mod tests {
     use serde_json::json;
 
     async fn to_event(req: &HttpRequest, mut payload: Payload) -> Event {
-        web::Payload::from_request(&req, &mut payload)
+        web::Payload::from_request(req, &mut payload)
             .then(|p| req.to_event(p.unwrap()))
             .await
             .unwrap()
@@ -120,7 +120,7 @@ mod tests {
             .insert_header(("ce-int_ex", "10"))
             .insert_header(("ce-bool_ex", "true"))
             .insert_header(("content-type", "application/json"))
-            .set_json(&fixtures::json_data())
+            .set_json(fixtures::json_data())
             .to_http_parts();
 
         assert_eq!(expected, to_event(&req, payload).await);

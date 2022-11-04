@@ -12,7 +12,7 @@ pub struct NatsCloudEvent {
 
 impl AsRef<[u8]> for NatsCloudEvent {
     fn as_ref(&self) -> &[u8] {
-        &self.payload.as_ref()
+        self.payload.as_ref()
     }
 }
 

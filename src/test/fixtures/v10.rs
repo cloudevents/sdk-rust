@@ -166,7 +166,7 @@ pub fn full_json_base64_data_json() -> Value {
         int_ext_name: int_ext_value,
         "datacontenttype": json_datacontenttype(),
         "dataschema": dataschema(),
-        "data_base64": base64::encode(&json_data_binary())
+        "data_base64": base64::encode(json_data_binary())
     })
 }
 

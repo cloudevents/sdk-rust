@@ -94,7 +94,7 @@ impl BinaryDeserializer for ConsumerRecordDeserializer {
             }
         }
 
-        if self.payload != None {
+        if self.payload.is_some() {
             visitor.end_with_data(self.payload.unwrap())
         } else {
             visitor.end()
@@ -116,8 +116,7 @@ impl MessageDeserializer for ConsumerRecordDeserializer {
         match (
             self.headers
                 .get("content-type")
-                .map(|s| String::from_utf8(s.to_vec()).ok())
-                .flatten()
+                .and_then(|s| String::from_utf8(s.to_vec()).ok())
                 .map(|s| s.starts_with(CLOUDEVENTS_JSON_HEADER))
                 .unwrap_or(false),
             self.headers.get(SPEC_VERSION_HEADER),

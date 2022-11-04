@@ -9,7 +9,7 @@ use crate::message::{
     BinaryDeserializer, BinarySerializer, MessageAttributeValue, Result, StructuredSerializer,
 };
 use crate::Event;
-use rdkafka::message::{OwnedHeaders, ToBytes};
+use rdkafka::message::{Header, OwnedHeaders, ToBytes};
 use rdkafka::producer::{BaseRecord, FutureRecord};
 
 /// This struct contains a serialized CloudEvent message in the Kafka shape.
@@ -46,20 +46,27 @@ impl Default for MessageRecord {
 
 impl BinarySerializer<MessageRecord> for MessageRecord {
     fn set_spec_version(mut self, sv: SpecVersion) -> Result<Self> {
-        self.headers = self.headers.add(SPEC_VERSION_HEADER, &sv.to_string());
+        let v = sv.to_string();
+        let header = Header {
+            key: SPEC_VERSION_HEADER,
+            value: Some(&v),
+        };
+        self.headers = self.headers.insert(header);
         Ok(self)
     }
 
     fn set_attribute(mut self, name: &str, value: MessageAttributeValue) -> Result<Self> {
-        let key = &header_prefix(name);
-        self.headers = self.headers.add(key, &value.to_string());
+        let v = value.to_string();
+        let header = Header {
+            key: &header_prefix(name),
+            value: Some(&v),
+        };
+        self.headers = self.headers.insert(header);
         Ok(self)
     }
 
-    fn set_extension(mut self, name: &str, value: MessageAttributeValue) -> Result<Self> {
-        let key = &header_prefix(name);
-        self.headers = self.headers.add(key, &value.to_string());
-        Ok(self)
+    fn set_extension(self, name: &str, value: MessageAttributeValue) -> Result<Self> {
+        self.set_attribute(name, value)
     }
 
     fn end_with_data(mut self, bytes: Vec<u8>) -> Result<MessageRecord> {
@@ -74,7 +81,11 @@ impl BinarySerializer<MessageRecord> for MessageRecord {
 
 impl StructuredSerializer<MessageRecord> for MessageRecord {
     fn set_structured_event(mut self, bytes: Vec<u8>) -> Result<MessageRecord> {
-        self.headers = self.headers.add(CONTENT_TYPE, CLOUDEVENTS_JSON_HEADER);
+        let header = Header {
+            key: CONTENT_TYPE,
+            value: Some(CLOUDEVENTS_JSON_HEADER),
+        };
+        self.headers = self.headers.insert(header);
 
         self.payload = Some(bytes);
 

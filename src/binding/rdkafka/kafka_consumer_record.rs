@@ -20,16 +20,13 @@ pub struct ConsumerRecordDeserializer {
 
 impl ConsumerRecordDeserializer {
     fn get_kafka_headers(message: &impl Message) -> Result<HashMap<String, Vec<u8>>> {
-        let mut hm = HashMap::new();
-        let headers = message
-            .headers()
-            // TODO create an error variant for invalid headers
-            .ok_or(crate::message::Error::WrongEncoding {})?;
-        for i in 0..headers.count() {
-            let header = headers.get(i).unwrap();
-            hm.insert(header.0.to_string(), Vec::from(header.1));
+        match message.headers() {
+            None => Err(crate::message::Error::WrongEncoding {}),
+            Some(headers) => Ok(headers
+                .iter()
+                .map(|h| (h.key.to_string(), Vec::from(h.value.unwrap())))
+                .collect()),
         }
-        Ok(hm)
     }
 
     pub fn new(message: &impl Message) -> Result<ConsumerRecordDeserializer> {

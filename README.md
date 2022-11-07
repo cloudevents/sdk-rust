@@ -42,7 +42,7 @@ enabling your Protocol Binding of choice:
 
 ```toml
 [dependencies]
-cloudevents-sdk = { version = "0.5.0" }
+cloudevents-sdk = { version = "0.6.0" }
 ```
 
 Now you can start creating events:

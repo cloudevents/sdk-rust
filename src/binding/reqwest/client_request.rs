@@ -2,7 +2,7 @@ use reqwest_lib as reqwest;
 
 use crate::binding::{
     http::{header_prefix, SPEC_VERSION_HEADER},
-    CLOUDEVENTS_JSON_HEADER,
+    CLOUDEVENTS_BATCH_JSON_HEADER, CLOUDEVENTS_JSON_HEADER,
 };
 use crate::event::SpecVersion;
 use crate::message::{
@@ -72,17 +72,34 @@ pub fn event_to_request(event: Event, request_builder: RequestBuilder) -> Result
     BinaryDeserializer::deserialize_binary(event, RequestSerializer::new(request_builder))
 }
 
+/// Method to fill a [`RequestBuilder`] with a batched [`Vec<Event>`].
+pub fn events_to_request(
+    events: Vec<Event>,
+    request_builder: RequestBuilder,
+) -> Result<RequestBuilder> {
+    let bytes = serde_json::to_vec(&events)?;
+    Ok(request_builder
+        .header(reqwest::header::CONTENT_TYPE, CLOUDEVENTS_BATCH_JSON_HEADER)
+        .body(bytes))
+}
+
 /// Extension Trait for [`RequestBuilder`] which acts as a wrapper for the function [`event_to_request()`].
 ///
 /// This trait is sealed and cannot be implemented for types outside of this crate.
 pub trait RequestBuilderExt: private::Sealed {
     /// Write in this [`RequestBuilder`] the provided [`Event`]. Similar to invoking [`Event`].
     fn event(self, event: Event) -> Result<RequestBuilder>;
+    /// Write in this [`RequestBuilder`] the provided batched [`Vec<Event>`].
+    fn events(self, events: Vec<Event>) -> Result<RequestBuilder>;
 }
 
 impl RequestBuilderExt for RequestBuilder {
     fn event(self, event: Event) -> Result<RequestBuilder> {
         event_to_request(event, self)
+    }
+
+    fn events(self, events: Vec<Event>) -> Result<RequestBuilder> {
+        events_to_request(events, self)
     }
 }
 
@@ -180,6 +197,27 @@ mod tests {
         .send()
         .await
         .unwrap();
+
+        m.assert();
+    }
+
+    #[tokio::test]
+    async fn test_batched_request() {
+        let input = vec![fixtures::v10::full_json_data_string_extension()];
+        let url = mockito::server_url();
+        let m = mock("POST", "/")
+            .match_header("content-type", "application/cloudevents-batch+json")
+            .match_body(Matcher::Exact(serde_json::to_string(&input).unwrap()))
+            .create();
+
+        let client = reqwest::Client::new();
+        client
+            .post(&url)
+            .events(input)
+            .unwrap()
+            .send()
+            .await
+            .unwrap();
 
         m.assert();
     }

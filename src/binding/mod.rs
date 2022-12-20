@@ -52,6 +52,7 @@ pub(crate) mod kafka {
 }
 
 pub(crate) static CLOUDEVENTS_JSON_HEADER: &str = "application/cloudevents+json";
+pub(crate) static CLOUDEVENTS_BATCH_JSON_HEADER: &str = "application/cloudevents-batch+json";
 pub(crate) static CONTENT_TYPE: &str = "content-type";
 
 fn header_prefix(prefix: &str, name: &str) -> String {

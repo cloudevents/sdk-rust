@@ -1,9 +1,10 @@
 use reqwest_lib as reqwest;
 
-use crate::binding::http;
+use crate::binding;
 use crate::message::{Error, Result};
 use crate::Event;
 use async_trait::async_trait;
+use http::header;
 use reqwest::Response;
 
 /// Method to transform an incoming [`Response`] to [`Event`].
@@ -12,7 +13,26 @@ pub async fn response_to_event(res: Response) -> Result<Event> {
     let b = res.bytes().await.map_err(|e| Error::Other {
         source: Box::new(e),
     })?;
-    http::to_event(&h, b.to_vec())
+    binding::http::to_event(&h, b.to_vec())
+}
+
+/// Method to transform an incoming [`Response`] to a batched [`Vec<Event>`]
+pub async fn response_to_events(res: Response) -> Result<Vec<Event>> {
+    if res
+        .headers()
+        .get(header::CONTENT_TYPE)
+        .and_then(|v| v.to_str().ok())
+        .filter(|&v| v.starts_with(binding::CLOUDEVENTS_BATCH_JSON_HEADER))
+        .is_none()
+    {
+        return Err(Error::WrongEncoding {});
+    }
+
+    let bytes = res.bytes().await.map_err(|e| Error::Other {
+        source: Box::new(e),
+    })?;
+
+    Ok(serde_json::from_slice(&bytes)?)
 }
 
 /// Extension Trait for [`Response`] which acts as a wrapper for the function [`response_to_event()`].
@@ -22,12 +42,18 @@ pub async fn response_to_event(res: Response) -> Result<Event> {
 pub trait ResponseExt: private::Sealed {
     /// Convert this [`Response`] to [`Event`].
     async fn into_event(self) -> Result<Event>;
+    /// Convert this [`Response`] to a batched [`Vec<Event>`].
+    async fn into_events(self) -> Result<Vec<Event>>;
 }
 
 #[async_trait(?Send)]
 impl ResponseExt for Response {
     async fn into_event(self) -> Result<Event> {
         response_to_event(self).await
+    }
+
+    async fn into_events(self) -> Result<Vec<Event>> {
+        response_to_events(self).await
     }
 }
 
@@ -44,6 +70,7 @@ mod tests {
     use super::*;
     use mockito::mock;
     use reqwest_lib as reqwest;
+    use std::vec;
 
     use crate::test::fixtures;
 
@@ -128,6 +155,33 @@ mod tests {
             .await
             .unwrap()
             .into_event()
+            .await
+            .unwrap();
+
+        assert_eq!(expected, res);
+    }
+
+    #[tokio::test]
+    async fn test_batched_response() {
+        let expected = vec![fixtures::v10::full_json_data_string_extension()];
+
+        let url = mockito::server_url();
+        let _m = mock("GET", "/")
+            .with_status(200)
+            .with_header(
+                "content-type",
+                "application/cloudevents-batch+json; charset=utf-8",
+            )
+            .with_body(serde_json::to_string(&expected).unwrap())
+            .create();
+
+        let client = reqwest::Client::new();
+        let res = client
+            .get(&url)
+            .send()
+            .await
+            .unwrap()
+            .into_events()
             .await
             .unwrap();
 

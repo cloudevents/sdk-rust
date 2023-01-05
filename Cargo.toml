@@ -77,11 +77,18 @@ serde_yaml = "0.8"
 rmp-serde = "1"
 
 # runtime dev-deps
-actix-rt = { version = "^2" }
+
 url = { version = "^2.1", features = ["serde"] }
 serde_json = { version = "^1.0" }
 chrono = { version = "^0.4", features = ["serde"] }
 mockito = "0.25.1"
-tokio = { version = "^1.0", features = ["full"] }
 mime = "0.3"
+
+
+[target."cfg(not(target_os = \"wasi\"))".dev-dependencies]
+actix-rt = { version = "^2" }
+tokio = { version = "^1.0", features = ["full"] }
 tower = { version = "0.4", features = ["util"] }
+
+[target.'cfg(all(target_arch = "wasm32", target_os = "wasi"))'.dev-dependencies]
+tokio_wasi = { version = "1", features = ["io-util", "fs", "net", "time", "rt", "macros"] }

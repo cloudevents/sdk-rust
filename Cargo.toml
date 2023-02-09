@@ -71,7 +71,7 @@ hyper_wasi = { version = "0.15", features = ["full"], optional = true  }
 
 [dev-dependencies]
 rstest = "0.6"
-claim = { git = "https://github.com/No9/rust-claim", rev="739d12b3d55c05ceb9a2b78cf0ca4ccb7455abdb" }
+claims = "0.7.1"
 version-sync = "0.9.2"
 serde_yaml = "0.8"
 rmp-serde = "1"

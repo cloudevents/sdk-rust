@@ -1,6 +1,6 @@
 [package]
 name = "cloudevents-sdk"
-version = "0.6.0"
+version = "0.7.0"
 authors = ["Francesco Guardiani <francescoguard@gmail.com>"]
 license-file = "LICENSE"
 edition = "2018"

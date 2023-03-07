@@ -66,7 +66,7 @@ mod tests {
     use crate::EventBuilder;
     use crate::EventBuilderV03;
     use crate::EventBuilderV10;
-    use claim::*;
+    use claims::*;
     use rstest::rstest;
     use serde_json::{json, Value};
     use serde_yaml;

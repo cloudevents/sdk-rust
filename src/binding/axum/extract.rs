@@ -48,7 +48,7 @@ mod tests {
     async fn axum_test_request() {
         let expected = fixtures::v10::minimal_string_extension();
 
-        let mut request = Request::builder()
+        let request = Request::builder()
             .method(http::Method::POST)
             .header("ce-specversion", "1.0")
             .header("ce-id", "0001")
@@ -65,7 +65,7 @@ mod tests {
 
     #[tokio::test]
     async fn axum_test_bad_request() {
-        let mut request = Request::builder()
+        let request = Request::builder()
             .method(http::Method::POST)
             .header("ce-specversion", "BAD SPECIFICATION")
             .header("ce-id", "0001")
@@ -88,7 +88,7 @@ mod tests {
     async fn axum_test_request_with_full_data() {
         let expected = fixtures::v10::full_binary_json_data_string_extension();
 
-        let mut request = Request::builder()
+        let request = Request::builder()
             .method(http::Method::POST)
             .header("ce-specversion", "1.0")
             .header("ce-id", "0001")

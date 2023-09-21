@@ -67,10 +67,6 @@ Checkout the examples using our integrations to learn how to send and receive ev
 * [Warp Example](example-projects/warp-example)
 * [NATS Example](example-projects/nats-example)
 
-## Development & Contributing
-
-If you're interested in contributing to sdk-rust, look at [Contributing documentation](CONTRIBUTING.md)
-
 ## Community
 
 - There are bi-weekly calls immediately following the
@@ -102,3 +98,10 @@ information.
 [Docs badge]: https://docs.rs/cloudevents-sdk/badge.svg
 [docs.rs]: https://docs.rs/cloudevents-sdk
 [feature flag]: https://doc.rust-lang.org/cargo/reference/manifest.html#the-features-section
+
+## Additional SDK Resources
+
+- [List of current active maintainers](MAINTAINERS.md)
+- [How to contribute to the project](CONTRIBUTING.md)
+- [SDK's License](LICENSE)
+- [SDK's Release process](RELEASING.md)

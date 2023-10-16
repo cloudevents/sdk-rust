@@ -93,6 +93,10 @@ for how PR reviews and approval, and our
 [Code of Conduct](https://github.com/cloudevents/spec/blob/master/community/GOVERNANCE.md#additional-information)
 information.
 
+If there is a security concern with one of the CloudEvents specifications, or
+with one of the project's SDKs, please send an email to
+[cncf-cloudevents-security@lists.cncf.io](mailto:cncf-cloudevents-security@lists.cncf.io).
+
 [Crates badge]: https://img.shields.io/crates/v/cloudevents-sdk.svg
 [crates.io]: https://crates.io/crates/cloudevents-sdk
 [Docs badge]: https://docs.rs/cloudevents-sdk/badge.svg

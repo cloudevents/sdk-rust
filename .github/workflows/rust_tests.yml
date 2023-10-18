@@ -31,20 +31,20 @@ jobs:
     - run: sudo apt-get install -y musl musl-dev musl-tools cmake
       if: matrix.target == 'x86_64-unknown-linux-musl'
 
-    # Caching stuff
-    - uses: actions/cache@v2
-      with:
-        path: |
-          ~/.cargo/bin/
-          ~/.cargo/registry/index/
-          ~/.cargo/registry/cache/
-          ~/.cargo/git/db/
-        key: ${{ runner.os }}-cargo-deps-${{ hashFiles('**/Cargo.toml') }}
-    - uses: actions/cache@v2
-      with:
-        path: |
-          target/
-        key: ${{ runner.os }}-cargo-target-${{ matrix.toolchain }}-${{ matrix.target }}-${{ hashFiles('**/Cargo.toml') }}
+    # # Caching stuff
+    # - uses: actions/cache@v2
+    #   with:
+    #     path: |
+    #       ~/.cargo/bin/
+    #       ~/.cargo/registry/index/
+    #       ~/.cargo/registry/cache/
+    #       ~/.cargo/git/db/
+    #     key: ${{ runner.os }}-cargo-deps-${{ hashFiles('**/Cargo.toml') }}
+    # - uses: actions/cache@v2
+    #   with:
+    #     path: |
+    #       target/
+    #     key: ${{ runner.os }}-cargo-target-${{ matrix.toolchain }}-${{ matrix.target }}-${{ hashFiles('**/Cargo.toml') }}
     - uses: actions-rs/toolchain@v1
       with:
         toolchain: ${{ matrix.toolchain }}

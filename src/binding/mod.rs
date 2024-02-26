@@ -6,6 +6,9 @@ pub mod actix;
 #[cfg_attr(docsrs, doc(cfg(feature = "axum")))]
 #[cfg(feature = "axum")]
 pub mod axum;
+#[cfg_attr(docsrs, doc(cfg(feature = "fe2o3-amqp")))]
+#[cfg(feature = "fe2o3-amqp")]
+pub mod fe2o3_amqp;
 
 #[cfg_attr(
     docsrs,

@@ -49,12 +49,11 @@
 //!         .build();
 //!
 //!     match event {
-//!         Ok(event) => Ok(from_event(event)),
-//!         Err(e) => Ok(warp::reply::with_status(
+//!         Ok(event) => from_event(event),
+//!         Err(e) => warp::reply::with_status(
 //!             e.to_string(),
 //!             StatusCode::INTERNAL_SERVER_ERROR,
-//!         )
-//!         .into_response()),
+//!         ).into_response(),
 //!     }
 //! });
 //!

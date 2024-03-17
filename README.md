@@ -42,7 +42,7 @@ enabling your Protocol Binding of choice:
 
 ```toml
 [dependencies]
-cloudevents-sdk = { version = "0.6.0" }
+cloudevents-sdk = { version = "0.7.0" }
 ```
 
 Now you can start creating events:
@@ -66,10 +66,6 @@ Checkout the examples using our integrations to learn how to send and receive ev
 * [Kafka Example](example-projects/rdkafka-example)
 * [Warp Example](example-projects/warp-example)
 * [NATS Example](example-projects/nats-example)
-
-## Development & Contributing
-
-If you're interested in contributing to sdk-rust, look at [Contributing documentation](CONTRIBUTING.md)
 
 ## Community
 
@@ -97,8 +93,19 @@ for how PR reviews and approval, and our
 [Code of Conduct](https://github.com/cloudevents/spec/blob/master/community/GOVERNANCE.md#additional-information)
 information.
 
+If there is a security concern with one of the CloudEvents specifications, or
+with one of the project's SDKs, please send an email to
+[cncf-cloudevents-security@lists.cncf.io](mailto:cncf-cloudevents-security@lists.cncf.io).
+
 [Crates badge]: https://img.shields.io/crates/v/cloudevents-sdk.svg
 [crates.io]: https://crates.io/crates/cloudevents-sdk
 [Docs badge]: https://docs.rs/cloudevents-sdk/badge.svg
 [docs.rs]: https://docs.rs/cloudevents-sdk
 [feature flag]: https://doc.rust-lang.org/cargo/reference/manifest.html#the-features-section
+
+## Additional SDK Resources
+
+- [List of current active maintainers](MAINTAINERS.md)
+- [How to contribute to the project](CONTRIBUTING.md)
+- [SDK's License](LICENSE)
+- [SDK's Release process](RELEASING.md)

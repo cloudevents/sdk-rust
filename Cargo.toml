@@ -8,9 +8,7 @@ description = "CloudEvents official Rust SDK"
 documentation = "https://docs.rs/cloudevents-sdk"
 readme = "README.md"
 repository = "https://github.com/cloudevents/sdk-rust"
-exclude = [
-    ".github/*"
-]
+exclude = [".github/*"]
 categories = ["web-programming", "encoding", "data-structures"]
 
 # Enable all features when building on docs.rs to show feature gated bindings
@@ -45,30 +43,34 @@ uuid = { version = "1", features = ["v4"] }
 # runtime optional deps
 actix-web = { version = "4", optional = true }
 actix-http = { version = "3", optional = true }
-reqwest-lib = { version = "^0.11", default-features = false, features = ["rustls-tls"], optional = true, package = "reqwest" }
-rdkafka-lib = { version = "^0.29", features = ["cmake-build"], optional = true, package = "rdkafka" }
+reqwest-lib = { version = "^0.11", default-features = false, features = [
+    "rustls-tls",
+], optional = true, package = "reqwest" }
+rdkafka-lib = { version = "^0.29", features = [
+    "cmake-build",
+], optional = true, package = "rdkafka" }
 warp-lib = { version = "^0.3", optional = true, package = "warp" }
 async-trait = { version = "^0.1.33", optional = true }
 bytes = { version = "^1.0", optional = true }
 futures = { version = "^0.3", optional = true }
 http = { version = "0.2", optional = true }
 hyper = { version = "^0.14", optional = true }
-axum-lib = { version = "^0.6", optional = true, package="axum"}
+axum-lib = { version = "^0.6", optional = true, package = "axum" }
 http-body = { version = "^0.4", optional = true }
 poem-lib = { version = "=1.2.34", optional = true, package = "poem" }
 nats-lib = { version = "0.21.0", optional = true, package = "nats" }
 
-[target."cfg(not(target_arch = \"wasm32\"))".dependencies]
+[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
 hostname = "^0.3"
 
 [target.'cfg(all(target_arch = "wasm32", target_os = "unknown"))'.dependencies]
 web-sys = { version = "^0.3", features = ["Window", "Location"] }
 
-[target."cfg(not(target_os = \"wasi\"))".dependencies]
+[target.'cfg(not(target_os = "wasi"))'.dependencies]
 hyper = { version = "^0.14", optional = true }
 
 [target.'cfg(all(target_arch = "wasm32", target_os = "wasi"))'.dependencies]
-hyper_wasi = { version = "0.15", features = ["full"], optional = true  }
+hyper_wasi = { version = "0.15", features = ["full"], optional = true }
 
 [dev-dependencies]
 rstest = "0.6"
@@ -86,10 +88,17 @@ mockito = "0.25.1"
 mime = "0.3"
 
 
-[target."cfg(not(target_os = \"wasi\"))".dev-dependencies]
+[target.'cfg(not(target_os = "wasi"))'.dev-dependencies]
 actix-rt = { version = "^2" }
 tokio = { version = "^1.0", features = ["full"] }
 tower = { version = "0.4", features = ["util"] }
 
 [target.'cfg(all(target_arch = "wasm32", target_os = "wasi"))'.dev-dependencies]
-tokio_wasi = { version = "1", features = ["io-util", "fs", "net", "time", "rt", "macros"] }
+tokio_wasi = { version = "1", features = [
+    "io-util",
+    "fs",
+    "net",
+    "time",
+    "rt",
+    "macros",
+] }

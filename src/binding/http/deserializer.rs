@@ -34,9 +34,9 @@ impl<'a, T: Headers<'a>> BinaryDeserializer for Deserializer<'a, T> {
                 .unwrap()?,
         )?;
 
-        visitor = visitor.set_spec_version(spec_version.clone())?;
-
         let attributes = spec_version.attribute_names();
+
+        visitor = visitor.set_spec_version(spec_version)?;
 
         for (hn, hv) in self.headers.iter().filter(|(hn, _)| {
             let key = hn.as_str();

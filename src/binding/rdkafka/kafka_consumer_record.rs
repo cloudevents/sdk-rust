@@ -51,9 +51,9 @@ impl BinaryDeserializer for ConsumerRecordDeserializer {
             })?,
         )?;
 
-        visitor = visitor.set_spec_version(spec_version.clone())?;
-
         let attributes = spec_version.attribute_names();
+
+        visitor = visitor.set_spec_version(spec_version)?;
 
         if let Some(hv) = self.headers.remove(CONTENT_TYPE) {
             visitor = visitor.set_attribute(

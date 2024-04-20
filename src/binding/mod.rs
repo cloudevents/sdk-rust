@@ -7,6 +7,9 @@ pub mod actix;
 #[cfg(feature = "axum")]
 pub mod axum;
 
+#[cfg_attr(docsrs, doc(cfg(feature = "async-nats")))]
+#[cfg(feature = "async-nats")]
+pub mod async_nats;
 #[cfg_attr(
     docsrs,
     doc(cfg(any(

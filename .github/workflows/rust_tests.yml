@@ -170,3 +170,12 @@ jobs:
         command: build
         toolchain: ${{ matrix.toolchain }}
         args: --target ${{ matrix.target }} --manifest-path ./example-projects/nats-example/Cargo.toml
+
+    - uses: actions-rs/cargo@v1
+      name: "Build wasi-example"
+      if: matrix.target == 'wasm32-wasi' && matrix.toolchain == 'stable'
+      with:
+        command: build
+        toolchain: ${{ matrix.toolchain }}
+        args: --target ${{ matrix.target }} --manifest-path ./example-projects/wasi-example/Cargo.toml
+        

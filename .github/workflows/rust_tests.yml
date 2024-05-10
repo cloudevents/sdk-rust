@@ -116,6 +116,14 @@ jobs:
         CARGO_TARGET_WASM32_WASI_RUNNER: wasmedge
     # Build examples
     - uses: actions-rs/cargo@v1
+      name: "Build wasi-example"
+      if: matrix.target == 'wasm32-wasi' && matrix.toolchain == 'stable'
+      with:
+        command: build
+        toolchain: ${{ matrix.toolchain }}
+        args: --target ${{ matrix.target }} --manifest-path ./example-projects/wasi-example/Cargo.toml
+
+    - uses: actions-rs/cargo@v1
       name: "Build reqwest-wasm-example"
       if: matrix.target == 'wasm32-unknown-unknown' && matrix.toolchain == 'stable'
       with:
@@ -170,3 +178,4 @@ jobs:
         command: build
         toolchain: ${{ matrix.toolchain }}
         args: --target ${{ matrix.target }} --manifest-path ./example-projects/nats-example/Cargo.toml
+

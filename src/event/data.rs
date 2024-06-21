@@ -82,9 +82,40 @@ impl TryFrom<Data> for String {
 impl fmt::Display for Data {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         match self {
-            Data::Binary(vec) => write!(f, "Binary data: {:?}", str::from_utf8(vec).unwrap()),
+            Data::Binary(vec) => {
+                write!(f, "Binary data: ")?;
+                let mut slice = &vec[..];
+                loop {
+                    match str::from_utf8(slice) {
+                        Ok(s) => break f.write_str(s),
+                        Err(e) => {
+                            let (good, bad) = slice.split_at(e.valid_up_to());
+
+                            // SAFETY: good is a valid utf8 sequency
+                            f.write_str(unsafe { str::from_utf8_unchecked(good) })?;
+
+                            write!(f, "\\x{:02X}", bad[0])?;
+                            slice = &bad[1..];
+                        }
+                    }
+                }
+            }
             Data::String(s) => write!(f, "String data: {}", s),
             Data::Json(j) => write!(f, "Json data: {}", j),
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::Data;
+
+    #[test]
+    fn display_arbitrary_bytes() {
+        let d = Data::Binary(b"E onde sou s\xC3\xB3 desejo, queres n\xC3\xA3o\xF0\x90".into());
+        assert_eq!(
+            format!("{}", d),
+            r"Binary data: E onde sou só desejo, queres não\xF0\x90"
+        );
     }
 }

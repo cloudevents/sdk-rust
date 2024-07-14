@@ -8,6 +8,8 @@ use crate::{
         Result, StructuredDeserializer, StructuredSerializer,
     },
 };
+#[cfg(feature = "axum")]
+use http_1_1 as http;
 use std::convert::TryFrom;
 
 pub struct Deserializer<'a, T: Headers<'a>> {

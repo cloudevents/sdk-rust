@@ -1,27 +1,21 @@
-use axum_lib as axum;
-
-use axum::{
-    body::{boxed, BoxBody},
-    http::Response,
-    response::IntoResponse,
-};
-use http::{header, StatusCode};
-use hyper::body::Body;
-
 use crate::binding::http::builder::adapter::to_response;
 use crate::event::Event;
+use axum::{body::Body, http::Response, response::IntoResponse};
+use axum_lib_0_7 as axum;
+use http::{header, StatusCode};
+use http_1_1 as http;
 
 impl IntoResponse for Event {
-    fn into_response(self) -> Response<BoxBody> {
+    fn into_response(self) -> Response<Body> {
         match to_response(self) {
             Ok(resp) => {
                 let (parts, body) = resp.into_parts();
-                Response::from_parts(parts, boxed(body))
+                Response::from_parts(parts, Body::new(body))
             }
             Err(err) => Response::builder()
                 .status(StatusCode::INTERNAL_SERVER_ERROR)
                 .header(header::CONTENT_TYPE, "text/plain")
-                .body(boxed(Body::from(err.to_string())))
+                .body(Body::from(err.to_string()))
                 .unwrap(),
         }
     }
@@ -105,7 +99,7 @@ mod tests {
         );
 
         let (_, body) = resp.into_parts();
-        let body = hyper::body::to_bytes(body).await.unwrap();
+        let body = axum::body::to_bytes(body, usize::MAX).await.unwrap();
 
         assert_eq!(fixtures::json_data_binary(), body);
     }

@@ -6,13 +6,14 @@
 //! To echo events:
 //!
 //! ```
-//! use axum_lib as axum;
+//! # use axum_lib_0_7 as  axum;
 //! use axum::{
 //!     routing::{get, post},
 //!     Router,
 //! };
 //! use cloudevents::Event;
 //! use http::StatusCode;
+//! # use http_1_1 as http;
 //!
 //! fn app() -> Router {
 //!     Router::new()
@@ -31,13 +32,14 @@
 //! To create event inside request handlers and send them as responses:
 //!
 //! ```
-//! use axum_lib as axum;
+//! # use axum_lib_0_7 as  axum;
 //! use axum::{
 //!     routing::{get, post},
 //!     Router,
 //! };
 //! use cloudevents::{Event, EventBuilder, EventBuilderV10};
 //! use http::StatusCode;
+//! # use http_1_1 as http;
 //! use serde_json::json;
 //!
 //! fn app() -> Router {
@@ -77,7 +79,7 @@ pub mod response;
 #[cfg(test)]
 mod tests {
 
-    use axum_lib as axum;
+    use axum_lib_0_7 as axum;
 
     use axum::{
         body::Body,
@@ -155,7 +157,7 @@ mod tests {
         );
 
         let (_, body) = resp.into_parts();
-        let body = hyper::body::to_bytes(body).await.unwrap();
+        let body = axum::body::to_bytes(body, usize::MAX).await.unwrap();
 
         assert_eq!(j.to_string().as_bytes(), body);
     }

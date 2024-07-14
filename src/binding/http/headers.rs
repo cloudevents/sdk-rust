@@ -1,4 +1,6 @@
 use http::header::{AsHeaderName, HeaderMap, HeaderName, HeaderValue};
+#[cfg(feature = "axum")]
+use http_1_1 as http;
 
 /// Any http library should be able to use the
 /// [`to_event`](super::to_event) function with an implementation of

@@ -2,6 +2,18 @@
 //!
 //! Note: these APIs should be considered unstable and subject to changes.
 
+#[cfg(all(
+    feature = "axum",
+    any(
+        feature = "http-binding",
+        feature = "actix",
+        feature = "reqwest",
+        feature = "warp",
+        feature = "poem"
+    )
+))]
+compile_error!("feature `axum` cannot be used with features `http-binding`, `actix`, `reqwest`, `warp`, or `poem`");
+
 mod deserializer;
 mod encoding;
 mod error;

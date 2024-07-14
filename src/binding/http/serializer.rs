@@ -12,6 +12,8 @@ use crate::message::{
 };
 use crate::Event;
 use http::Request;
+#[cfg(feature = "axum")]
+use http_1_1 as http;
 use std::convert::TryFrom;
 use std::fmt::Debug;
 
@@ -131,6 +133,8 @@ mod tests {
     use crate::test::fixtures;
     use bytes::Bytes;
     use http::Request;
+    #[cfg(feature = "axum")]
+    use http_1_1 as http;
     use std::convert::TryFrom;
 
     #[test]

@@ -84,26 +84,41 @@ pub struct Event {
 
 #[delegate(self.attributes)]
 impl AttributesReader for Event {
-    fn id(&self) -> &str;
-    fn source(&self) -> &UriReference;
-    fn specversion(&self) -> SpecVersion;
-    fn ty(&self) -> &str;
-    fn datacontenttype(&self) -> Option<&str>;
-    fn dataschema(&self) -> Option<&Url>;
-    fn subject(&self) -> Option<&str>;
-    fn time(&self) -> Option<&DateTime<Utc>>;
+    fn id(&self) -> &str {}
+    fn source(&self) -> &UriReference {}
+    fn specversion(&self) -> SpecVersion {}
+    fn ty(&self) -> &str {}
+    fn datacontenttype(&self) -> Option<&str> {}
+    fn dataschema(&self) -> Option<&Url> {}
+    fn subject(&self) -> Option<&str> {}
+    fn time(&self) -> Option<&DateTime<Utc>> {}
 }
 
 #[delegate(self.attributes)]
 impl AttributesWriter for Event {
-    fn set_id(&mut self, id: impl Into<String>) -> String;
-    fn set_source(&mut self, source: impl Into<UriReference>) -> UriReference;
-    fn set_type(&mut self, ty: impl Into<String>) -> String;
-    fn set_subject(&mut self, subject: Option<impl Into<String>>) -> Option<String>;
-    fn set_time(&mut self, time: Option<impl Into<DateTime<Utc>>>) -> Option<DateTime<Utc>>;
-    fn set_datacontenttype(&mut self, datacontenttype: Option<impl Into<String>>)
-        -> Option<String>;
-    fn set_dataschema(&mut self, dataschema: Option<impl Into<Url>>) -> Option<Url>;
+    fn set_id(&mut self, id: impl Into<String>) -> String {}
+    fn set_source(&mut self, source: impl Into<UriReference>) -> UriReference {}
+    fn set_type(&mut self, ty: impl Into<String>) -> String {}
+    fn set_subject(
+        &mut self,
+        subject: Option<impl Into<String>>,
+    ) -> Option<String> {
+    }
+    fn set_time(
+        &mut self,
+        time: Option<impl Into<DateTime<Utc>>>,
+    ) -> Option<DateTime<Utc>> {
+    }
+    fn set_datacontenttype(
+        &mut self,
+        datacontenttype: Option<impl Into<String>>,
+    ) -> Option<String> {
+    }
+    fn set_dataschema(
+        &mut self,
+        dataschema: Option<impl Into<Url>>,
+    ) -> Option<Url> {
+    }
 }
 
 impl Default for Event {
@@ -139,12 +154,16 @@ impl Event {
 
     /// Returns an [`Iterator`] for all the available [CloudEvents Context attributes](https://github.com/cloudevents/spec/blob/master/spec.md#context-attributes), excluding extensions.
     /// This iterator does not contain the `data` field.
-    pub fn iter_attributes(&self) -> impl Iterator<Item = (&str, AttributeValue)> {
+    pub fn iter_attributes(
+        &self,
+    ) -> impl Iterator<Item = (&str, AttributeValue)> {
         self.attributes.iter()
     }
 
     /// Get all the [extensions](https://github.com/cloudevents/spec/blob/master/spec.md#extension-context-attributes)
-    pub fn iter_extensions(&self) -> impl Iterator<Item = (&str, &ExtensionValue)> {
+    pub fn iter_extensions(
+        &self,
+    ) -> impl Iterator<Item = (&str, &ExtensionValue)> {
         self.extensions.iter().map(|(k, v)| (k.as_str(), v))
     }
 
@@ -206,7 +225,10 @@ impl Event {
     /// let mut e = Event::default();
     /// let old_data = e.set_data_unchecked(json!({}));
     /// ```
-    pub fn set_data_unchecked(&mut self, data: impl Into<Data>) -> Option<Data> {
+    pub fn set_data_unchecked(
+        &mut self,
+        data: impl Into<Data>,
+    ) -> Option<Data> {
         std::mem::replace(&mut self.data, Some(data.into()))
     }
 

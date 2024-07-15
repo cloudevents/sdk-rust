@@ -1,5 +1,10 @@
-use crate::event::attributes::{default_hostname, AttributeValue, AttributesConverter};
-use crate::event::{AttributesReader, AttributesV03, AttributesWriter, SpecVersion, UriReference};
+use crate::event::attributes::{
+    default_hostname, AttributeValue, AttributesConverter,
+};
+use crate::event::{
+    AttributesReader, AttributesV03, AttributesWriter, SpecVersion,
+    UriReference,
+};
 use crate::message::{BinarySerializer, MessageAttributeValue};
 use chrono::{DateTime, Utc};
 use core::fmt::Debug;
@@ -51,10 +56,16 @@ impl<'a> Iterator for AttributesIntoIterator<'a> {
     type Item = (&'a str, AttributeValue<'a>);
     fn next(&mut self) -> Option<Self::Item> {
         let result = match self.index {
-            0 => Some(("specversion", AttributeValue::SpecVersion(SpecVersion::V10))),
+            0 => Some((
+                "specversion",
+                AttributeValue::SpecVersion(SpecVersion::V10),
+            )),
             1 => Some(("id", AttributeValue::String(&self.attributes.id))),
             2 => Some(("type", AttributeValue::String(&self.attributes.ty))),
-            3 => Some(("source", AttributeValue::URIRef(&self.attributes.source))),
+            3 => Some((
+                "source",
+                AttributeValue::URIRef(&self.attributes.source),
+            )),
             4 => self
                 .attributes
                 .datacontenttype
@@ -132,11 +143,17 @@ impl AttributesWriter for Attributes {
         std::mem::replace(&mut self.ty, ty.into())
     }
 
-    fn set_subject(&mut self, subject: Option<impl Into<String>>) -> Option<String> {
+    fn set_subject(
+        &mut self,
+        subject: Option<impl Into<String>>,
+    ) -> Option<String> {
         std::mem::replace(&mut self.subject, subject.map(Into::into))
     }
 
-    fn set_time(&mut self, time: Option<impl Into<DateTime<Utc>>>) -> Option<DateTime<Utc>> {
+    fn set_time(
+        &mut self,
+        time: Option<impl Into<DateTime<Utc>>>,
+    ) -> Option<DateTime<Utc>> {
         std::mem::replace(&mut self.time, time.map(Into::into))
     }
 
@@ -144,10 +161,16 @@ impl AttributesWriter for Attributes {
         &mut self,
         datacontenttype: Option<impl Into<String>>,
     ) -> Option<String> {
-        std::mem::replace(&mut self.datacontenttype, datacontenttype.map(Into::into))
+        std::mem::replace(
+            &mut self.datacontenttype,
+            datacontenttype.map(Into::into),
+        )
     }
 
-    fn set_dataschema(&mut self, dataschema: Option<impl Into<Url>>) -> Option<Url> {
+    fn set_dataschema(
+        &mut self,
+        dataschema: Option<impl Into<Url>>,
+    ) -> Option<Url> {
         std::mem::replace(&mut self.dataschema, dataschema.map(Into::into))
     }
 }
@@ -171,9 +194,14 @@ impl crate::event::message::AttributesDeserializer for super::Attributes {
         self,
         mut visitor: V,
     ) -> crate::message::Result<V> {
-        visitor = visitor.set_attribute("id", MessageAttributeValue::String(self.id))?;
-        visitor = visitor.set_attribute("type", MessageAttributeValue::String(self.ty))?;
-        visitor = visitor.set_attribute("source", MessageAttributeValue::UriRef(self.source))?;
+        visitor = visitor
+            .set_attribute("id", MessageAttributeValue::String(self.id))?;
+        visitor = visitor
+            .set_attribute("type", MessageAttributeValue::String(self.ty))?;
+        visitor = visitor.set_attribute(
+            "source",
+            MessageAttributeValue::UriRef(self.source),
+        )?;
         if self.datacontenttype.is_some() {
             visitor = visitor.set_attribute(
                 "datacontenttype",
@@ -193,8 +221,10 @@ impl crate::event::message::AttributesDeserializer for super::Attributes {
             )?;
         }
         if self.time.is_some() {
-            visitor = visitor
-                .set_attribute("time", MessageAttributeValue::DateTime(self.time.unwrap()))?;
+            visitor = visitor.set_attribute(
+                "time",
+                MessageAttributeValue::DateTime(self.time.unwrap()),
+            )?;
         }
         Ok(visitor)
     }
@@ -222,7 +252,6 @@ impl AttributesConverter for Attributes {
 mod tests {
     use super::*;
     use crate::test::fixtures;
-    use chrono::NaiveDateTime;
 
     #[test]
     fn iter_v10_test() {
@@ -244,13 +273,10 @@ mod tests {
             datacontenttype: None,
             dataschema: None,
             subject: None,
-            time: Some(DateTime::<Utc>::from_utc(
-                NaiveDateTime::from_timestamp(61, 0),
-                Utc,
-            )),
+            time: DateTime::from_timestamp(61, 0),
         };
         let b = &mut a.into_iter();
-        let time = DateTime::<Utc>::from_utc(NaiveDateTime::from_timestamp(61, 0), Utc);
+        let time = DateTime::from_timestamp(61, 0).unwrap();
 
         assert_eq!(
             ("specversion", AttributeValue::SpecVersion(SpecVersion::V10)),

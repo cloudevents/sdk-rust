@@ -114,7 +114,7 @@ mod private {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use mockito::{mock, Matcher};
+    use mockito::Matcher;
     use reqwest_lib as reqwest;
 
     use crate::message::StructuredDeserializer;
@@ -123,7 +123,7 @@ mod tests {
     #[tokio::test]
     async fn test_request() {
         let url = mockito::server_url();
-        let m = mock("POST", "/")
+        let m = mockito::mock("POST", "/")
             .match_header("ce-specversion", "1.0")
             .match_header("ce-id", "0001")
             .match_header("ce-type", "test_event.test_application")
@@ -149,7 +149,7 @@ mod tests {
     #[tokio::test]
     async fn test_request_with_full_data() {
         let url = mockito::server_url();
-        let m = mock("POST", "/")
+        let m = mockito::mock("POST", "/")
             .match_header("ce-specversion", "1.0")
             .match_header("ce-id", "0001")
             .with_header("ce-type", "test_event.test_application")
@@ -183,7 +183,7 @@ mod tests {
         let input = fixtures::v10::full_json_data_string_extension();
 
         let url = mockito::server_url();
-        let m = mock("POST", "/")
+        let m = mockito::mock("POST", "/")
             .match_header("content-type", "application/cloudevents+json")
             .match_body(Matcher::Exact(serde_json::to_string(&input).unwrap()))
             .create();
@@ -204,8 +204,9 @@ mod tests {
     #[tokio::test]
     async fn test_batched_request() {
         let input = vec![fixtures::v10::full_json_data_string_extension()];
+
         let url = mockito::server_url();
-        let m = mock("POST", "/")
+        let m = mockito::mock("POST", "/")
             .match_header("content-type", "application/cloudevents-batch+json")
             .match_body(Matcher::Exact(serde_json::to_string(&input).unwrap()))
             .create();

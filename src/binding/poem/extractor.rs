@@ -1,10 +1,9 @@
-use async_trait::async_trait;
+use crate::binding::http::to_event;
+use crate::Event;
+
 use poem_lib::error::ResponseError;
 use poem_lib::http::StatusCode;
 use poem_lib::{FromRequest, Request, RequestBody, Result};
-
-use crate::binding::http::to_event;
-use crate::Event;
 
 impl ResponseError for crate::message::Error {
     fn status(&self) -> StatusCode {
@@ -12,7 +11,6 @@ impl ResponseError for crate::message::Error {
     }
 }
 
-#[async_trait]
 impl<'a> FromRequest<'a> for Event {
     async fn from_request(req: &'a Request, body: &mut RequestBody) -> Result<Self> {
         Ok(to_event(req.headers(), body.take()?.into_vec().await?)?)
@@ -57,7 +55,7 @@ mod tests {
 
         let (req, mut body) = req.split();
         let resp = Event::from_request(&req, &mut body).await.err().unwrap();
-        assert_eq!(resp.as_response().status(), StatusCode::BAD_REQUEST);
+        assert_eq!(resp.status(), StatusCode::BAD_REQUEST);
         assert_eq!(resp.to_string(), "Invalid specversion BAD SPECIFICATION");
     }
 

@@ -10,7 +10,7 @@ edition = "2018"
 crate-type = ["cdylib"]
 
 [dependencies]
-reqwest = "^0.11"
+reqwest = "^0.12"
 uuid = "1"
 cloudevents-sdk = { path = "../..", features = ["reqwest"] }
 url = { version = "^2.1" }

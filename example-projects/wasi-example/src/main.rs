@@ -1,5 +1,5 @@
-use cloudevents::binding::http::builder::adapter::to_response;
-use cloudevents::binding::http::to_event;
+use cloudevents::binding::http_0_2::builder::adapter::to_response;
+use cloudevents::binding::http_0_2::to_event;
 
 use hyper::service::{make_service_fn, service_fn};
 use hyper::Server;
@@ -23,7 +23,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     }
     Ok(())
 }
-async fn handle_request(req: Request<Body>) -> Result<Response<Body>, anyhow::Error> {
+async fn handle_request(
+    req: Request<Body>,
+) -> Result<Response<Body>, anyhow::Error> {
     match (req.method(), req.uri().path()) {
         (&Method::POST, "/") => {
             let headers = req.headers().clone();
@@ -34,7 +36,9 @@ async fn handle_request(req: Request<Body>) -> Result<Response<Body>, anyhow::Er
 
             to_response(_respevt).map_err(|err| err.into())
         }
-        (&Method::GET, "/health/readiness") => Ok(Response::new(Body::from(""))),
+        (&Method::GET, "/health/readiness") => {
+            Ok(Response::new(Body::from("")))
+        }
         (&Method::GET, "/health/liveness") => Ok(Response::new(Body::from(""))),
         _ => {
             let mut not_found = Response::default();

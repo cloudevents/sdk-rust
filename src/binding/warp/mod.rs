@@ -24,6 +24,7 @@
 //!
 //! ```
 //! # use warp_lib as warp;
+//! # use http_0_2 as http;
 //! use cloudevents::{Event, EventBuilder, EventBuilderV10};
 //! use http::StatusCode;
 //! use serde_json::json;

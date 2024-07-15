@@ -4,6 +4,7 @@ use crate::binding;
 use crate::message::{Error, Result};
 use crate::Event;
 use async_trait::async_trait;
+use http;
 use http::header;
 use reqwest::Response;
 
@@ -68,7 +69,6 @@ mod private {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use mockito::mock;
     use reqwest_lib as reqwest;
     use std::vec;
 
@@ -77,7 +77,7 @@ mod tests {
     #[tokio::test]
     async fn test_response() {
         let url = mockito::server_url();
-        let _m = mock("GET", "/")
+        let _m = mockito::mock("GET", "/")
             .with_status(200)
             .with_header("ce-specversion", "1.0")
             .with_header("ce-id", "0001")
@@ -104,7 +104,7 @@ mod tests {
     #[tokio::test]
     async fn test_response_with_full_data() {
         let url = mockito::server_url();
-        let _m = mock("GET", "/")
+        let _m = mockito::mock("GET", "/")
             .with_status(200)
             .with_header("ce-specversion", "1.0")
             .with_header("ce-id", "0001")
@@ -139,7 +139,7 @@ mod tests {
         let expected = fixtures::v10::full_json_data_string_extension();
 
         let url = mockito::server_url();
-        let _m = mock("GET", "/")
+        let _m = mockito::mock("GET", "/")
             .with_status(200)
             .with_header(
                 "content-type",
@@ -166,7 +166,7 @@ mod tests {
         let expected = vec![fixtures::v10::full_json_data_string_extension()];
 
         let url = mockito::server_url();
-        let _m = mock("GET", "/")
+        let _m = mockito::mock("GET", "/")
             .with_status(200)
             .with_header(
                 "content-type",

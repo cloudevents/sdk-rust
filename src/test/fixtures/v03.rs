@@ -1,5 +1,6 @@
 use crate::test::fixtures::*;
 use crate::{Event, EventBuilder, EventBuilderV03};
+use base64::prelude::*;
 use serde_json::{json, Value};
 
 use url::Url;
@@ -120,7 +121,7 @@ pub fn full_json_base64_data_json() -> Value {
         "datacontenttype": json_datacontenttype(),
         "schemaurl": dataschema(),
         "datacontentencoding": "base64",
-        "data": base64::encode(json_data_binary())
+        "data": BASE64_STANDARD.encode(json_data_binary())
     })
 }
 
@@ -199,6 +200,6 @@ pub fn full_xml_base64_data_json() -> Value {
         int_ext_name: int_ext_value,
         "datacontenttype": xml_datacontenttype(),
         "datacontentencoding": "base64",
-        "data": base64::encode(Vec::from(xml_data()))
+        "data": BASE64_STANDARD.encode(Vec::from(xml_data()))
     })
 }

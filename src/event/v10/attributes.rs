@@ -222,7 +222,6 @@ impl AttributesConverter for Attributes {
 mod tests {
     use super::*;
     use crate::test::fixtures;
-    use chrono::NaiveDateTime;
 
     #[test]
     fn iter_v10_test() {
@@ -244,13 +243,10 @@ mod tests {
             datacontenttype: None,
             dataschema: None,
             subject: None,
-            time: Some(DateTime::<Utc>::from_utc(
-                NaiveDateTime::from_timestamp(61, 0),
-                Utc,
-            )),
+            time: DateTime::from_timestamp(61, 0),
         };
         let b = &mut a.into_iter();
-        let time = DateTime::<Utc>::from_utc(NaiveDateTime::from_timestamp(61, 0), Utc);
+        let time = DateTime::from_timestamp(61, 0).unwrap();
 
         assert_eq!(
             ("specversion", AttributeValue::SpecVersion(SpecVersion::V10)),

@@ -2,9 +2,9 @@ use async_trait::async_trait;
 use axum::body::Bytes;
 use axum::extract::{FromRequest, Request};
 use axum::response::Response;
-use axum_lib_0_7 as axum;
+use axum_lib as axum;
+use http;
 use http::StatusCode;
-use http_1_1 as http;
 
 use crate::binding::http::to_event;
 use crate::event::Event;
@@ -17,19 +17,15 @@ where
 {
     type Rejection = Response;
 
-    async fn from_request(
-        req: Request,
-        _state: &S,
-    ) -> Result<Self, Self::Rejection> {
+    async fn from_request(req: Request, _state: &S) -> Result<Self, Self::Rejection> {
         let (parts, body) = req.into_parts();
 
-        let body =
-            axum::body::to_bytes(body, usize::MAX).await.map_err(|e| {
-                Response::builder()
-                    .status(StatusCode::INTERNAL_SERVER_ERROR)
-                    .body(axum::body::Body::from(e.to_string()))
-                    .unwrap()
-            })?;
+        let body = axum::body::to_bytes(body, usize::MAX).await.map_err(|e| {
+            Response::builder()
+                .status(StatusCode::INTERNAL_SERVER_ERROR)
+                .body(axum::body::Body::from(e.to_string()))
+                .unwrap()
+        })?;
 
         to_event(&parts.headers, body.to_vec()).map_err(|e| {
             Response::builder()
@@ -42,8 +38,6 @@ where
 
 #[cfg(test)]
 mod tests {
-    use axum_lib_0_7 as axum;
-
     use super::*;
     use axum::body::Body;
     use axum::extract::FromRequest;

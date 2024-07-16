@@ -1,20 +1,20 @@
-#[cfg(feature = "axum")]
+#[cfg(feature = "http-1-1")]
 use bytes::Bytes;
 use http::Response;
-#[cfg(feature = "axum")]
+#[cfg(feature = "http-1-1")]
 use http_1_1 as http;
-#[cfg(feature = "axum")]
+#[cfg(feature = "http-body-util")]
 use http_body_util::Full;
-#[cfg(not(feature = "axum"))]
+#[cfg(feature = "hyper")]
 use hyper::body::Body;
 use std::cell::Cell;
 
 use crate::binding::http::{Builder, Serializer};
 use crate::message::{BinaryDeserializer, Error, Result};
 use crate::Event;
-#[cfg(feature = "axum")]
+#[cfg(feature = "http-1-1")]
 use std::convert::Infallible;
-#[cfg(feature = "axum")]
+#[cfg(feature = "http-1-1")]
 type BoxBody = http_body_util::combinators::UnsyncBoxBody<Bytes, Infallible>;
 
 struct Adapter {
@@ -27,12 +27,11 @@ impl Builder<Response<Body>> for Adapter {
         self.builder.set(self.builder.take().header(key, value));
     }
     fn body(&mut self, bytes: Vec<u8>) -> Result<Response<Body>> {
-        self.builder
-            .take()
-            .body(Body::from(bytes))
-            .map_err(|e| crate::message::Error::Other {
+        self.builder.take().body(Body::from(bytes)).map_err(|e| {
+            crate::message::Error::Other {
                 source: Box::new(e),
-            })
+            }
+        })
     }
     fn finish(&mut self) -> Result<Response<Body>> {
         self.body(Vec::new())
@@ -70,7 +69,9 @@ pub fn to_response(event: Event) -> std::result::Result<Response<Body>, Error> {
 }
 
 #[cfg(feature = "axum")]
-pub fn to_response(event: Event) -> std::result::Result<Response<BoxBody>, Error> {
+pub fn to_response(
+    event: Event,
+) -> std::result::Result<Response<BoxBody>, Error> {
     BinaryDeserializer::deserialize_binary(
         event,
         Serializer::new(Adapter {

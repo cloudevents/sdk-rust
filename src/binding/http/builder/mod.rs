@@ -2,7 +2,7 @@
 pub mod adapter;
 
 use crate::message::Result;
-#[cfg(feature = "axum")]
+#[cfg(feature = "http-1-1")]
 use http_1_1 as http;
 
 pub trait Builder<R> {

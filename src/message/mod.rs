@@ -4,15 +4,11 @@
 
 #[cfg(all(
     feature = "axum",
-    any(
-        feature = "http-binding",
-        feature = "actix",
-        feature = "reqwest",
-        feature = "warp",
-        feature = "poem"
-    )
+    any(feature = "actix", feature = "warp", feature = "poem")
 ))]
-compile_error!("feature `axum` cannot be used with features `http-binding`, `actix`, `reqwest`, `warp`, or `poem`");
+compile_error!(
+    "feature `axum` cannot be used with features `actix`, `warp`, or `poem`"
+);
 
 mod deserializer;
 mod encoding;

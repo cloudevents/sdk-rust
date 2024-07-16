@@ -1,5 +1,5 @@
 use http::header::{AsHeaderName, HeaderMap, HeaderName, HeaderValue};
-#[cfg(feature = "axum")]
+#[cfg(feature = "http-1-1")]
 use http_1_1 as http;
 
 /// Any http library should be able to use the

@@ -8,22 +8,23 @@ use crate::binding::{
 use crate::event::SpecVersion;
 use crate::message::BinaryDeserializer;
 use crate::message::{
-    BinarySerializer, Error, MessageAttributeValue, Result, StructuredSerializer,
+    BinarySerializer, Error, MessageAttributeValue, Result,
+    StructuredSerializer,
 };
 use crate::Event;
 use http::Request;
-#[cfg(feature = "axum")]
+#[cfg(feature = "http-1-1")]
 use http_1_1 as http;
 use std::convert::TryFrom;
 use std::fmt::Debug;
 
 macro_rules! str_to_header_value {
     ($header_value:expr) => {
-        http::header::HeaderValue::from_str(&$header_value.to_string()).map_err(|e| {
-            crate::message::Error::Other {
+        http::header::HeaderValue::from_str(&$header_value.to_string()).map_err(
+            |e| crate::message::Error::Other {
                 source: Box::new(e),
-            }
-        })
+            },
+        )
     };
 }
 
@@ -46,14 +47,22 @@ impl<T> BinarySerializer<T> for Serializer<T> {
         Ok(self)
     }
 
-    fn set_attribute(self, name: &str, value: MessageAttributeValue) -> Result<Self> {
+    fn set_attribute(
+        self,
+        name: &str,
+        value: MessageAttributeValue,
+    ) -> Result<Self> {
         self.builder
             .borrow_mut()
             .header(&header_prefix(name), str_to_header_value!(value)?);
         Ok(self)
     }
 
-    fn set_extension(self, name: &str, value: MessageAttributeValue) -> Result<Self> {
+    fn set_extension(
+        self,
+        name: &str,
+        value: MessageAttributeValue,
+    ) -> Result<Self> {
         self.builder
             .borrow_mut()
             .header(&header_prefix(name), str_to_header_value!(value)?);
@@ -80,7 +89,8 @@ impl<T> StructuredSerializer<T> for Serializer<T> {
     }
 }
 
-impl<T> BinarySerializer<http::request::Request<Option<T>>> for http::request::Builder
+impl<T> BinarySerializer<http::request::Request<Option<T>>>
+    for http::request::Builder
 where
     T: TryFrom<Vec<u8>>,
     <T as TryFrom<Vec<u8>>>::Error: Debug,
@@ -90,19 +100,30 @@ where
         Ok(self)
     }
 
-    fn set_attribute(mut self, name: &str, value: MessageAttributeValue) -> Result<Self> {
+    fn set_attribute(
+        mut self,
+        name: &str,
+        value: MessageAttributeValue,
+    ) -> Result<Self> {
         let key = &header_prefix(name);
         self = self.header(key, &value.to_string());
         Ok(self)
     }
 
-    fn set_extension(mut self, name: &str, value: MessageAttributeValue) -> Result<Self> {
+    fn set_extension(
+        mut self,
+        name: &str,
+        value: MessageAttributeValue,
+    ) -> Result<Self> {
         let key = &header_prefix(name);
         self = self.header(key, &value.to_string());
         Ok(self)
     }
 
-    fn end_with_data(self, bytes: Vec<u8>) -> Result<http::request::Request<Option<T>>> {
+    fn end_with_data(
+        self,
+        bytes: Vec<u8>,
+    ) -> Result<http::request::Request<Option<T>>> {
         let body = T::try_from(bytes).unwrap();
         self.body(Some(body)).map_err(|e| Error::Other {
             source: Box::new(e),
@@ -124,7 +145,10 @@ where
     type Error = crate::message::Error;
 
     fn try_from(event: Event) -> Result<Self> {
-        BinaryDeserializer::deserialize_binary(event, http::request::Builder::new())
+        BinaryDeserializer::deserialize_binary(
+            event,
+            http::request::Builder::new(),
+        )
     }
 }
 
@@ -133,14 +157,15 @@ mod tests {
     use crate::test::fixtures;
     use bytes::Bytes;
     use http::Request;
-    #[cfg(feature = "axum")]
+    #[cfg(feature = "http-1-1")]
     use http_1_1 as http;
     use std::convert::TryFrom;
 
     #[test]
     fn test_event_to_http_request() {
         let event = fixtures::v10::minimal_string_extension();
-        let request: Request<Option<Vec<u8>>> = Request::try_from(event).unwrap();
+        let request: Request<Option<Vec<u8>>> =
+            Request::try_from(event).unwrap();
 
         assert_eq!(request.headers()["ce-id"], "0001");
         assert_eq!(request.headers()["ce-type"], "test_event.test_application");
@@ -149,7 +174,8 @@ mod tests {
     #[test]
     fn test_event_to_bytes_body() {
         let event = fixtures::v10::full_binary_json_data_string_extension();
-        let request: Request<Option<Vec<u8>>> = Request::try_from(event).unwrap();
+        let request: Request<Option<Vec<u8>>> =
+            Request::try_from(event).unwrap();
 
         assert_eq!(request.headers()["ce-id"], "0001");
         assert_eq!(request.headers()["ce-type"], "test_event.test_application");

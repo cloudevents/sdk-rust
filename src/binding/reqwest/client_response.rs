@@ -5,6 +5,7 @@ use crate::message::{Error, Result};
 use crate::Event;
 use async_trait::async_trait;
 use http::header;
+use http_1_1 as http;
 use reqwest::Response;
 
 /// Method to transform an incoming [`Response`] to [`Event`].

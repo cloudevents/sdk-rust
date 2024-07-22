@@ -2,14 +2,6 @@
 //!
 //! Note: these APIs should be considered unstable and subject to changes.
 
-#[cfg(all(
-    feature = "axum",
-    any(feature = "actix", feature = "warp", feature = "poem")
-))]
-compile_error!(
-    "feature `axum` cannot be used with features `actix`, `warp`, or `poem`"
-);
-
 mod deserializer;
 mod encoding;
 mod error;

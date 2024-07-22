@@ -1,10 +1,14 @@
-use async_trait::async_trait;
-use poem_lib::error::ResponseError;
-use poem_lib::http::StatusCode;
-use poem_lib::{FromRequest, Request, RequestBody, Result};
+use std::collections::HashMap;
+use std::future::IntoFuture;
 
 use crate::binding::http::to_event;
-use crate::Event;
+use crate::{Event, EventBuilder, EventBuilderV10};
+use async_trait::async_trait;
+use futures::FutureExt;
+use http_1_1::HeaderMap;
+use poem_lib::error::ResponseError;
+use poem_lib::http::StatusCode;
+use poem_lib::{Error, FromRequest, Request, RequestBody, Result};
 
 impl ResponseError for crate::message::Error {
     fn status(&self) -> StatusCode {
@@ -12,9 +16,16 @@ impl ResponseError for crate::message::Error {
     }
 }
 
-#[async_trait]
+// #[async_trait]
+// ^ this is causing weird lifetime issues:
+//
+// lifetime parameters or bounds on method `from_request` do not match the trait declaration
+// lifetimes do not match method in trait
 impl<'a> FromRequest<'a> for Event {
-    async fn from_request(req: &'a Request, body: &mut RequestBody) -> Result<Self> {
+    async fn from_request(
+        req: &'a Request,
+        body: &mut RequestBody,
+    ) -> Result<Self> {
         Ok(to_event(req.headers(), body.take()?.into_vec().await?)?)
     }
 }
@@ -57,7 +68,7 @@ mod tests {
 
         let (req, mut body) = req.split();
         let resp = Event::from_request(&req, &mut body).await.err().unwrap();
-        assert_eq!(resp.as_response().status(), StatusCode::BAD_REQUEST);
+        assert_eq!(resp.status(), StatusCode::BAD_REQUEST);
         assert_eq!(resp.to_string(), "Invalid specversion BAD SPECIFICATION");
     }
 

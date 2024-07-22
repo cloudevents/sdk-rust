@@ -21,7 +21,7 @@ struct Adapter {
     builder: Cell<http::response::Builder>,
 }
 
-#[cfg(not(feature = "axum"))]
+#[cfg(feature = "hyper")]
 impl Builder<Response<Body>> for Adapter {
     fn header(&mut self, key: &str, value: http::header::HeaderValue) {
         self.builder.set(self.builder.take().header(key, value));
@@ -38,7 +38,7 @@ impl Builder<Response<Body>> for Adapter {
     }
 }
 
-#[cfg(feature = "axum")]
+#[cfg(feature = "http-1-1")]
 impl Builder<Response<BoxBody>> for Adapter {
     fn header(&mut self, key: &str, value: http::header::HeaderValue) {
         self.builder.set(self.builder.take().header(key, value));
@@ -58,7 +58,7 @@ impl Builder<Response<BoxBody>> for Adapter {
     }
 }
 
-#[cfg(not(feature = "axum"))]
+#[cfg(feature = "hyper")]
 pub fn to_response(event: Event) -> std::result::Result<Response<Body>, Error> {
     BinaryDeserializer::deserialize_binary(
         event,
@@ -68,7 +68,7 @@ pub fn to_response(event: Event) -> std::result::Result<Response<Body>, Error> {
     )
 }
 
-#[cfg(feature = "axum")]
+#[cfg(feature = "http-1-1")]
 pub fn to_response(
     event: Event,
 ) -> std::result::Result<Response<BoxBody>, Error> {

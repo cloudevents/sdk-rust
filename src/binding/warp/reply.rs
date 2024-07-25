@@ -1,10 +1,7 @@
+use crate::{AttributesReader, Data, Event};
+#[cfg(feature = "http-1-1")]
+use warp::{http::StatusCode, reply::Reply, reply::Response};
 use warp_lib as warp;
-
-use crate::binding::http::builder::adapter::to_response;
-
-use crate::Event;
-use http::StatusCode;
-use warp::reply::Response;
 
 ///
 /// # Serializes [`crate::Event`] as a http response
@@ -20,18 +17,46 @@ use warp::reply::Response;
 ///    .map(|| from_event(Event::default()));
 /// ```
 pub fn from_event(event: Event) -> Response {
-    match to_response(event) {
-        Ok(response) => response,
-        Err(e) => warp::http::response::Response::builder()
-            .status(StatusCode::INTERNAL_SERVER_ERROR)
-            .body(hyper::body::Body::from(e.to_string()))
-            .unwrap(),
+    let mut builder =
+        warp::http::response::Response::builder().status(StatusCode::OK);
+
+    if let Some(dct) = event.datacontenttype() {
+        builder = builder.header("Content-Type", dct);
     }
+
+    for (key, value) in event.iter() {
+        builder =
+            builder.header(format!("ce-{key}").as_str(), value.to_string());
+    }
+
+    let body = match event.data {
+        Some(data) => match data {
+            Data::Binary(v) => hyper::Body::from(v),
+            Data::String(s) => hyper::Body::from(s),
+            Data::Json(j) => match serde_json::to_string(&j) {
+                Ok(s) => hyper::Body::from(s),
+                Err(e) => {
+                    builder = builder.status(StatusCode::INTERNAL_SERVER_ERROR);
+                    hyper::Body::from(e.to_string())
+                }
+            },
+        },
+        None => hyper::Body::empty(),
+    };
+
+    builder.body(body).into_response()
 }
 
 #[cfg(test)]
 mod tests {
     use crate::test::fixtures;
+    #[cfg(feature = "http-1-1")]
+    use http_1_1 as http;
+    #[cfg(feature = "http-body-util")]
+    use http_body_util::BodyExt;
+    // #[cfg(feature = "hyper-1-3")]
+    // use hyper_1_3 as hyper;
+    use warp_lib as warp;
 
     #[test]
     fn test_response() {

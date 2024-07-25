@@ -1,14 +1,9 @@
-use std::collections::HashMap;
-use std::future::IntoFuture;
-
 use crate::binding::http::to_event;
-use crate::{Event, EventBuilder, EventBuilderV10};
-use async_trait::async_trait;
-use futures::FutureExt;
-use http_1_1::HeaderMap;
+use crate::Event;
+
 use poem_lib::error::ResponseError;
 use poem_lib::http::StatusCode;
-use poem_lib::{Error, FromRequest, Request, RequestBody, Result};
+use poem_lib::{FromRequest, Request, RequestBody, Result};
 
 impl ResponseError for crate::message::Error {
     fn status(&self) -> StatusCode {

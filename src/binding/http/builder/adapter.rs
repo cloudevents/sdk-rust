@@ -58,7 +58,7 @@ impl Builder<Response<BoxBody>> for Adapter {
     }
 }
 
-#[cfg(feature = "hyper")]
+#[cfg(all(feature = "hyper", not(feature = "http-1-1")))]
 pub fn to_response(event: Event) -> std::result::Result<Response<Body>, Error> {
     BinaryDeserializer::deserialize_binary(
         event,

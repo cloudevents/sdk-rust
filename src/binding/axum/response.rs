@@ -1,9 +1,9 @@
 use crate::binding::http::builder::adapter::to_response;
 use crate::event::Event;
 use axum::{body::Body, http::Response, response::IntoResponse};
-use axum_lib_0_7 as axum;
+use axum_lib as axum;
+use http;
 use http::{header, StatusCode};
-use http_1_1 as http;
 
 impl IntoResponse for Event {
     fn into_response(self) -> Response<Body> {

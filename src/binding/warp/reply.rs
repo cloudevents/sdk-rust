@@ -1,5 +1,5 @@
 use crate::{AttributesReader, Data, Event};
-#[cfg(feature = "http-1-1")]
+
 use warp::{http::StatusCode, reply::Reply, reply::Response};
 use warp_lib as warp;
 
@@ -33,7 +33,7 @@ pub fn from_event(event: Event) -> Response {
         Some(data) => match data {
             Data::Binary(v) => hyper::Body::from(v),
             Data::String(s) => hyper::Body::from(s),
-            Data::Json(j) => match serde_json::to_string(&j) {
+            Data::Json(j) => match serde_json::to_vec(&j) {
                 Ok(s) => hyper::Body::from(s),
                 Err(e) => {
                     builder = builder.status(StatusCode::INTERNAL_SERVER_ERROR);
@@ -50,12 +50,9 @@ pub fn from_event(event: Event) -> Response {
 #[cfg(test)]
 mod tests {
     use crate::test::fixtures;
-    #[cfg(feature = "http-1-1")]
-    use http_1_1 as http;
-    #[cfg(feature = "http-body-util")]
+
+    use http;
     use http_body_util::BodyExt;
-    // #[cfg(feature = "hyper-1-3")]
-    // use hyper_1_3 as hyper;
     use warp_lib as warp;
 
     #[test]

@@ -2,9 +2,9 @@ use async_trait::async_trait;
 use axum::body::Bytes;
 use axum::extract::{FromRequest, Request};
 use axum::response::Response;
-use axum_lib_0_7 as axum;
+use axum_lib as axum;
+use http;
 use http::StatusCode;
-use http_1_1 as http;
 
 use crate::binding::http::to_event;
 use crate::event::Event;
@@ -42,7 +42,7 @@ where
 
 #[cfg(test)]
 mod tests {
-    use axum_lib_0_7 as axum;
+    use axum_lib;
 
     use super::*;
     use axum::body::Body;

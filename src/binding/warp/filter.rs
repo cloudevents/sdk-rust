@@ -4,9 +4,11 @@ use crate::EventBuilderV10;
 
 use warp_lib as warp;
 
-#[cfg(feature = "http-1-1")]
-use http_1_1 as http;
-use warp::http::HeaderMap;
+use crate::binding::http::Headers;
+
+use http;
+use http::header::AsHeaderName;
+use warp::http::{HeaderMap, HeaderValue};
 use warp::Filter;
 use warp::Rejection;
 

@@ -6,10 +6,12 @@ use actix_web::{web, HttpRequest};
 use async_trait::async_trait;
 use futures::{future::LocalBoxFuture, FutureExt, StreamExt};
 use http::header::{AsHeaderName, HeaderName, HeaderValue};
+use http;
 
 /// Implement Headers for the actix HeaderMap
 impl<'a> Headers<'a> for actix_http::header::HeaderMap {
-    type Iterator = Box<dyn Iterator<Item = (&'a HeaderName, &'a HeaderValue)> + 'a>;
+    type Iterator =
+        Box<dyn Iterator<Item = (&'a HeaderName, &'a HeaderValue)> + 'a>;
     fn get<K: AsHeaderName>(&self, key: K) -> Option<&HeaderValue> {
         self.get(key.as_str())
     }
@@ -27,13 +29,15 @@ pub async fn request_to_event(
     while let Some(item) = payload.next().await {
         bytes.extend_from_slice(&item?);
     }
-    to_event(req.headers(), bytes.to_vec()).map_err(actix_web::error::ErrorBadRequest)
+    to_event(req.headers(), bytes.to_vec())
+        .map_err(actix_web::error::ErrorBadRequest)
 }
 
 /// So that an actix-web handler may take an Event parameter
 impl actix_web::FromRequest for Event {
     type Error = actix_web::Error;
-    type Future = LocalBoxFuture<'static, std::result::Result<Self, Self::Error>>;
+    type Future =
+        LocalBoxFuture<'static, std::result::Result<Self, Self::Error>>;
 
     fn from_request(r: &HttpRequest, p: &mut Payload) -> Self::Future {
         let request = r.to_owned();
@@ -141,7 +145,8 @@ mod tests {
             "datacontenttype": "application/json",
             "data": fixtures::json_data()
         });
-        let bytes = serde_json::to_string(&payload).expect("Failed to serialize test data to json");
+        let bytes = serde_json::to_string(&payload)
+            .expect("Failed to serialize test data to json");
 
         let expected = fixtures::v10::full_json_data_string_extension();
 

@@ -1,5 +1,5 @@
 use crate::{AttributesReader, Data, Event};
-#[cfg(feature = "http-1-1")]
+
 use bytes::Bytes;
 use poem_lib::http::StatusCode;
 use poem_lib::{IntoResponse, Response};

@@ -9,8 +9,8 @@ use crate::{
         StructuredSerializer,
     },
 };
-#[cfg(feature = "http-1-1")]
-use http_1_1 as http;
+
+use http;
 use std::convert::TryFrom;
 
 pub struct Deserializer<'a, T: Headers<'a>> {

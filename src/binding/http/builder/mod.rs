@@ -2,8 +2,8 @@
 pub mod adapter;
 
 use crate::message::Result;
-#[cfg(feature = "http-1-1")]
-use http_1_1 as http;
+
+use http;
 
 pub trait Builder<R> {
     fn header(&mut self, key: &str, value: http::header::HeaderValue);

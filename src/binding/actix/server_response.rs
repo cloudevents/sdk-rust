@@ -3,6 +3,7 @@ use crate::message::{BinaryDeserializer, Result};
 use crate::Event;
 use actix_web::http::StatusCode;
 use actix_web::{HttpRequest, HttpResponse, HttpResponseBuilder};
+use http;
 
 impl Builder<HttpResponse> for HttpResponseBuilder {
     fn header(&mut self, key: &str, value: http::header::HeaderValue) {
@@ -38,11 +39,17 @@ impl actix_web::Responder for Event {
 /// This trait is sealed and cannot be implemented for types outside of this crate.
 pub trait HttpResponseBuilderExt: private::Sealed {
     /// Fill this [`HttpResponseBuilder`] with an [`Event`].
-    fn event(self, event: Event) -> std::result::Result<HttpResponse, actix_web::Error>;
+    fn event(
+        self,
+        event: Event,
+    ) -> std::result::Result<HttpResponse, actix_web::Error>;
 }
 
 impl HttpResponseBuilderExt for HttpResponseBuilder {
-    fn event(self, event: Event) -> std::result::Result<HttpResponse, actix_web::Error> {
+    fn event(
+        self,
+        event: Event,
+    ) -> std::result::Result<HttpResponse, actix_web::Error> {
         event_to_response(event, self)
     }
 }

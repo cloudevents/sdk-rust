@@ -4,9 +4,8 @@ use crate::{
     event::SpecVersion,
     header_value_to_str, message,
     message::{
-        BinaryDeserializer, BinarySerializer, Encoding, MessageAttributeValue,
-        MessageDeserializer, Result, StructuredDeserializer,
-        StructuredSerializer,
+        BinaryDeserializer, BinarySerializer, Encoding, MessageAttributeValue, MessageDeserializer,
+        Result, StructuredDeserializer, StructuredSerializer,
     },
 };
 
@@ -25,10 +24,7 @@ impl<'a, T: Headers<'a>> Deserializer<'a, T> {
 }
 
 impl<'a, T: Headers<'a>> BinaryDeserializer for Deserializer<'a, T> {
-    fn deserialize_binary<R: Sized, V: BinarySerializer<R>>(
-        self,
-        mut visitor: V,
-    ) -> Result<R> {
+    fn deserialize_binary<R: Sized, V: BinarySerializer<R>>(self, mut visitor: V) -> Result<R> {
         if self.encoding() != Encoding::BINARY {
             return Err(message::Error::WrongEncoding {});
         }
@@ -53,16 +49,12 @@ impl<'a, T: Headers<'a>> BinaryDeserializer for Deserializer<'a, T> {
             if attributes.contains(&name) {
                 visitor = visitor.set_attribute(
                     name,
-                    MessageAttributeValue::String(String::from(
-                        header_value_to_str!(hv)?,
-                    )),
+                    MessageAttributeValue::String(String::from(header_value_to_str!(hv)?)),
                 )?
             } else {
                 visitor = visitor.set_extension(
                     name,
-                    MessageAttributeValue::String(String::from(
-                        header_value_to_str!(hv)?,
-                    )),
+                    MessageAttributeValue::String(String::from(header_value_to_str!(hv)?)),
                 )?
             }
         }
@@ -70,9 +62,7 @@ impl<'a, T: Headers<'a>> BinaryDeserializer for Deserializer<'a, T> {
         if let Some(hv) = self.headers.get(http::header::CONTENT_TYPE) {
             visitor = visitor.set_attribute(
                 "datacontenttype",
-                MessageAttributeValue::String(String::from(
-                    header_value_to_str!(hv)?,
-                )),
+                MessageAttributeValue::String(String::from(header_value_to_str!(hv)?)),
             )?
         }
 
@@ -85,10 +75,7 @@ impl<'a, T: Headers<'a>> BinaryDeserializer for Deserializer<'a, T> {
 }
 
 impl<'a, T: Headers<'a>> StructuredDeserializer for Deserializer<'a, T> {
-    fn deserialize_structured<R: Sized, V: StructuredSerializer<R>>(
-        self,
-        visitor: V,
-    ) -> Result<R> {
+    fn deserialize_structured<R: Sized, V: StructuredSerializer<R>>(self, visitor: V) -> Result<R> {
         if self.encoding() != Encoding::STRUCTURED {
             return Err(message::Error::WrongEncoding {});
         }

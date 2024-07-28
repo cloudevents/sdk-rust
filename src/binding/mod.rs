@@ -24,8 +24,11 @@ pub mod axum;
 ))]
 pub mod http;
 
-#[cfg_attr(docsrs, doc(cfg(any(feature = "actix", feature = "warp",))))]
-#[cfg(any(feature = "actix", feature = "warp",))]
+#[cfg_attr(
+    docsrs,
+    doc(cfg(any(feature = "http-0-2-binding", feature = "actix", feature = "warp",)))
+)]
+#[cfg(any(feature = "http-0-2-binding", feature = "actix", feature = "warp",))]
 pub mod http_0_2;
 
 #[cfg_attr(docsrs, doc(cfg(feature = "nats")))]
@@ -52,10 +55,8 @@ pub(crate) mod kafka {
     }
 }
 
-pub(crate) static CLOUDEVENTS_JSON_HEADER: &str =
-    "application/cloudevents+json";
-pub(crate) static CLOUDEVENTS_BATCH_JSON_HEADER: &str =
-    "application/cloudevents-batch+json";
+pub(crate) static CLOUDEVENTS_JSON_HEADER: &str = "application/cloudevents+json";
+pub(crate) static CLOUDEVENTS_BATCH_JSON_HEADER: &str = "application/cloudevents-batch+json";
 pub(crate) static CONTENT_TYPE: &str = "content-type";
 
 fn header_prefix(prefix: &str, name: &str) -> String {

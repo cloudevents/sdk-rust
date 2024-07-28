@@ -6,8 +6,7 @@ use crate::binding::{
 };
 use crate::event::SpecVersion;
 use crate::message::{
-    BinaryDeserializer, BinarySerializer, MessageAttributeValue, Result,
-    StructuredSerializer,
+    BinaryDeserializer, BinarySerializer, MessageAttributeValue, Result, StructuredSerializer,
 };
 use crate::Event;
 use reqwest::RequestBuilder;
@@ -38,21 +37,13 @@ impl BinarySerializer<RequestBuilder> for RequestSerializer {
         Ok(self)
     }
 
-    fn set_attribute(
-        mut self,
-        name: &str,
-        value: MessageAttributeValue,
-    ) -> Result<Self> {
+    fn set_attribute(mut self, name: &str, value: MessageAttributeValue) -> Result<Self> {
         let key = &header_prefix(name);
         self.req = self.req.header(key, value.to_string());
         Ok(self)
     }
 
-    fn set_extension(
-        mut self,
-        name: &str,
-        value: MessageAttributeValue,
-    ) -> Result<Self> {
+    fn set_extension(mut self, name: &str, value: MessageAttributeValue) -> Result<Self> {
         let key = &header_prefix(name);
         self.req = self.req.header(key, value.to_string());
         Ok(self)
@@ -77,14 +68,8 @@ impl StructuredSerializer<RequestBuilder> for RequestSerializer {
 }
 
 /// Method to fill a [`RequestBuilder`] with an [`Event`].
-pub fn event_to_request(
-    event: Event,
-    request_builder: RequestBuilder,
-) -> Result<RequestBuilder> {
-    BinaryDeserializer::deserialize_binary(
-        event,
-        RequestSerializer::new(request_builder),
-    )
+pub fn event_to_request(event: Event, request_builder: RequestBuilder) -> Result<RequestBuilder> {
+    BinaryDeserializer::deserialize_binary(event, RequestSerializer::new(request_builder))
 }
 
 /// Method to fill a [`RequestBuilder`] with a batched [`Vec<Event>`].

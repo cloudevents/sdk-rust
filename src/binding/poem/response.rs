@@ -13,15 +13,12 @@ impl IntoResponse for Event {
         }
 
         for (key, value) in self.iter() {
-            builder =
-                builder.header(format!("ce-{key}").as_str(), value.to_string());
+            builder = builder.header(format!("ce-{key}").as_str(), value.to_string());
         }
 
         match self.data {
             Some(data) => match data {
-                Data::Binary(v) => {
-                    builder.body(Bytes::copy_from_slice(v.as_slice()))
-                }
+                Data::Binary(v) => builder.body(Bytes::copy_from_slice(v.as_slice())),
                 Data::String(s) => builder.body(s.clone()),
                 Data::Json(j) => match serde_json::to_string(&j) {
                     Ok(s) => builder.body(s),

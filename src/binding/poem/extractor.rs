@@ -17,10 +17,7 @@ impl ResponseError for crate::message::Error {
 // lifetime parameters or bounds on method `from_request` do not match the trait declaration
 // lifetimes do not match method in trait
 impl<'a> FromRequest<'a> for Event {
-    async fn from_request(
-        req: &'a Request,
-        body: &mut RequestBody,
-    ) -> Result<Self> {
+    async fn from_request(req: &'a Request, body: &mut RequestBody) -> Result<Self> {
         Ok(to_event(req.headers(), body.take()?.into_vec().await?)?)
     }
 }

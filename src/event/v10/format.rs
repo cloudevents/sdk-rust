@@ -1,8 +1,7 @@
 use super::Attributes;
 use crate::event::data::is_json_content_type;
 use crate::event::format::{
-    parse_data_base64, parse_data_base64_json, parse_data_json,
-    parse_data_string,
+    parse_data_base64, parse_data_base64_json, parse_data_json, parse_data_string,
 };
 use crate::event::{Data, ExtensionValue};
 use base64::prelude::*;
@@ -24,29 +23,14 @@ impl crate::event::format::EventFormatDeserializer for EventFormatDeserializer {
             id: extract_field!(map, "id", String, E)?,
             ty: extract_field!(map, "type", String, E)?,
             source: extract_field!(map, "source", String, E)?,
-            datacontenttype: extract_optional_field!(
-                map,
-                "datacontenttype",
-                String,
-                E
-            )?,
-            dataschema: extract_optional_field!(
-                map,
-                "dataschema",
-                String,
-                E,
-                |s: String| { Url::parse(&s) }
-            )?,
+            datacontenttype: extract_optional_field!(map, "datacontenttype", String, E)?,
+            dataschema: extract_optional_field!(map, "dataschema", String, E, |s: String| {
+                Url::parse(&s)
+            })?,
             subject: extract_optional_field!(map, "subject", String, E)?,
-            time: extract_optional_field!(
-                map,
-                "time",
-                String,
-                E,
-                |s: String| {
-                    DateTime::parse_from_rfc3339(&s).map(DateTime::<Utc>::from)
-                }
-            )?,
+            time: extract_optional_field!(map, "time", String, E, |s: String| {
+                DateTime::parse_from_rfc3339(&s).map(DateTime::<Utc>::from)
+            })?,
         }))
     }
 
@@ -62,17 +46,13 @@ impl crate::event::format::EventFormatDeserializer for EventFormatDeserializer {
         Ok(match (data, data_base64, is_json) {
             (Some(d), None, true) => Some(Data::Json(parse_data_json(d)?)),
             (Some(d), None, false) => Some(Data::String(parse_data_string(d)?)),
-            (None, Some(d), true) => {
-                match parse_data_base64_json::<E>(d.to_owned()) {
-                    Ok(x) => Some(Data::Json(x)),
-                    Err(_) => Some(Data::Binary(parse_data_base64(d)?)),
-                }
-            }
+            (None, Some(d), true) => match parse_data_base64_json::<E>(d.to_owned()) {
+                Ok(x) => Some(Data::Json(x)),
+                Err(_) => Some(Data::Binary(parse_data_base64(d)?)),
+            },
             (None, Some(d), false) => Some(Data::Binary(parse_data_base64(d)?)),
             (Some(_), Some(_), _) => {
-                return Err(E::custom(
-                    "Cannot have both data and data_base64 field",
-                ))
+                return Err(E::custom("Cannot have both data and data_base64 field"))
             }
             (None, None, _) => None,
         })
@@ -81,8 +61,7 @@ impl crate::event::format::EventFormatDeserializer for EventFormatDeserializer {
 
 pub(crate) struct EventFormatSerializer {}
 
-impl<S: serde::Serializer>
-    crate::event::format::EventFormatSerializer<S, Attributes>
+impl<S: serde::Serializer> crate::event::format::EventFormatSerializer<S, Attributes>
     for EventFormatSerializer
 {
     fn serialize(
@@ -124,8 +103,9 @@ impl<S: serde::Serializer>
         match data {
             Some(Data::Json(j)) => state.serialize_entry("data", j)?,
             Some(Data::String(s)) => state.serialize_entry("data", s)?,
-            Some(Data::Binary(v)) => state
-                .serialize_entry("data_base64", &BASE64_STANDARD.encode(v))?,
+            Some(Data::Binary(v)) => {
+                state.serialize_entry("data_base64", &BASE64_STANDARD.encode(v))?
+            }
             _ => (),
         };
         for (k, v) in extensions {

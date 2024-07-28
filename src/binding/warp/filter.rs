@@ -38,10 +38,7 @@ pub fn to_event() -> impl Filter<Extract = (Event,), Error = Rejection> + Copy {
         .and_then(create_event)
 }
 
-async fn create_event(
-    headers: HeaderMap,
-    body: bytes::Bytes,
-) -> Result<Event, Rejection> {
+async fn create_event(headers: HeaderMap, body: bytes::Bytes) -> Result<Event, Rejection> {
     http::to_event(&headers, body.to_vec())
         .map_err(|error| warp::reject::custom(EventFilterError { error }))
 }
@@ -119,8 +116,7 @@ mod tests {
         let mut event = result.clone();
         let (_datacontenttype, _dataschema, data) = event.take_data();
         let actual_payload: Vec<u8> = data.unwrap().try_into().unwrap();
-        let expected_payload: Vec<u8> =
-            serde_json::to_vec(&fixtures::json_data()).unwrap();
+        let expected_payload: Vec<u8> = serde_json::to_vec(&fixtures::json_data()).unwrap();
         assert_eq!(expected_payload, actual_payload);
 
         assert_eq!(expected, result);

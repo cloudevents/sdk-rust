@@ -32,9 +32,7 @@ impl Builder<Response<BoxBody>> for Adapter {
     }
 }
 
-pub fn to_response(
-    event: Event,
-) -> std::result::Result<Response<BoxBody>, Error> {
+pub fn to_response(event: Event) -> std::result::Result<Response<BoxBody>, Error> {
     BinaryDeserializer::deserialize_binary(
         event,
         Serializer::new(Adapter {

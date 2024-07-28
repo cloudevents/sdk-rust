@@ -1,6 +1,6 @@
 [package]
 name = "cloudevents-sdk"
-version = "0.7.0"
+version = "0.8.0"
 authors = ["Francesco Guardiani <francescoguard@gmail.com>"]
 license-file = "LICENSE"
 edition = "2018"
@@ -23,6 +23,7 @@ name = "cloudevents"
 
 [features]
 http-binding = ["async-trait", "bytes", "futures", "http"]
+http-0-2-binding = ["async-trait", "bytes", "futures", "http-0-2"]
 actix = ["actix-web", "actix-http", "async-trait", "bytes", "futures", "http-0-2"]
 reqwest = ["reqwest-lib", "async-trait", "bytes", "http", "uuid/js"]
 rdkafka = ["rdkafka-lib", "bytes", "futures"]

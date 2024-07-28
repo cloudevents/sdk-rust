@@ -1,7 +1,6 @@
 use super::{
-    Attributes, Data, Event, EventFormatDeserializerV03,
-    EventFormatDeserializerV10, EventFormatSerializerV03,
-    EventFormatSerializerV10,
+    Attributes, Data, Event, EventFormatDeserializerV03, EventFormatDeserializerV10,
+    EventFormatSerializerV03, EventFormatSerializerV10,
 };
 use crate::event::{AttributesReader, ExtensionValue};
 use base64::prelude::*;
@@ -12,8 +11,7 @@ use std::collections::HashMap;
 
 macro_rules! parse_field {
     ($value:expr, $target_type:ty, $error:ty) => {
-        <$target_type>::deserialize($value.into_deserializer())
-            .map_err(<$error>::custom)
+        <$target_type>::deserialize($value.into_deserializer()).map_err(<$error>::custom)
     };
 
     ($value:expr, $target_type:ty, $error:ty, $mapper:expr) => {
@@ -67,9 +65,7 @@ pub fn parse_data_base64<E: serde::de::Error>(v: Value) -> Result<Vec<u8>, E> {
     })
 }
 
-pub fn parse_data_base64_json<E: serde::de::Error>(
-    v: Value,
-) -> Result<Value, E> {
+pub fn parse_data_base64_json<E: serde::de::Error>(v: Value) -> Result<Value, E> {
     let data = parse_data_base64(v)?;
     serde_json::from_slice(&data).map_err(E::custom)
 }
@@ -84,9 +80,7 @@ pub(crate) trait EventFormatDeserializer {
         map: &mut Map<String, Value>,
     ) -> Result<Option<Data>, E>;
 
-    fn deserialize_event<E: serde::de::Error>(
-        mut map: Map<String, Value>,
-    ) -> Result<Event, E> {
+    fn deserialize_event<E: serde::de::Error>(mut map: Map<String, Value>) -> Result<Event, E> {
         let attributes = Self::deserialize_attributes(&mut map)?;
         let data = Self::deserialize_data(
             attributes.datacontenttype().unwrap_or("application/json"),
@@ -98,8 +92,7 @@ pub(crate) trait EventFormatDeserializer {
             .map(|(k, v)| {
                 Ok((
                     k,
-                    ExtensionValue::deserialize(v.into_deserializer())
-                        .map_err(E::custom)?,
+                    ExtensionValue::deserialize(v.into_deserializer()).map_err(E::custom)?,
                 ))
             })
             .collect::<Result<HashMap<String, ExtensionValue>, E>>()?;
@@ -122,24 +115,15 @@ pub(crate) trait EventFormatSerializer<S: Serializer, A: Sized> {
 }
 
 impl<'de> Deserialize<'de> for Event {
-    fn deserialize<D>(
-        deserializer: D,
-    ) -> Result<Self, <D as Deserializer<'de>>::Error>
+    fn deserialize<D>(deserializer: D) -> Result<Self, <D as Deserializer<'de>>::Error>
     where
         D: Deserializer<'de>,
     {
         let root_value = Value::deserialize(deserializer)?;
         let mut map: Map<String, Value> =
-            Map::deserialize(root_value.into_deserializer())
-                .map_err(D::Error::custom)?;
+            Map::deserialize(root_value.into_deserializer()).map_err(D::Error::custom)?;
 
-        match extract_field!(
-            map,
-            "specversion",
-            String,
-            <D as Deserializer<'de>>::Error
-        )?
-        .as_str()
+        match extract_field!(map, "specversion", String, <D as Deserializer<'de>>::Error)?.as_str()
         {
             "0.3" => EventFormatDeserializerV03::deserialize_event(map),
             "1.0" => EventFormatDeserializerV10::deserialize_event(map),
@@ -152,26 +136,17 @@ impl<'de> Deserialize<'de> for Event {
 }
 
 impl Serialize for Event {
-    fn serialize<S>(
-        &self,
-        serializer: S,
-    ) -> Result<<S as Serializer>::Ok, <S as Serializer>::Error>
+    fn serialize<S>(&self, serializer: S) -> Result<<S as Serializer>::Ok, <S as Serializer>::Error>
     where
         S: Serializer,
     {
         match &self.attributes {
-            Attributes::V03(a) => EventFormatSerializerV03::serialize(
-                a,
-                &self.data,
-                &self.extensions,
-                serializer,
-            ),
-            Attributes::V10(a) => EventFormatSerializerV10::serialize(
-                a,
-                &self.data,
-                &self.extensions,
-                serializer,
-            ),
+            Attributes::V03(a) => {
+                EventFormatSerializerV03::serialize(a, &self.data, &self.extensions, serializer)
+            }
+            Attributes::V10(a) => {
+                EventFormatSerializerV10::serialize(a, &self.data, &self.extensions, serializer)
+            }
         }
     }
 }

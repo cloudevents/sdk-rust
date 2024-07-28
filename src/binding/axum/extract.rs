@@ -17,19 +17,15 @@ where
 {
     type Rejection = Response;
 
-    async fn from_request(
-        req: Request,
-        _state: &S,
-    ) -> Result<Self, Self::Rejection> {
+    async fn from_request(req: Request, _state: &S) -> Result<Self, Self::Rejection> {
         let (parts, body) = req.into_parts();
 
-        let body =
-            axum::body::to_bytes(body, usize::MAX).await.map_err(|e| {
-                Response::builder()
-                    .status(StatusCode::INTERNAL_SERVER_ERROR)
-                    .body(axum::body::Body::from(e.to_string()))
-                    .unwrap()
-            })?;
+        let body = axum::body::to_bytes(body, usize::MAX).await.map_err(|e| {
+            Response::builder()
+                .status(StatusCode::INTERNAL_SERVER_ERROR)
+                .body(axum::body::Body::from(e.to_string()))
+                .unwrap()
+        })?;
 
         to_event(&parts.headers, body.to_vec()).map_err(|e| {
             Response::builder()

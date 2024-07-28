@@ -4,8 +4,8 @@ use crate::binding;
 use crate::message::{Error, Result};
 use crate::Event;
 use async_trait::async_trait;
-use http::header;
 use http;
+use http::header;
 use reqwest::Response;
 
 /// Method to transform an incoming [`Response`] to [`Event`].

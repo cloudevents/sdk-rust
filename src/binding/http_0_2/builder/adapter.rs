@@ -17,11 +17,12 @@ impl Builder<Response<Body>> for Adapter {
         self.builder.set(self.builder.take().header(key, value));
     }
     fn body(&mut self, bytes: Vec<u8>) -> Result<Response<Body>> {
-        self.builder.take().body(Body::from(bytes)).map_err(|e| {
-            crate::message::Error::Other {
+        self.builder
+            .take()
+            .body(Body::from(bytes))
+            .map_err(|e| crate::message::Error::Other {
                 source: Box::new(e),
-            }
-        })
+            })
     }
     fn finish(&mut self) -> Result<Response<Body>> {
         self.body(Vec::new())

@@ -42,8 +42,6 @@ where
 
 #[cfg(test)]
 mod tests {
-    use axum_lib;
-
     use super::*;
     use axum::body::Body;
     use axum::extract::FromRequest;

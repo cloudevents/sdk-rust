@@ -1,8 +1,12 @@
-use crate::{AttributesReader, Data, Event};
-
-use warp::{http::StatusCode, reply::Reply, reply::Response};
 use warp_lib as warp;
 
+use crate::binding::http_0_2::builder::adapter::to_response;
+
+use crate::Event;
+use http::StatusCode;
+use http_0_2 as http;
+use hyper_0_14 as hyper;
+use warp::reply::Response;
 ///
 /// # Serializes [`crate::Event`] as a http response
 ///
@@ -17,43 +21,19 @@ use warp_lib as warp;
 ///    .map(|| from_event(Event::default()));
 /// ```
 pub fn from_event(event: Event) -> Response {
-    let mut builder =
-        warp::http::response::Response::builder().status(StatusCode::OK);
-
-    if let Some(dct) = event.datacontenttype() {
-        builder = builder.header("Content-Type", dct);
+    match to_response(event) {
+        Ok(response) => response,
+        Err(e) => warp::http::response::Response::builder()
+            .status(StatusCode::INTERNAL_SERVER_ERROR)
+            .body(hyper::body::Body::from(e.to_string()))
+            .unwrap(),
     }
-
-    for (key, value) in event.iter() {
-        builder =
-            builder.header(format!("ce-{key}").as_str(), value.to_string());
-    }
-
-    let body = match event.data {
-        Some(data) => match data {
-            Data::Binary(v) => hyper::Body::from(v),
-            Data::String(s) => hyper::Body::from(s),
-            Data::Json(j) => match serde_json::to_vec(&j) {
-                Ok(s) => hyper::Body::from(s),
-                Err(e) => {
-                    builder = builder.status(StatusCode::INTERNAL_SERVER_ERROR);
-                    hyper::Body::from(e.to_string())
-                }
-            },
-        },
-        None => hyper::Body::empty(),
-    };
-
-    builder.body(body).into_response()
 }
 
 #[cfg(test)]
 mod tests {
     use crate::test::fixtures;
-
-    use http;
-    use http_body_util::BodyExt;
-    use warp_lib as warp;
+    use hyper_0_14 as hyper;
 
     #[test]
     fn test_response() {

@@ -1,14 +1,9 @@
-use crate::Event;
-use crate::EventBuilder;
-use crate::EventBuilderV10;
-
 use warp_lib as warp;
 
-use crate::binding::http::Headers;
+use crate::binding::http_0_2 as http;
 
-use http;
-use http::header::AsHeaderName;
-use warp::http::{HeaderMap, HeaderValue};
+use crate::Event;
+use warp::http::HeaderMap;
 use warp::Filter;
 use warp::Rejection;
 
@@ -47,8 +42,8 @@ async fn create_event(
     headers: HeaderMap,
     body: bytes::Bytes,
 ) -> Result<Event, Rejection> {
-    let builder = EventBuilderV10::new();
-    todo!()
+    http::to_event(&headers, body.to_vec())
+        .map_err(|error| warp::reject::custom(EventFilterError { error }))
 }
 
 #[cfg(test)]

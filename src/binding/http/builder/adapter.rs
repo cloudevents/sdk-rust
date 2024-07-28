@@ -1,7 +1,6 @@
 use bytes::Bytes;
 use http::Response;
 use http_body_util::Full;
-use hyper::body::Body;
 use std::cell::Cell;
 
 use crate::binding::http::{Builder, Serializer};

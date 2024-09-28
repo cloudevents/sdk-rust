@@ -6,7 +6,8 @@ use crate::binding::{
 };
 use crate::event::SpecVersion;
 use crate::message::{
-    BinaryDeserializer, BinarySerializer, MessageAttributeValue, Result, StructuredSerializer,
+    BinaryDeserializer, BinarySerializer, MessageAttributeValue, Result,
+    StructuredSerializer,
 };
 use crate::Event;
 use reqwest::RequestBuilder;
@@ -37,13 +38,21 @@ impl BinarySerializer<RequestBuilder> for RequestSerializer {
         Ok(self)
     }
 
-    fn set_attribute(mut self, name: &str, value: MessageAttributeValue) -> Result<Self> {
+    fn set_attribute(
+        mut self,
+        name: &str,
+        value: MessageAttributeValue,
+    ) -> Result<Self> {
         let key = &header_prefix(name);
         self.req = self.req.header(key, value.to_string());
         Ok(self)
     }
 
-    fn set_extension(mut self, name: &str, value: MessageAttributeValue) -> Result<Self> {
+    fn set_extension(
+        mut self,
+        name: &str,
+        value: MessageAttributeValue,
+    ) -> Result<Self> {
         let key = &header_prefix(name);
         self.req = self.req.header(key, value.to_string());
         Ok(self)
@@ -68,8 +77,14 @@ impl StructuredSerializer<RequestBuilder> for RequestSerializer {
 }
 
 /// Method to fill a [`RequestBuilder`] with an [`Event`].
-pub fn event_to_request(event: Event, request_builder: RequestBuilder) -> Result<RequestBuilder> {
-    BinaryDeserializer::deserialize_binary(event, RequestSerializer::new(request_builder))
+pub fn event_to_request(
+    event: Event,
+    request_builder: RequestBuilder,
+) -> Result<RequestBuilder> {
+    BinaryDeserializer::deserialize_binary(
+        event,
+        RequestSerializer::new(request_builder),
+    )
 }
 
 /// Method to fill a [`RequestBuilder`] with a batched [`Vec<Event>`].
@@ -122,11 +137,8 @@ mod tests {
 
     #[tokio::test]
     async fn test_request() {
-        let mut server = mockito::Server::new_async().await;
-        let url = server.url();
-
-        let m = server
-            .mock("POST", "/")
+        let url = mockito::server_url();
+        let m = mockito::mock("POST", "/")
             .match_header("ce-specversion", "1.0")
             .match_header("ce-id", "0001")
             .match_header("ce-type", "test_event.test_application")
@@ -151,11 +163,8 @@ mod tests {
 
     #[tokio::test]
     async fn test_request_with_full_data() {
-        let mut server = mockito::Server::new_async().await;
-        let url = server.url();
-
-        let m = server
-            .mock("POST", "/")
+        let url = mockito::server_url();
+        let m = mockito::mock("POST", "/")
             .match_header("ce-specversion", "1.0")
             .match_header("ce-id", "0001")
             .with_header("ce-type", "test_event.test_application")
@@ -188,15 +197,11 @@ mod tests {
     async fn test_structured_request_with_full_data() {
         let input = fixtures::v10::full_json_data_string_extension();
 
-        let mut server = mockito::Server::new_async().await;
-        let url = server.url();
-
-        let m = server
-            .mock("POST", "/")
+        let url = mockito::server_url();
+        let m = mockito::mock("POST", "/")
             .match_header("content-type", "application/cloudevents+json")
             .match_body(Matcher::Exact(serde_json::to_string(&input).unwrap()))
-            .create_async()
-            .await;
+            .create();
 
         let client = reqwest::Client::new();
         StructuredDeserializer::deserialize_structured(
@@ -214,15 +219,12 @@ mod tests {
     #[tokio::test]
     async fn test_batched_request() {
         let input = vec![fixtures::v10::full_json_data_string_extension()];
-        let mut server = mockito::Server::new_async().await;
-        let url = server.url();
 
-        let m = server
-            .mock("POST", "/")
+        let url = mockito::server_url();
+        let m = mockito::mock("POST", "/")
             .match_header("content-type", "application/cloudevents-batch+json")
             .match_body(Matcher::Exact(serde_json::to_string(&input).unwrap()))
-            .create_async()
-            .await;
+            .create();
 
         let client = reqwest::Client::new();
         client

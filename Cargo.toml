@@ -84,7 +84,7 @@ rmp-serde = "1"
 url = { version = "^2.1", features = ["serde"] }
 serde_json = { version = "^1.0" }
 chrono = { version = "^0.4", features = ["serde"] }
-mockito = "^1.4"
+mockito = "0.31.1"
 mime = "0.3"
 
 

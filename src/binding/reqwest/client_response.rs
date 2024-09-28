@@ -76,19 +76,15 @@ mod tests {
 
     #[tokio::test]
     async fn test_response() {
-        let mut server = mockito::Server::new_async().await;
-        let url = server.url();
-
-        let _m = server
-            .mock("GET", "/")
+        let url = mockito::server_url();
+        let _m = mockito::mock("GET", "/")
             .with_status(200)
             .with_header("ce-specversion", "1.0")
             .with_header("ce-id", "0001")
             .with_header("ce-type", "test_event.test_application")
             .with_header("ce-source", "http://localhost/")
             .with_header("ce-someint", "10")
-            .create_async()
-            .await;
+            .create();
 
         let expected = fixtures::v10::minimal_string_extension();
 
@@ -107,11 +103,8 @@ mod tests {
 
     #[tokio::test]
     async fn test_response_with_full_data() {
-        let mut server = mockito::Server::new_async().await;
-        let url = server.url();
-
-        let _m = server
-            .mock("GET", "/")
+        let url = mockito::server_url();
+        let _m = mockito::mock("GET", "/")
             .with_status(200)
             .with_header("ce-specversion", "1.0")
             .with_header("ce-id", "0001")
@@ -124,8 +117,7 @@ mod tests {
             .with_header("ce-bool_ex", "true")
             .with_header("ce-time", &fixtures::time().to_rfc3339())
             .with_body(fixtures::json_data().to_string())
-            .create_async()
-            .await;
+            .create();
 
         let expected = fixtures::v10::full_binary_json_data_string_extension();
 
@@ -146,19 +138,15 @@ mod tests {
     async fn test_structured_response_with_full_data() {
         let expected = fixtures::v10::full_json_data_string_extension();
 
-        let mut server = mockito::Server::new_async().await;
-        let url = server.url();
-
-        let _m = server
-            .mock("GET", "/")
+        let url = mockito::server_url();
+        let _m = mockito::mock("GET", "/")
             .with_status(200)
             .with_header(
                 "content-type",
                 "application/cloudevents+json; charset=utf-8",
             )
             .with_body(serde_json::to_string(&expected).unwrap())
-            .create_async()
-            .await;
+            .create();
 
         let client = reqwest::Client::new();
         let res = client
@@ -177,19 +165,15 @@ mod tests {
     async fn test_batched_response() {
         let expected = vec![fixtures::v10::full_json_data_string_extension()];
 
-        let mut server = mockito::Server::new_async().await;
-        let url = server.url();
-
-        let _m = server
-            .mock("GET", "/")
+        let url = mockito::server_url();
+        let _m = mockito::mock("GET", "/")
             .with_status(200)
             .with_header(
                 "content-type",
                 "application/cloudevents-batch+json; charset=utf-8",
             )
             .with_body(serde_json::to_string(&expected).unwrap())
-            .create_async()
-            .await;
+            .create();
 
         let client = reqwest::Client::new();
         let res = client

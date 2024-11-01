@@ -22,9 +22,7 @@ fn echo_app() -> Router {
 #[tokio::main]
 async fn main() {
     if std::env::var("RUST_LOG").is_err() {
-        unsafe {
-            std::env::set_var("RUST_LOG", "axum_example=debug,tower_http=debug")
-        }
+        std::env::set_var("RUST_LOG", "axum_example=debug,tower_http=debug")
     }
     tracing_subscriber::fmt::init();
     let service = echo_app();
@@ -49,12 +47,7 @@ mod tests {
     #[tokio::test]
     async fn axum_mod_test() {
         if std::env::var("RUST_LOG").is_err() {
-            unsafe {
-                std::env::set_var(
-                    "RUST_LOG",
-                    "axum_example=debug,tower_http=debug",
-                )
-            }
+            std::env::set_var("RUST_LOG", "axum_example=debug,tower_http=debug")
         }
         tracing_subscriber::fmt::init();
 

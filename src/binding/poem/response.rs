@@ -1,14 +1,33 @@
+use crate::{AttributesReader, Data, Event};
+
+use bytes::Bytes;
 use poem_lib::http::StatusCode;
 use poem_lib::{IntoResponse, Response};
 
-use crate::binding::http::builder::adapter::to_response;
-use crate::Event;
-
 impl IntoResponse for Event {
     fn into_response(self) -> Response {
-        match to_response(self) {
-            Ok(resp) => resp.into(),
-            Err(err) => (StatusCode::INTERNAL_SERVER_ERROR, err.to_string()).into(),
+        let mut builder = Response::builder().status(StatusCode::OK);
+
+        if let Some(dct) = self.datacontenttype() {
+            builder = builder.content_type(dct);
+        }
+
+        for (key, value) in self.iter() {
+            builder = builder.header(format!("ce-{key}").as_str(), value.to_string());
+        }
+
+        match self.data {
+            Some(data) => match data {
+                Data::Binary(v) => builder.body(Bytes::copy_from_slice(v.as_slice())),
+                Data::String(s) => builder.body(s.clone()),
+                Data::Json(j) => match serde_json::to_string(&j) {
+                    Ok(s) => builder.body(s),
+                    Err(e) => Response::builder()
+                        .status(StatusCode::INTERNAL_SERVER_ERROR)
+                        .body(e.to_string()),
+                },
+            },
+            None => builder.finish(),
         }
     }
 }

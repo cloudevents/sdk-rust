@@ -1,11 +1,12 @@
 use warp_lib as warp;
 
-use crate::binding::http::builder::adapter::to_response;
+use crate::binding::http_0_2::builder::adapter::to_response;
 
 use crate::Event;
 use http::StatusCode;
+use http_0_2 as http;
+use hyper_0_14 as hyper;
 use warp::reply::Response;
-
 ///
 /// # Serializes [`crate::Event`] as a http response
 ///
@@ -32,6 +33,7 @@ pub fn from_event(event: Event) -> Response {
 #[cfg(test)]
 mod tests {
     use crate::test::fixtures;
+    use hyper_0_14 as hyper;
 
     #[test]
     fn test_response() {

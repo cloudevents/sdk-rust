@@ -3,6 +3,7 @@ use super::{
     EventFormatSerializerV03, EventFormatSerializerV10,
 };
 use crate::event::{AttributesReader, ExtensionValue};
+use base64::prelude::*;
 use serde::de::{Error, IntoDeserializer};
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use serde_json::{Map, Value};
@@ -58,7 +59,9 @@ pub fn parse_data_string<E: serde::de::Error>(v: Value) -> Result<String, E> {
 
 pub fn parse_data_base64<E: serde::de::Error>(v: Value) -> Result<Vec<u8>, E> {
     parse_field!(v, String, E).and_then(|s| {
-        base64::decode(s).map_err(|e| E::custom(format_args!("decode error `{}`", e)))
+        BASE64_STANDARD
+            .decode(s)
+            .map_err(|e| E::custom(format_args!("decode error `{}`", e)))
     })
 }
 

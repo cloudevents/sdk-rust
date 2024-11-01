@@ -45,7 +45,7 @@ pub fn subject() -> String {
 }
 
 pub fn time() -> DateTime<Utc> {
-    Utc.ymd(2020, 3, 16).and_hms(11, 50, 00)
+    Utc.with_ymd_and_hms(2020, 3, 16, 11, 50, 00).unwrap()
 }
 
 pub fn string_extension() -> (String, String) {

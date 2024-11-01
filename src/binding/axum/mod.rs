@@ -155,7 +155,7 @@ mod tests {
         );
 
         let (_, body) = resp.into_parts();
-        let body = hyper::body::to_bytes(body).await.unwrap();
+        let body = axum::body::to_bytes(body, usize::MAX).await.unwrap();
 
         assert_eq!(j.to_string().as_bytes(), body);
     }

@@ -4,7 +4,6 @@ use axum::{
 };
 use cloudevents::Event;
 use http::StatusCode;
-use std::net::SocketAddr;
 use tower_http::trace::TraceLayer;
 
 fn echo_app() -> Router {
@@ -27,12 +26,8 @@ async fn main() {
     }
     tracing_subscriber::fmt::init();
     let service = echo_app();
-    let addr = SocketAddr::from(([127, 0, 0, 1], 8080));
-    tracing::debug!("listening on {}", addr);
-    axum::Server::bind(&addr)
-        .serve(service.into_make_service())
-        .await
-        .unwrap();
+    let listener = tokio::net::TcpListener::bind("0.0.0.0:8080").await.unwrap();
+    axum::serve(listener, service).await.unwrap();
 }
 
 #[cfg(test)]

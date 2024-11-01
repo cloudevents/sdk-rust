@@ -1,8 +1,8 @@
 use std::{cell::RefCell, rc::Rc};
 
-use crate::binding::http::builder::Builder;
+use crate::binding::http_0_2::builder::Builder;
 use crate::binding::{
-    http::{header_prefix, SPEC_VERSION_HEADER},
+    http_0_2::{header_prefix, SPEC_VERSION_HEADER},
     CLOUDEVENTS_JSON_HEADER,
 };
 use crate::event::SpecVersion;
@@ -12,8 +12,7 @@ use crate::message::{
 };
 use crate::Event;
 use http::Request;
-
-use http;
+use http_0_2 as http;
 use std::convert::TryFrom;
 use std::fmt::Debug;
 
@@ -133,8 +132,7 @@ mod tests {
     use crate::test::fixtures;
     use bytes::Bytes;
     use http::Request;
-
-    use http;
+    use http_0_2 as http;
     use std::convert::TryFrom;
 
     #[test]

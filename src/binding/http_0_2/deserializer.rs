@@ -8,8 +8,7 @@ use crate::{
         Result, StructuredDeserializer, StructuredSerializer,
     },
 };
-
-use http;
+use http_0_2 as http;
 use std::convert::TryFrom;
 
 pub struct Deserializer<'a, T: Headers<'a>> {

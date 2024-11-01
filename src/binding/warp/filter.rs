@@ -1,6 +1,6 @@
 use warp_lib as warp;
 
-use crate::binding::http;
+use crate::binding::http_0_2 as http;
 
 use crate::Event;
 use warp::http::HeaderMap;

@@ -1,8 +1,9 @@
-use crate::binding::http::{Builder, Serializer};
+use crate::binding::http_0_2::{Builder, Serializer};
 use crate::message::{BinaryDeserializer, Result};
 use crate::Event;
 use actix_web::http::StatusCode;
 use actix_web::{HttpRequest, HttpResponse, HttpResponseBuilder};
+use http_0_2 as http;
 
 impl Builder<HttpResponse> for HttpResponseBuilder {
     fn header(&mut self, key: &str, value: http::header::HeaderValue) {

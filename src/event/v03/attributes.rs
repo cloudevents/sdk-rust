@@ -221,7 +221,7 @@ impl crate::event::message::AttributesDeserializer for super::Attributes {
 mod tests {
     use super::*;
     use crate::test::fixtures;
-    use chrono::NaiveDateTime;
+    use chrono::DateTime;
 
     #[test]
     fn iter_v03_test() {
@@ -243,13 +243,10 @@ mod tests {
             datacontenttype: None,
             schemaurl: None,
             subject: None,
-            time: Some(DateTime::<Utc>::from_utc(
-                NaiveDateTime::from_timestamp(61, 0),
-                Utc,
-            )),
+            time: DateTime::from_timestamp(61, 0),
         };
         let b = &mut a.into_iter();
-        let time = DateTime::<Utc>::from_utc(NaiveDateTime::from_timestamp(61, 0), Utc);
+        let time = DateTime::from_timestamp(61, 0).unwrap();
 
         assert_eq!(
             ("specversion", AttributeValue::SpecVersion(SpecVersion::V03)),

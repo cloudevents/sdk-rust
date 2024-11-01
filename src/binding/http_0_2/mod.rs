@@ -13,8 +13,7 @@ mod serializer;
 pub use builder::Builder;
 use core::convert::TryFrom;
 use http::Response;
-
-use http;
+use http_0_2 as http;
 pub use serializer::Serializer;
 use std::convert::TryInto;
 use std::fmt::Debug;
@@ -54,8 +53,7 @@ mod tests {
     use crate::Event;
     use core::convert::TryFrom;
     use http::Response;
-
-    use http;
+    use http_0_2 as http;
 
     #[test]
     fn test_response_to_event() {

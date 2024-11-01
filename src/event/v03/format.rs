@@ -4,6 +4,7 @@ use crate::event::format::{
     parse_data_base64, parse_data_base64_json, parse_data_json, parse_data_string,
 };
 use crate::event::{Data, ExtensionValue};
+use base64::prelude::*;
 use chrono::{DateTime, Utc};
 use serde::de::IntoDeserializer;
 use serde::ser::SerializeMap;
@@ -102,7 +103,7 @@ impl<S: serde::Serializer> crate::event::format::EventFormatSerializer<S, Attrib
             Some(Data::Json(j)) => state.serialize_entry("data", j)?,
             Some(Data::String(s)) => state.serialize_entry("data", s)?,
             Some(Data::Binary(v)) => {
-                state.serialize_entry("data", &base64::encode(v))?;
+                state.serialize_entry("data", &BASE64_STANDARD.encode(v))?;
                 state.serialize_entry("datacontentencoding", "base64")?;
             }
             _ => (),

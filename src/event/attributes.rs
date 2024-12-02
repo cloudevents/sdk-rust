@@ -11,13 +11,14 @@ use url::Url;
 /// This represents the types defined in the [CloudEvent spec type system](https://github.com/cloudevents/spec/blob/v1.0/spec.md#type-system)
 #[derive(Debug, PartialEq, Eq)]
 pub enum AttributeValue<'a> {
-    SpecVersion(SpecVersion),
-    String(&'a str),
-    URI(&'a Url),
-    URIRef(&'a UriReference),
     Boolean(&'a bool),
     Integer(&'a i64),
+    String(&'a str),
+    Binary(&'a [u8]),
+    URI(&'a Url),
+    URIRef(&'a UriReference),
     Time(&'a DateTime<Utc>),
+    SpecVersion(SpecVersion),
 }
 
 impl<'a> From<&'a ExtensionValue> for AttributeValue<'a> {
@@ -33,13 +34,14 @@ impl<'a> From<&'a ExtensionValue> for AttributeValue<'a> {
 impl fmt::Display for AttributeValue<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            AttributeValue::SpecVersion(s) => s.fmt(f),
+            AttributeValue::Boolean(b) => f.serialize_bool(**b),
+            AttributeValue::Integer(i) => f.serialize_i64(**i),
             AttributeValue::String(s) => f.write_str(s),
+            AttributeValue::Binary(b) => f.write_str(&base64::encode(b)),
             AttributeValue::URI(s) => f.write_str(s.as_str()),
             AttributeValue::URIRef(s) => f.write_str(s.as_str()),
             AttributeValue::Time(s) => f.write_str(&s.to_rfc3339()),
-            AttributeValue::Boolean(b) => f.serialize_bool(**b),
-            AttributeValue::Integer(i) => f.serialize_i64(**i),
+            AttributeValue::SpecVersion(s) => s.fmt(f),
         }
     }
 }

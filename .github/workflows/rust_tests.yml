@@ -100,14 +100,14 @@ jobs:
         args: --target wasm32-unknown-unknown --features reqwest
     - uses: actions-rs/cargo@v1
       name: "Build"
-      if: matrix.target == 'wasm32-wasi'
+      if: matrix.target == 'wasm32-wasip1'
       with:
         command: build
         toolchain: ${{ matrix.toolchain }}
         args: --target ${{ matrix.target }} --features "http-0-2-binding hyper-0-14 hyper_wasi"
     - uses: actions-rs/cargo@v1
       name: "Test"
-      if: matrix.target == 'wasm32-wasi'
+      if: matrix.target == 'wasm32-wasip1'
       with:
         command: test
         toolchain: ${{ matrix.toolchain }}
@@ -117,7 +117,7 @@ jobs:
     # Build examples
     - uses: actions-rs/cargo@v1
       name: "Build wasi-example"
-      if: matrix.target == 'wasm32-wasi' && matrix.toolchain == 'stable'
+      if: matrix.target == 'wasm32-wasip1' && matrix.toolchain == 'stable'
       with:
         command: build
         toolchain: ${{ matrix.toolchain }}

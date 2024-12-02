@@ -4,7 +4,7 @@ https://wasmedge.org/docs/start/install/
 
 To run the server:
 ```console
-cargo run --target wasm32-wasi
+cargo run --target wasm32-wasip1
 ```
 
 To test a GET:

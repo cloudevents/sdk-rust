@@ -84,26 +84,29 @@ pub struct Event {
 
 #[delegate(self.attributes)]
 impl AttributesReader for Event {
-    fn id(&self) -> &str;
-    fn source(&self) -> &UriReference;
-    fn specversion(&self) -> SpecVersion;
-    fn ty(&self) -> &str;
-    fn datacontenttype(&self) -> Option<&str>;
-    fn dataschema(&self) -> Option<&Url>;
-    fn subject(&self) -> Option<&str>;
-    fn time(&self) -> Option<&DateTime<Utc>>;
+    fn id(&self) -> &str {}
+    fn source(&self) -> &UriReference {}
+    fn specversion(&self) -> SpecVersion {}
+    fn ty(&self) -> &str {}
+    fn datacontenttype(&self) -> Option<&str> {}
+    fn dataschema(&self) -> Option<&Url> {}
+    fn subject(&self) -> Option<&str> {}
+    fn time(&self) -> Option<&DateTime<Utc>> {}
 }
 
 #[delegate(self.attributes)]
 impl AttributesWriter for Event {
-    fn set_id(&mut self, id: impl Into<String>) -> String;
-    fn set_source(&mut self, source: impl Into<UriReference>) -> UriReference;
-    fn set_type(&mut self, ty: impl Into<String>) -> String;
-    fn set_subject(&mut self, subject: Option<impl Into<String>>) -> Option<String>;
-    fn set_time(&mut self, time: Option<impl Into<DateTime<Utc>>>) -> Option<DateTime<Utc>>;
-    fn set_datacontenttype(&mut self, datacontenttype: Option<impl Into<String>>)
-        -> Option<String>;
-    fn set_dataschema(&mut self, dataschema: Option<impl Into<Url>>) -> Option<Url>;
+    fn set_id(&mut self, id: impl Into<String>) -> String {}
+    fn set_source(&mut self, source: impl Into<UriReference>) -> UriReference {}
+    fn set_type(&mut self, ty: impl Into<String>) -> String {}
+    fn set_subject(&mut self, subject: Option<impl Into<String>>) -> Option<String> {}
+    fn set_time(&mut self, time: Option<impl Into<DateTime<Utc>>>) -> Option<DateTime<Utc>> {}
+    fn set_datacontenttype(
+        &mut self,
+        datacontenttype: Option<impl Into<String>>,
+    ) -> Option<String> {
+    }
+    fn set_dataschema(&mut self, dataschema: Option<impl Into<Url>>) -> Option<Url> {}
 }
 
 impl Default for Event {

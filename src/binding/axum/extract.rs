@@ -1,45 +1,46 @@
-use axum_lib as axum;
-
 use async_trait::async_trait;
-use axum::extract::FromRequest;
-use axum::http::Request;
-use http::request::Parts;
+use axum::body::Bytes;
+use axum::extract::{FromRequest, Request};
+use axum::response::Response;
+use axum_lib as axum;
+use http;
 use http::StatusCode;
-use http_body::Body;
-use hyper::body;
 
 use crate::binding::http::to_event;
 use crate::event::Event;
 
-type BoxError = Box<dyn std::error::Error + Send + Sync>;
-
 #[async_trait]
-impl<S, B> FromRequest<S, B> for Event
+impl<S> FromRequest<S> for Event
 where
-    B: Body + Send + 'static,
-    B::Data: Send,
-    B::Error: Into<BoxError>,
+    Bytes: FromRequest<S>,
     S: Send + Sync,
 {
-    type Rejection = (StatusCode, String);
+    type Rejection = Response;
 
-    async fn from_request(req: Request<B>, _state: &S) -> Result<Self, Self::Rejection> {
-        let (Parts { headers, .. }, req_body) = req.into_parts();
-        let buf = body::to_bytes(req_body)
-            .await
-            .map_err(|e| (StatusCode::BAD_REQUEST, format!("{}", e.into())))?
-            .to_vec();
+    async fn from_request(req: Request, _state: &S) -> Result<Self, Self::Rejection> {
+        let (parts, body) = req.into_parts();
 
-        to_event(&headers, buf).map_err(|e| (StatusCode::BAD_REQUEST, format!("{}", e)))
+        let body = axum::body::to_bytes(body, usize::MAX).await.map_err(|e| {
+            Response::builder()
+                .status(StatusCode::INTERNAL_SERVER_ERROR)
+                .body(axum::body::Body::from(e.to_string()))
+                .unwrap()
+        })?;
+
+        to_event(&parts.headers, body.to_vec()).map_err(|e| {
+            Response::builder()
+                .status(StatusCode::BAD_REQUEST)
+                .body(axum::body::Body::from(e.to_string()))
+                .unwrap()
+        })
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use axum_lib as axum;
-
     use super::*;
     use axum::body::Body;
+    use axum::extract::FromRequest;
     use axum::http::{self, Request, StatusCode};
 
     use crate::test::fixtures;
@@ -80,7 +81,7 @@ mod tests {
         assert!(result.is_err());
         let rejection = result.unwrap_err();
 
-        let reason = rejection.0;
+        let reason = rejection.status();
         assert_eq!(reason, StatusCode::BAD_REQUEST)
     }
 

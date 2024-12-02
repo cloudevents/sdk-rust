@@ -11,8 +11,6 @@ pub mod axum;
     docsrs,
     doc(cfg(any(
         feature = "http-binding",
-        feature = "actix",
-        feature = "warp",
         feature = "reqwest",
         feature = "axum",
         feature = "poem"
@@ -20,13 +18,19 @@ pub mod axum;
 )]
 #[cfg(any(
     feature = "http-binding",
-    feature = "actix",
-    feature = "warp",
     feature = "reqwest",
     feature = "axum",
     feature = "poem"
 ))]
 pub mod http;
+
+#[cfg_attr(
+    docsrs,
+    doc(cfg(any(feature = "http-0-2-binding", feature = "actix", feature = "warp",)))
+)]
+#[cfg(any(feature = "http-0-2-binding", feature = "actix", feature = "warp",))]
+pub mod http_0_2;
+
 #[cfg_attr(docsrs, doc(cfg(feature = "nats")))]
 #[cfg(feature = "nats")]
 pub mod nats;

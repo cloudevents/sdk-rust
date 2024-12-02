@@ -1,5 +1,6 @@
 use crate::test::fixtures::*;
 use crate::{Event, EventBuilder, EventBuilderV10};
+use base64::prelude::*;
 use serde_json::{json, Value};
 use url::Url;
 
@@ -166,7 +167,7 @@ pub fn full_json_base64_data_json() -> Value {
         int_ext_name: int_ext_value,
         "datacontenttype": json_datacontenttype(),
         "dataschema": dataschema(),
-        "data_base64": base64::encode(json_data_binary())
+        "data_base64": BASE64_STANDARD.encode(json_data_binary())
     })
 }
 
@@ -175,7 +176,7 @@ pub fn full_non_json_base64_data() -> Value {
         Value::Object(mut m) => {
             m.insert(
                 "data_base64".to_string(),
-                Value::String(base64::encode(b"hello world")),
+                Value::String(BASE64_STANDARD.encode(b"hello world")),
             );
             Value::Object(m)
         }
@@ -187,7 +188,11 @@ pub fn full_non_json_data() -> Event {
     let mut event = full_json_data();
     let value = full_non_json_base64_data();
     if let Value::Object(m) = value {
-        event.set_data_unchecked(base64::decode(m["data_base64"].as_str().unwrap()).unwrap());
+        event.set_data_unchecked(
+            BASE64_STANDARD
+                .decode(m["data_base64"].as_str().unwrap())
+                .unwrap(),
+        );
     }
     event
 }
@@ -266,6 +271,6 @@ pub fn full_xml_base64_data_json() -> Value {
         bool_ext_name: bool_ext_value,
         int_ext_name: int_ext_value,
         "datacontenttype": xml_datacontenttype(),
-        "data_base64": base64::encode(Vec::from(xml_data()))
+        "data_base64": BASE64_STANDARD.encode(Vec::from(xml_data()))
     })
 }

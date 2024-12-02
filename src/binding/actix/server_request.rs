@@ -1,4 +1,4 @@
-use crate::binding::http::{to_event, Headers};
+use crate::binding::http_0_2::{to_event, Headers};
 use crate::Event;
 use actix_web::dev::Payload;
 use actix_web::web::BytesMut;
@@ -6,6 +6,7 @@ use actix_web::{web, HttpRequest};
 use async_trait::async_trait;
 use futures::{future::LocalBoxFuture, FutureExt, StreamExt};
 use http::header::{AsHeaderName, HeaderName, HeaderValue};
+use http_0_2 as http;
 
 /// Implement Headers for the actix HeaderMap
 impl<'a> Headers<'a> for actix_http::header::HeaderMap {

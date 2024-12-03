@@ -2,7 +2,7 @@
 name = "reqwest-wasm-example"
 version = "0.3.0"
 authors = ["Francesco Guardiani <francescoguard@gmail.com>"]
-edition = "2018"
+edition = "2021"
 
 # Config mostly pulled from: https://github.com/rustwasm/wasm-bindgen/blob/master/examples/fetch/Cargo.toml
 

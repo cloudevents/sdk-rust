@@ -12,6 +12,7 @@ exclude = [
     ".github/*"
 ]
 categories = ["web-programming", "encoding", "data-structures"]
+resolver = "2"
 
 # Enable all features when building on docs.rs to show feature gated bindings
 [package.metadata.docs.rs]

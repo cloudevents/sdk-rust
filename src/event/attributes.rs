@@ -2,6 +2,7 @@ use super::{
     AttributesIntoIteratorV03, AttributesIntoIteratorV10, AttributesV03, AttributesV10,
     ExtensionValue, SpecVersion, UriReference,
 };
+use base64::prelude::*;
 use chrono::{DateTime, Utc};
 use serde::Serializer;
 use std::fmt;
@@ -37,7 +38,7 @@ impl fmt::Display for AttributeValue<'_> {
             AttributeValue::Boolean(b) => f.serialize_bool(**b),
             AttributeValue::Integer(i) => f.serialize_i64(**i),
             AttributeValue::String(s) => f.write_str(s),
-            AttributeValue::Binary(b) => f.write_str(&base64::encode(b)),
+            AttributeValue::Binary(b) => f.write_str(&BASE64_STANDARD.encode(b)),
             AttributeValue::URI(s) => f.write_str(s.as_str()),
             AttributeValue::URIRef(s) => f.write_str(s.as_str()),
             AttributeValue::Time(s) => f.write_str(&s.to_rfc3339()),

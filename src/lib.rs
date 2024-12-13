@@ -54,7 +54,7 @@
 //! [Extractors]: https://actix.rs/docs/extractors/
 //! [Responders]: https://actix.rs/docs/handlers/
 
-#![doc(html_root_url = "https://docs.rs/cloudevents-sdk/0.8.0")]
+#![doc(html_root_url = "https://docs.rs/cloudevents-sdk/0.9.0")]
 #![deny(rustdoc::broken_intra_doc_links)]
 #![cfg_attr(docsrs, feature(doc_cfg))] // Show feature gate in doc
 

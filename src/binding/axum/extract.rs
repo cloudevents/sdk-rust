@@ -1,4 +1,3 @@
-use async_trait::async_trait;
 use axum::body::Bytes;
 use axum::extract::{FromRequest, Request};
 use axum::response::Response;
@@ -9,7 +8,6 @@ use http::StatusCode;
 use crate::binding::http::to_event;
 use crate::event::Event;
 
-#[async_trait]
 impl<S> FromRequest<S> for Event
 where
     Bytes: FromRequest<S>,

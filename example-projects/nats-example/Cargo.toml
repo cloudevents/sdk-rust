@@ -9,4 +9,4 @@ edition = "2021"
 [dependencies]
 cloudevents-sdk = { path = "../..", features = ["nats"] }
 serde_json = "^1.0"
-nats = "^0.25"
+async-nats = "^0.42.0"

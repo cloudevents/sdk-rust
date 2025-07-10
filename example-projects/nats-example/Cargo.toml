@@ -10,3 +10,5 @@ edition = "2021"
 cloudevents-sdk = { path = "../..", features = ["nats"] }
 serde_json = "^1.0"
 async-nats = "^0.42.0"
+tokio = { version = "^1.0", features = ["full"] }
+futures = "^0.3"

@@ -34,7 +34,7 @@ jobs:
     - run: sudo apt-get install -y musl musl-dev musl-tools cmake
       if: matrix.target == 'x86_64-unknown-linux-musl'
     # # Caching stuff
-    - uses: actions/cache@v2
+    - uses: actions/cache@v4
       with:
         path: |
           ~/.cargo/bin/
@@ -42,7 +42,7 @@ jobs:
           ~/.cargo/registry/cache/
           ~/.cargo/git/db/
         key: ${{ runner.os }}-cargo-deps-${{ hashFiles('**/Cargo.toml') }}
-    - uses: actions/cache@v2
+    - uses: actions/cache@v4
       with:
         path: |
           target/

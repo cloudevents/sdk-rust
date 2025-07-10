@@ -1,15 +1,17 @@
-use std::{error::Error, thread};
+use std::error::Error;
 
 use cloudevents::binding::nats::{MessageExt, NatsCloudEvent};
 use cloudevents::{Event, EventBuilder, EventBuilderV10};
 use serde_json::json;
+use futures::StreamExt;
 
 /// First spin up a nats server i.e.
 /// ```bash
 /// docker run -p 4222:4222 -ti nats:latest
 /// ```
-fn main() -> Result<(), Box<dyn Error>> {
-    let nc = nats::connect("localhost:4222").unwrap();
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn Error>> {
+    let client = async_nats::connect("localhost:4222").await?;
 
     let event = EventBuilderV10::new()
         .id("123".to_string())
@@ -21,26 +23,27 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     let n_msg = NatsCloudEvent::from_event(event).unwrap();
 
-    let sub = nc.subscribe("test").unwrap();
+    let mut sub = client.subscribe("test").await?;
 
-    let t = thread::spawn(move || -> Result<Event, String> {
-        match sub.next() {
-            Some(msg) => match msg.to_event() {
+    let receive_task = tokio::spawn(async move {
+        if let Some(msg) = sub.next().await {
+            match msg.to_event() {
                 Ok(evt) => Ok(evt),
                 Err(e) => Err(e.to_string()),
-            },
-            None => Err("Unsubed or disconnected".to_string()),
+            }
+        } else {
+            Err("No event received".to_string())
         }
     });
 
-    nc.publish("test", n_msg)?;
+    client.publish("test", n_msg.payload.into()).await?;
 
-    let maybe_event = t.join().unwrap();
+    let maybe_event = receive_task.await?;
 
     if let Ok(evt) = maybe_event {
         println!("{}", evt.to_string());
     } else {
-        println!("{}", maybe_event.unwrap_err().to_string());
+        println!("{}", maybe_event.unwrap_err());
     }
 
     Ok(())

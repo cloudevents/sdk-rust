@@ -10,7 +10,7 @@ impl StructuredDeserializer for nats::Message {
         self,
         serializer: V,
     ) -> crate::message::Result<R> {
-        serializer.set_structured_event(self.data.to_vec())
+        serializer.set_structured_event(self.payload.to_vec())
     }
 }
 
@@ -47,12 +47,15 @@ mod tests {
     fn test_structured_deserialize_v10() {
         let expected = fixtures::v10::full_json_data_string_extension();
 
-        let nats_message = nats::Message::new(
-            "not_relevant",
-            None,
-            json!(expected).to_string().as_bytes(),
-            None,
-        );
+        let nats_message = nats::Message {
+            subject: "not_relevant".into(),
+            payload: json!(expected).to_string().into_bytes().into(),
+            reply: None,
+            headers: None,
+            status: None,
+            description: None,
+            length: 0,
+        };
 
         let actual = nats_message.to_event().unwrap();
 
@@ -63,12 +66,15 @@ mod tests {
     fn test_structured_deserialize_v03() {
         let expected = fixtures::v03::full_json_data();
 
-        let nats_message = nats::Message::new(
-            "not_relevant",
-            None,
-            json!(expected).to_string().as_bytes(),
-            None,
-        );
+        let nats_message = nats::Message {
+            subject: "not_relevant".into(),
+            payload: json!(expected).to_string().into_bytes().into(),
+            reply: None,
+            headers: None,
+            status: None,
+            description: None,
+            length: 0,
+        };
 
         let actual = nats_message.to_event().unwrap();
 

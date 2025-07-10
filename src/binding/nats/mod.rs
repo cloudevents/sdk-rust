@@ -22,7 +22,7 @@
 //! Serialize [Event](https://docs.rs/cloudevents-sdk/latest/cloudevents/event/struct.Event.html) into [NatsCloudEvent] and publish to nats subject
 //! ```no_run
 //!     use nats_lib as nats;
-//!     use cloudevents``::binding::nats::NatsCloudEvent;
+//!     use cloudevents::binding::nats::NatsCloudEvent;
 //!     use cloudevents::{EventBuilder, EventBuilderV10, Event};
 //!     use serde_json::json;
 //!

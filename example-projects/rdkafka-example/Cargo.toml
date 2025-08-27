@@ -16,4 +16,4 @@ serde_json = "^1.0"
 futures = "^0.3"
 tokio = { version = "^1.0", features = ["full"] }
 clap = "2.33.1"
-rdkafka = { version = "^0.37", features = ["cmake-build"] }
+rdkafka = { version = "^0.38", features = ["cmake-build"] }

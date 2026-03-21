@@ -79,8 +79,7 @@ Checkout the examples using our integrations to learn how to send and receive ev
 - Slack: #cloudeventssdk (or #cloudevents-sdk-rust) channel under
   [CNCF's Slack workspace](https://slack.cncf.io/).
 - Email: https://lists.cncf.io/g/cncf-cloudevents-sdk
-- Contact for additional information: Francesco Guardiani (`@slinkydeveloper`
-  on slack).
+
 
 Each SDK may have its own unique processes, tooling and guidelines, common
 governance related material can be found in the

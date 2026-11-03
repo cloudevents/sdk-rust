@@ -16,6 +16,8 @@ pub enum Data {
 }
 
 pub(crate) fn is_json_content_type(ct: &str) -> bool {
+    // Ignore media type parameters, e.g. `application/vnd.foo+json; charset=utf-8`
+    let ct = ct.split(';').next().unwrap_or(ct).trim();
     ct.starts_with("application/json") || ct.starts_with("text/json") || ct.ends_with("+json")
 }
 
@@ -114,6 +116,24 @@ mod tests {
         assert_eq!(
             format!("{}", d),
             r"Binary data: E onde sou só desejo, queres não\xF0\x90"
+        );
+    }
+
+    #[test]
+    fn deserialize_json_suffix_content_type_with_parameters() {
+        let event: crate::Event = serde_json::from_value(serde_json::json!({
+            "specversion": "1.0",
+            "id": "0001",
+            "type": "test_event.test_application",
+            "source": "http://localhost/",
+            "datacontenttype": "application/vnd.example+json; charset=utf-8",
+            "data": {"hello": "world"}
+        }))
+        .unwrap();
+
+        assert_eq!(
+            event.data(),
+            Some(&Data::Json(serde_json::json!({"hello": "world"})))
         );
     }
 }

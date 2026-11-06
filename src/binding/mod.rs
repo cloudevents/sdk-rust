@@ -6,6 +6,9 @@ pub mod actix;
 #[cfg_attr(docsrs, doc(cfg(feature = "axum")))]
 #[cfg(feature = "axum")]
 pub mod axum;
+#[cfg_attr(docsrs, doc(cfg(feature = "fe2o3-amqp")))]
+#[cfg(feature = "fe2o3-amqp")]
+pub mod fe2o3_amqp;
 
 #[cfg_attr(
     docsrs,
@@ -30,7 +33,6 @@ pub mod http;
 )]
 #[cfg(any(feature = "http-0-2-binding", feature = "actix", feature = "warp",))]
 pub mod http_0_2;
-
 #[cfg_attr(docsrs, doc(cfg(feature = "nats")))]
 #[cfg(feature = "nats")]
 pub mod nats;

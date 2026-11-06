@@ -28,9 +28,12 @@ jobs:
 
     # setup wasmedge
     - run: curl -sSf https://raw.githubusercontent.com/WasmEdge/WasmEdge/master/utils/install.sh | sudo bash -s -- -p /usr/local
-    # Setup musl if needed
+    # Install native librdkafka build dependencies on Linux
     - run: sudo apt-get update
-      if: matrix.target == 'x86_64-unknown-linux-musl'
+      if: startsWith(matrix.target, 'x86_64-unknown-linux-')
+    - run: sudo apt-get install -y libcurl4-openssl-dev libsasl2-dev
+      if: startsWith(matrix.target, 'x86_64-unknown-linux-')
+    # Setup musl if needed
     - run: sudo apt-get install -y musl musl-dev musl-tools cmake
       if: matrix.target == 'x86_64-unknown-linux-musl'
     # # Caching stuff

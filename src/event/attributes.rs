@@ -47,48 +47,48 @@ impl fmt::Display for AttributeValue<'_> {
     }
 }
 
-/// Trait to get [CloudEvents Context attributes](https://github.com/cloudevents/spec/blob/master/spec.md#context-attributes).
+/// Trait to get [CloudEvents Context attributes](https://github.com/cloudevents/spec/blob/main/cloudevents/spec.md#context-attributes).
 pub trait AttributesReader {
-    /// Get the [id](https://github.com/cloudevents/spec/blob/master/spec.md#id).
+    /// Get the [id](https://github.com/cloudevents/spec/blob/main/cloudevents/spec.md#id).
     fn id(&self) -> &str;
-    /// Get the [source](https://github.com/cloudevents/spec/blob/master/spec.md#source-1).
+    /// Get the [source](https://github.com/cloudevents/spec/blob/main/cloudevents/spec.md#source-1).
     fn source(&self) -> &UriReference;
-    /// Get the [specversion](https://github.com/cloudevents/spec/blob/master/spec.md#specversion).
+    /// Get the [specversion](https://github.com/cloudevents/spec/blob/main/cloudevents/spec.md#specversion).
     fn specversion(&self) -> SpecVersion;
-    /// Get the [type](https://github.com/cloudevents/spec/blob/master/spec.md#type).
+    /// Get the [type](https://github.com/cloudevents/spec/blob/main/cloudevents/spec.md#type).
     fn ty(&self) -> &str;
-    /// Get the [datacontenttype](https://github.com/cloudevents/spec/blob/master/spec.md#datacontenttype).
+    /// Get the [datacontenttype](https://github.com/cloudevents/spec/blob/main/cloudevents/spec.md#datacontenttype).
     fn datacontenttype(&self) -> Option<&str>;
-    /// Get the [dataschema](https://github.com/cloudevents/spec/blob/master/spec.md#dataschema).
+    /// Get the [dataschema](https://github.com/cloudevents/spec/blob/main/cloudevents/spec.md#dataschema).
     fn dataschema(&self) -> Option<&Url>;
-    /// Get the [subject](https://github.com/cloudevents/spec/blob/master/spec.md#subject).
+    /// Get the [subject](https://github.com/cloudevents/spec/blob/main/cloudevents/spec.md#subject).
     fn subject(&self) -> Option<&str>;
-    /// Get the [time](https://github.com/cloudevents/spec/blob/master/spec.md#time).
+    /// Get the [time](https://github.com/cloudevents/spec/blob/main/cloudevents/spec.md#time).
     fn time(&self) -> Option<&DateTime<Utc>>;
 }
 
-/// Trait to set [CloudEvents Context attributes](https://github.com/cloudevents/spec/blob/master/spec.md#context-attributes).
+/// Trait to set [CloudEvents Context attributes](https://github.com/cloudevents/spec/blob/main/cloudevents/spec.md#context-attributes).
 pub trait AttributesWriter {
-    /// Set the [id](https://github.com/cloudevents/spec/blob/master/spec.md#id).
+    /// Set the [id](https://github.com/cloudevents/spec/blob/main/cloudevents/spec.md#id).
     /// Returns the previous value.
     fn set_id(&mut self, id: impl Into<String>) -> String;
-    /// Set the [source](https://github.com/cloudevents/spec/blob/master/spec.md#source-1).
+    /// Set the [source](https://github.com/cloudevents/spec/blob/main/cloudevents/spec.md#source-1).
     /// Returns the previous value.
     fn set_source(&mut self, source: impl Into<UriReference>) -> UriReference;
-    /// Set the [type](https://github.com/cloudevents/spec/blob/master/spec.md#type).
+    /// Set the [type](https://github.com/cloudevents/spec/blob/main/cloudevents/spec.md#type).
     /// Returns the previous value.
     fn set_type(&mut self, ty: impl Into<String>) -> String;
-    /// Set the [subject](https://github.com/cloudevents/spec/blob/master/spec.md#subject).
+    /// Set the [subject](https://github.com/cloudevents/spec/blob/main/cloudevents/spec.md#subject).
     /// Returns the previous value.
     fn set_subject(&mut self, subject: Option<impl Into<String>>) -> Option<String>;
-    /// Set the [time](https://github.com/cloudevents/spec/blob/master/spec.md#time).
+    /// Set the [time](https://github.com/cloudevents/spec/blob/main/cloudevents/spec.md#time).
     /// Returns the previous value.
     fn set_time(&mut self, time: Option<impl Into<DateTime<Utc>>>) -> Option<DateTime<Utc>>;
-    /// Set the [datacontenttype](https://github.com/cloudevents/spec/blob/master/spec.md#datacontenttype).
+    /// Set the [datacontenttype](https://github.com/cloudevents/spec/blob/main/cloudevents/spec.md#datacontenttype).
     /// Returns the previous value.
     fn set_datacontenttype(&mut self, datacontenttype: Option<impl Into<String>>)
         -> Option<String>;
-    /// Set the [dataschema](https://github.com/cloudevents/spec/blob/master/spec.md#dataschema).
+    /// Set the [dataschema](https://github.com/cloudevents/spec/blob/main/cloudevents/spec.md#dataschema).
     /// Returns the previous value.
     fn set_dataschema(&mut self, dataschema: Option<impl Into<Url>>) -> Option<Url>;
 }

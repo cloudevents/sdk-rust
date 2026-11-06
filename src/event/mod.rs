@@ -44,10 +44,10 @@ use std::collections::HashMap;
 use std::fmt;
 use url::Url;
 
-/// Data structure that represents a [CloudEvent](https://github.com/cloudevents/spec/blob/master/spec.md).
+/// Data structure that represents a [CloudEvent](https://github.com/cloudevents/spec/blob/main/cloudevents/spec.md).
 /// It provides methods to get the attributes through [`AttributesReader`]
 /// and write them through [`AttributesWriter`].
-/// It also provides methods to read and write the [event data](https://github.com/cloudevents/spec/blob/master/spec.md#event-data).
+/// It also provides methods to read and write the [event data](https://github.com/cloudevents/spec/blob/main/cloudevents/spec.md#event-data).
 ///
 /// You can build events using [`super::EventBuilder`]
 /// ```
@@ -133,20 +133,20 @@ impl fmt::Display for Event {
 }
 
 impl Event {
-    /// Returns an [`Iterator`] for all the available [CloudEvents Context attributes](https://github.com/cloudevents/spec/blob/master/spec.md#context-attributes) and extensions.
+    /// Returns an [`Iterator`] for all the available [CloudEvents Context attributes](https://github.com/cloudevents/spec/blob/main/cloudevents/spec.md#context-attributes) and extensions.
     /// Same as chaining [`Event::iter_attributes()`] and [`Event::iter_extensions()`]
     pub fn iter(&self) -> impl Iterator<Item = (&str, AttributeValue)> {
         self.iter_attributes()
             .chain(self.extensions.iter().map(|(k, v)| (k.as_str(), v.into())))
     }
 
-    /// Returns an [`Iterator`] for all the available [CloudEvents Context attributes](https://github.com/cloudevents/spec/blob/master/spec.md#context-attributes), excluding extensions.
+    /// Returns an [`Iterator`] for all the available [CloudEvents Context attributes](https://github.com/cloudevents/spec/blob/main/cloudevents/spec.md#context-attributes), excluding extensions.
     /// This iterator does not contain the `data` field.
     pub fn iter_attributes(&self) -> impl Iterator<Item = (&str, AttributeValue)> {
         self.attributes.iter()
     }
 
-    /// Get all the [extensions](https://github.com/cloudevents/spec/blob/master/spec.md#extension-context-attributes)
+    /// Get all the [extensions](https://github.com/cloudevents/spec/blob/main/cloudevents/spec.md#extension-context-attributes)
     pub fn iter_extensions(&self) -> impl Iterator<Item = (&str, &ExtensionValue)> {
         self.extensions.iter().map(|(k, v)| (k.as_str(), v))
     }
@@ -213,12 +213,12 @@ impl Event {
         std::mem::replace(&mut self.data, Some(data.into()))
     }
 
-    /// Get the [extension](https://github.com/cloudevents/spec/blob/master/spec.md#extension-context-attributes) named `extension_name`
+    /// Get the [extension](https://github.com/cloudevents/spec/blob/main/cloudevents/spec.md#extension-context-attributes) named `extension_name`
     pub fn extension(&self, extension_name: &str) -> Option<&ExtensionValue> {
         self.extensions.get(extension_name)
     }
 
-    /// Set the [extension](https://github.com/cloudevents/spec/blob/master/spec.md#extension-context-attributes) named `extension_name` with `extension_value`
+    /// Set the [extension](https://github.com/cloudevents/spec/blob/main/cloudevents/spec.md#extension-context-attributes) named `extension_name` with `extension_value`
     pub fn set_extension<'name, 'event: 'name>(
         &'event mut self,
         extension_name: &'name str,
@@ -228,7 +228,7 @@ impl Event {
             .insert(extension_name.to_owned(), extension_value.into());
     }
 
-    /// Remove the [extension](https://github.com/cloudevents/spec/blob/master/spec.md#extension-context-attributes) named `extension_name`
+    /// Remove the [extension](https://github.com/cloudevents/spec/blob/main/cloudevents/spec.md#extension-context-attributes) named `extension_name`
     pub fn remove_extension<'name, 'event: 'name>(
         &'event mut self,
         extension_name: &'name str,

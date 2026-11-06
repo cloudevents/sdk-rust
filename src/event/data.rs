@@ -4,7 +4,7 @@ use std::fmt;
 use std::fmt::Formatter;
 use std::str;
 
-/// Event [data attribute](https://github.com/cloudevents/spec/blob/master/spec.md#event-data) representation
+/// Event [data attribute](https://github.com/cloudevents/spec/blob/main/cloudevents/spec.md#event-data) representation
 #[derive(PartialEq, Eq, Debug, Clone)]
 pub enum Data {
     /// Event has a binary payload

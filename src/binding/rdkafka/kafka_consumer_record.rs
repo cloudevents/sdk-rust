@@ -94,9 +94,10 @@ impl BinaryDeserializer for ConsumerRecordDeserializer {
             }
         }
 
-        match self.payload {
-            Some(payload) => visitor.end_with_data(payload),
-            None => visitor.end(),
+        if let Some(payload) = self.payload {
+            visitor.end_with_data(payload)
+        } else {
+            visitor.end()
         }
     }
 }

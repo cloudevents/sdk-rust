@@ -80,7 +80,30 @@ mod tests {
         let rejection = result.unwrap_err();
 
         let reason = rejection.status();
-        assert_eq!(reason, StatusCode::BAD_REQUEST)
+        assert_eq!(reason, StatusCode::BAD_REQUEST);
+        let body = axum::body::to_bytes(rejection.into_body(), usize::MAX)
+            .await
+            .unwrap();
+        assert_eq!(body, "Invalid specversion BAD SPECIFICATION");
+    }
+
+    #[tokio::test]
+    async fn axum_test_body_read_error() {
+        let request = Request::builder()
+            .method(http::Method::POST)
+            .body(Body::new(http_body_util::Limited::new(
+                Body::from("body exceeds limit"),
+                0,
+            )))
+            .unwrap();
+
+        let rejection = Event::from_request(request, &()).await.unwrap_err();
+
+        assert_eq!(rejection.status(), StatusCode::INTERNAL_SERVER_ERROR);
+        let body = axum::body::to_bytes(rejection.into_body(), usize::MAX)
+            .await
+            .unwrap();
+        assert_eq!(body, "length limit exceeded");
     }
 
     #[tokio::test]

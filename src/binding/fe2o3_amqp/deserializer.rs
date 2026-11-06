@@ -29,7 +29,7 @@ impl BinaryDeserializer for EventMessage {
                 .application_properties
                 .as_mut()
                 .ok_or(Error::WrongEncoding {})?
-                .remove(prefixed::SPECVERSION)
+                .swap_remove(prefixed::SPECVERSION)
                 .ok_or(Error::WrongEncoding {})
                 .map(|val| match val {
                     SimpleValue::String(s) => Ok(s),
@@ -65,7 +65,10 @@ impl BinaryDeserializer for EventMessage {
 
         match self.body {
             Body::Data(data) => {
-                let bytes = data.0.into_vec();
+                let bytes = data
+                    .into_iter()
+                    .flat_map(|data| data.0.into_vec())
+                    .collect();
                 serializer.end_with_data(bytes)
             }
             Body::Empty => serializer.end(),
@@ -81,7 +84,10 @@ impl StructuredDeserializer for EventMessage {
     ) -> Result<R> {
         use fe2o3_amqp_types::messaging::Body;
         let bytes = match self.body {
-            Body::Data(data) => data.0.into_vec(),
+            Body::Data(data) => data
+                .into_iter()
+                .flat_map(|data| data.0.into_vec())
+                .collect(),
             Body::Empty => vec![],
             Body::Sequence(_) | Body::Value(_) => return Err(Error::WrongEncoding {}),
         };

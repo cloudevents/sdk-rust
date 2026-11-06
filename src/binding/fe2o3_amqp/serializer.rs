@@ -70,7 +70,7 @@ impl BinarySerializer<EventMessage> for EventMessage {
 
     fn end_with_data(mut self, bytes: Vec<u8>) -> crate::message::Result<Self> {
         let data = Binary::from(bytes);
-        self.body = AmqpBody::Data(AmqpData(data));
+        self.body = AmqpBody::from(AmqpData(data));
         Ok(self)
     }
 
@@ -82,7 +82,7 @@ impl BinarySerializer<EventMessage> for EventMessage {
 impl StructuredSerializer<EventMessage> for EventMessage {
     fn set_structured_event(mut self, bytes: Vec<u8>) -> crate::message::Result<Self> {
         self.content_type = Some(Symbol::from("application/cloudevents+json; charset=utf-8"));
-        self.body = AmqpBody::Data(AmqpData(Binary::from(bytes)));
+        self.body = AmqpBody::from(AmqpData(Binary::from(bytes)));
         Ok(self)
     }
 }

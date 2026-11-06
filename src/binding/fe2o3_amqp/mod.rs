@@ -98,10 +98,8 @@ mod constants;
 
 /// Type alias for an AMQP 1.0 message
 ///
-/// The generic parameter can be anything that implements `Serialize` and `Deserialize` but is of
-/// no importance because all CloudEvents are using the `Body::Data` as the body section type. For
-/// convenience, this type alias chooses `Value` as the value of the generic parameter
-pub type AmqpMessage = Message<Value>;
+/// This type alias uses [`AmqpBody`] as the message body type.
+pub type AmqpMessage = Message<AmqpBody>;
 
 /// Type alias for an AMQP 1.0 Body
 ///

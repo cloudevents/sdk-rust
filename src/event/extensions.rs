@@ -4,7 +4,7 @@ use std::fmt;
 
 #[derive(PartialEq, Eq, Debug, Clone, Serialize, Deserialize)]
 #[serde(untagged)]
-/// Represents all the possible [CloudEvents extension](https://github.com/cloudevents/spec/blob/master/spec.md#extension-context-attributes) values
+/// Represents all the possible [CloudEvents extension](https://github.com/cloudevents/spec/blob/main/cloudevents/spec.md#extension-context-attributes) values
 pub enum ExtensionValue {
     /// Represents a [`String`] value.
     String(String),

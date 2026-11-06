@@ -191,27 +191,20 @@ impl crate::event::message::AttributesDeserializer for super::Attributes {
         visitor = visitor.set_attribute("id", MessageAttributeValue::String(self.id))?;
         visitor = visitor.set_attribute("type", MessageAttributeValue::String(self.ty))?;
         visitor = visitor.set_attribute("source", MessageAttributeValue::UriRef(self.source))?;
-        if self.datacontenttype.is_some() {
+        if let Some(datacontenttype) = self.datacontenttype {
             visitor = visitor.set_attribute(
                 "datacontenttype",
-                MessageAttributeValue::String(self.datacontenttype.unwrap()),
+                MessageAttributeValue::String(datacontenttype),
             )?;
         }
-        if self.schemaurl.is_some() {
-            visitor = visitor.set_attribute(
-                "schemaurl",
-                MessageAttributeValue::Uri(self.schemaurl.unwrap()),
-            )?;
+        if let Some(schemaurl) = self.schemaurl {
+            visitor = visitor.set_attribute("schemaurl", MessageAttributeValue::Uri(schemaurl))?;
         }
-        if self.subject.is_some() {
-            visitor = visitor.set_attribute(
-                "subject",
-                MessageAttributeValue::String(self.subject.unwrap()),
-            )?;
+        if let Some(subject) = self.subject {
+            visitor = visitor.set_attribute("subject", MessageAttributeValue::String(subject))?;
         }
-        if self.time.is_some() {
-            visitor = visitor
-                .set_attribute("time", MessageAttributeValue::DateTime(self.time.unwrap()))?;
+        if let Some(time) = self.time {
+            visitor = visitor.set_attribute("time", MessageAttributeValue::DateTime(time))?;
         }
         Ok(visitor)
     }

@@ -37,18 +37,18 @@
 //! only the module associated with the Protocol Binding you need:
 //!
 //! - `actix`: Enables the [`binding::actix`] protocol binding module. This
-//! extends the [`actix_web::HttpRequest`] with a
-//! [`to_event`](binding::actix::HttpRequestExt::to_event) function, the
-//! [`actix_web::HttpResponseBuilder`] with an
-//! [`event`](binding::actix::HttpResponseBuilderExt::event) function,
-//! and implementations for [`actix_web::FromRequest`] and
-//! [`actix_web::Responder`] in order to take advantage of actix-web's
-//! [Extractors] and [Responders]
+//!   extends the [`actix_web::HttpRequest`] with a
+//!   [`to_event`](binding::actix::HttpRequestExt::to_event) function, the
+//!   [`actix_web::HttpResponseBuilder`] with an
+//!   [`event`](binding::actix::HttpResponseBuilderExt::event) function,
+//!   and implementations for [`actix_web::FromRequest`] and
+//!   [`actix_web::Responder`] in order to take advantage of actix-web's
+//!   [Extractors] and [Responders]
 //! - `reqwest`: Enables the [`binding::reqwest`] protocol binding module.
 //! - `warp`: Enables the [`binding::warp`] protocol binding module.
 //! - `axum`: Enables the [`binding::axum`] protocol binding module.
 //! - `rdkafka`: Enables the [`binding::rdkafka`] protocol binding module to
-//! seamlessly consume/produce cloudevents within Kafka messages.
+//!   seamlessly consume/produce cloudevents within Kafka messages.
 //!
 //! [feature flags]: https://doc.rust-lang.org/cargo/reference/manifest.html#the-features-section
 //! [Extractors]: https://actix.rs/docs/extractors/

@@ -28,10 +28,17 @@ jobs:
 
     # setup wasmedge
     - run: curl -sSf https://raw.githubusercontent.com/WasmEdge/WasmEdge/master/utils/install.sh | sudo bash -s -- -p /usr/local
-    # Setup musl if needed
+    # Install native librdkafka build dependencies on Linux
     - run: sudo apt-get update
-      if: matrix.target == 'x86_64-unknown-linux-musl'
+      if: startsWith(matrix.target, 'x86_64-unknown-linux-')
+    - run: sudo apt-get install -y cmake libcurl4-openssl-dev
+      if: startsWith(matrix.target, 'x86_64-unknown-linux-')
+    # Setup musl if needed
     - run: sudo apt-get install -y musl musl-dev musl-tools cmake
+      if: matrix.target == 'x86_64-unknown-linux-musl'
+    # librdkafka 2.12.1 includes curl headers even with WITH_CURL=0.
+    # Expose only those headers, not glibc's system headers, to musl-gcc.
+    - run: sudo ln -s /usr/include/x86_64-linux-gnu/curl /usr/include/x86_64-linux-musl/curl
       if: matrix.target == 'x86_64-unknown-linux-musl'
     # # Caching stuff
     - uses: actions/cache@v5

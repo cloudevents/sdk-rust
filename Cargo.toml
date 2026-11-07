@@ -41,7 +41,6 @@ delegate-attr = "^0.3"
 base64 = "^0.22"
 url = { version = "^2.5", features = ["serde"] }
 snafu = "^0.8"
-bitflags = "^2.6"
 uuid = { version = "1", features = ["v4"] }
 
 # runtime optional deps

@@ -11,7 +11,7 @@ on:
 jobs:
   build:
     name: ${{ matrix.toolchain }} / ${{ matrix.target }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
       matrix:
@@ -24,7 +24,7 @@ jobs:
           - wasm32-unknown-unknown
           - wasm32-wasip1
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v7
 
     # setup wasmedge
     - run: curl -sSf https://raw.githubusercontent.com/WasmEdge/WasmEdge/master/utils/install.sh | sudo bash -s -- -p /usr/local
@@ -34,7 +34,7 @@ jobs:
     - run: sudo apt-get install -y musl musl-dev musl-tools cmake
       if: matrix.target == 'x86_64-unknown-linux-musl'
     # # Caching stuff
-    - uses: actions/cache@v4
+    - uses: actions/cache@v5
       with:
         path: |
           ~/.cargo/bin/
@@ -42,140 +42,78 @@ jobs:
           ~/.cargo/registry/cache/
           ~/.cargo/git/db/
         key: ${{ runner.os }}-cargo-deps-${{ hashFiles('**/Cargo.toml') }}
-    - uses: actions/cache@v4
+    - uses: actions/cache@v5
       with:
         path: |
           target/
         key: ${{ runner.os }}-cargo-target-${{ matrix.toolchain }}-${{ matrix.target }}-${{ hashFiles('**/Cargo.toml') }}
-    - uses: actions-rs/toolchain@v1
+    - uses: dtolnay/rust-toolchain@master
       with:
         toolchain: ${{ matrix.toolchain }}
-        target: ${{ matrix.target }}
-        override: true
+        targets: ${{ matrix.target }}
 
     # If glibc, compile and test all
-    - uses: actions-rs/cargo@v1
-      name: "Build"
+    - name: "Build"
       if: matrix.target == 'x86_64-unknown-linux-gnu'
-      with:
-        command: build
-        toolchain: ${{ matrix.toolchain }}
-        args: --target ${{ matrix.target }} --all-features
-    - uses: actions-rs/cargo@v1
-      name: "Test"
+      run: cargo build --target ${{ matrix.target }} --all-features
+    - name: "Test"
       if: matrix.target == 'x86_64-unknown-linux-gnu'
-      with:
-        command: test
-        toolchain: ${{ matrix.toolchain }}
-        args: --target ${{ matrix.target }} --all-features
+      run: cargo test --target ${{ matrix.target }} --all-features
 
     # If musl, compile and test all
-    - uses: actions-rs/cargo@v1
-      name: "Build"
+    - name: "Build"
       if: matrix.target == 'x86_64-unknown-linux-musl'
-      with:
-        command: build
-        toolchain: ${{ matrix.toolchain }}
-        args: --target ${{ matrix.target }} --all-features
+      run: cargo build --target ${{ matrix.target }} --all-features
       env:
         CC: musl-gcc
         CXX: g++
-    - uses: actions-rs/cargo@v1
-      name: "Test"
+    - name: "Test"
       if: matrix.target == 'x86_64-unknown-linux-musl'
-      with:
-        command: test
-        toolchain: ${{ matrix.toolchain }}
-        args: --target ${{ matrix.target }} --all-features
+      run: cargo test --target ${{ matrix.target }} --all-features
       env:
         CC: musl-gcc
         CXX: g++
 
-    - uses: actions-rs/cargo@v1
-      name: "Build"
+    - name: "Build"
       if: matrix.target == 'wasm32-unknown-unknown'
-      with:
-        command: build
-        toolchain: ${{ matrix.toolchain }}
-        args: --target wasm32-unknown-unknown --features reqwest
-    - uses: actions-rs/cargo@v1
-      name: "Build"
+      run: cargo build --target wasm32-unknown-unknown --features reqwest
+    - name: "Build"
       if: matrix.target == 'wasm32-wasi'
-      with:
-        command: build
-        toolchain: ${{ matrix.toolchain }}
-        args: --target ${{ matrix.target }} --features "http-0-2-binding hyper-0-14 hyper_wasi"
-    - uses: actions-rs/cargo@v1
-      name: "Test"
+      run: cargo build --target ${{ matrix.target }} --features "http-0-2-binding hyper-0-14 hyper_wasi"
+    - name: "Test"
       if: matrix.target == 'wasm32-wasi'
-      with:
-        command: test
-        toolchain: ${{ matrix.toolchain }}
-        args: --target ${{ matrix.target }} --features "http-0-2-binding hyper-0-14 hyper_wasi"
+      run: cargo test --target ${{ matrix.target }} --features "http-0-2-binding hyper-0-14 hyper_wasi"
       env:
         CARGO_TARGET_WASM32_WASI_RUNNER: wasmedge
     # Build examples
-    - uses: actions-rs/cargo@v1
-      name: "Build wasi-example"
+    - name: "Build wasi-example"
       if: matrix.target == 'wasm32-wasi' && matrix.toolchain == 'stable'
-      with:
-        command: build
-        toolchain: ${{ matrix.toolchain }}
-        args: --target ${{ matrix.target }} --manifest-path ./example-projects/wasi-example/Cargo.toml
+      run: cargo build --target ${{ matrix.target }} --manifest-path ./example-projects/wasi-example/Cargo.toml
 
-    - uses: actions-rs/cargo@v1
-      name: "Build reqwest-wasm-example"
+    - name: "Build reqwest-wasm-example"
       if: matrix.target == 'wasm32-unknown-unknown' && matrix.toolchain == 'stable'
-      with:
-        command: build
-        toolchain: ${{ matrix.toolchain }}
-        args: --target ${{ matrix.target }} --manifest-path ./example-projects/reqwest-wasm-example/Cargo.toml
+      run: cargo build --target ${{ matrix.target }} --manifest-path ./example-projects/reqwest-wasm-example/Cargo.toml
 
-    - uses: actions-rs/cargo@v1
-      name: "Build rdkafka-example"
+    - name: "Build rdkafka-example"
       if: matrix.target == 'x86_64-unknown-linux-gnu' && matrix.toolchain == 'stable'
-      with:
-        command: build
-        toolchain: ${{ matrix.toolchain }}
-        args: --target ${{ matrix.target }} --manifest-path ./example-projects/rdkafka-example/Cargo.toml
+      run: cargo build --target ${{ matrix.target }} --manifest-path ./example-projects/rdkafka-example/Cargo.toml
 
-    - uses: actions-rs/cargo@v1
-      name: "Build actix-web-example"
+    - name: "Build actix-web-example"
       if: matrix.target == 'x86_64-unknown-linux-gnu' && matrix.toolchain == 'stable'
-      with:
-        command: build
-        toolchain: ${{ matrix.toolchain }}
-        args: --target ${{ matrix.target }} --manifest-path ./example-projects/actix-web-example/Cargo.toml
+      run: cargo build --target ${{ matrix.target }} --manifest-path ./example-projects/actix-web-example/Cargo.toml
 
-    - uses: actions-rs/cargo@v1
-      name: "Build warp-example"
+    - name: "Build warp-example"
       if: matrix.target == 'x86_64-unknown-linux-gnu' && matrix.toolchain == 'stable'
-      with:
-        command: build
-        toolchain: ${{ matrix.toolchain }}
-        args: --target ${{ matrix.target }} --manifest-path ./example-projects/warp-example/Cargo.toml
+      run: cargo build --target ${{ matrix.target }} --manifest-path ./example-projects/warp-example/Cargo.toml
 
-    - uses: actions-rs/cargo@v1
-      name: "Build axum-example"
+    - name: "Build axum-example"
       if: matrix.target == 'x86_64-unknown-linux-gnu' && matrix.toolchain == 'stable'
-      with:
-        command: build
-        toolchain: ${{ matrix.toolchain }}
-        args: --target ${{ matrix.target }} --manifest-path ./example-projects/axum-example/Cargo.toml
+      run: cargo build --target ${{ matrix.target }} --manifest-path ./example-projects/axum-example/Cargo.toml
 
-    - uses: actions-rs/cargo@v1
-      name: "Build poem-example"
+    - name: "Build poem-example"
       if: matrix.target == 'x86_64-unknown-linux-gnu' && matrix.toolchain == 'stable'
-      with:
-        command: build
-        toolchain: ${{ matrix.toolchain }}
-        args: --target ${{ matrix.target }} --manifest-path ./example-projects/poem-example/Cargo.toml
+      run: cargo build --target ${{ matrix.target }} --manifest-path ./example-projects/poem-example/Cargo.toml
 
-    - uses: actions-rs/cargo@v1
-      name: "Build nats-example"
+    - name: "Build nats-example"
       if: matrix.target == 'x86_64-unknown-linux-gnu' && matrix.toolchain == 'stable'
-      with:
-        command: build
-        toolchain: ${{ matrix.toolchain }}
-        args: --target ${{ matrix.target }} --manifest-path ./example-projects/nats-example/Cargo.toml
-
+      run: cargo build --target ${{ matrix.target }} --manifest-path ./example-projects/nats-example/Cargo.toml

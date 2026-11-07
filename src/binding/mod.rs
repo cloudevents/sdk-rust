@@ -55,10 +55,41 @@ pub(crate) mod kafka {
     }
 }
 
+#[cfg(any(
+    feature = "http-binding",
+    feature = "http-0-2-binding",
+    feature = "actix",
+    feature = "reqwest",
+    feature = "warp",
+    feature = "axum",
+    feature = "poem",
+    feature = "rdkafka"
+))]
 pub(crate) static CLOUDEVENTS_JSON_HEADER: &str = "application/cloudevents+json";
+#[cfg(feature = "reqwest")]
 pub(crate) static CLOUDEVENTS_BATCH_JSON_HEADER: &str = "application/cloudevents-batch+json";
+#[cfg(any(
+    feature = "http-binding",
+    feature = "http-0-2-binding",
+    feature = "actix",
+    feature = "reqwest",
+    feature = "warp",
+    feature = "axum",
+    feature = "poem",
+    feature = "rdkafka"
+))]
 pub(crate) static CONTENT_TYPE: &str = "content-type";
 
+#[cfg(any(
+    feature = "http-binding",
+    feature = "http-0-2-binding",
+    feature = "actix",
+    feature = "reqwest",
+    feature = "warp",
+    feature = "axum",
+    feature = "poem",
+    feature = "rdkafka"
+))]
 fn header_prefix(prefix: &str, name: &str) -> String {
     if name == "datacontenttype" {
         CONTENT_TYPE.to_string()

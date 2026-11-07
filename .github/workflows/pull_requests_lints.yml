@@ -8,22 +8,14 @@ on:
 jobs:
   lint:
     name: Rust
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions-rs/toolchain@v1
+      - uses: actions/checkout@v7
+      - uses: dtolnay/rust-toolchain@master
         with:
-          profile: minimal
           toolchain: stable
-          override: true
-          components: clippy, rustfmt
-      - uses: actions-rs/cargo@v1
-        name: "Cargo fmt"
-        with:
-          command: fmt
-          args: --all -- --check
-      - uses: actions-rs/clippy-check@v1
-        name: "Cargo clippy"
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          args: --all-features
+          components: clippy,rustfmt
+      - name: Cargo fmt
+        run: cargo fmt --all -- --check
+      - name: Cargo clippy
+        run: cargo clippy --all-features -- -D warnings

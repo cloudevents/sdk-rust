@@ -247,7 +247,7 @@ impl Attributes {
         }
     }
 
-    pub(crate) fn iter(&self) -> impl Iterator<Item = (&str, AttributeValue)> {
+    pub(crate) fn iter(&self) -> impl Iterator<Item = (&str, AttributeValue<'_>)> {
         match self {
             Attributes::V03(a) => AttributesIter::IterV03(a.into_iter()),
             Attributes::V10(a) => AttributesIter::IterV10(a.into_iter()),

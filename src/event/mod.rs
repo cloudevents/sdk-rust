@@ -135,14 +135,14 @@ impl fmt::Display for Event {
 impl Event {
     /// Returns an [`Iterator`] for all the available [CloudEvents Context attributes](https://github.com/cloudevents/spec/blob/main/cloudevents/spec.md#context-attributes) and extensions.
     /// Same as chaining [`Event::iter_attributes()`] and [`Event::iter_extensions()`]
-    pub fn iter(&self) -> impl Iterator<Item = (&str, AttributeValue)> {
+    pub fn iter(&self) -> impl Iterator<Item = (&str, AttributeValue<'_>)> {
         self.iter_attributes()
             .chain(self.extensions.iter().map(|(k, v)| (k.as_str(), v.into())))
     }
 
     /// Returns an [`Iterator`] for all the available [CloudEvents Context attributes](https://github.com/cloudevents/spec/blob/main/cloudevents/spec.md#context-attributes), excluding extensions.
     /// This iterator does not contain the `data` field.
-    pub fn iter_attributes(&self) -> impl Iterator<Item = (&str, AttributeValue)> {
+    pub fn iter_attributes(&self) -> impl Iterator<Item = (&str, AttributeValue<'_>)> {
         self.attributes.iter()
     }
 
@@ -194,7 +194,7 @@ impl Event {
     ) -> (Option<String>, Option<Data>) {
         (
             self.attributes.set_datacontenttype(Some(datacontenttype)),
-            std::mem::replace(&mut self.data, Some(data.into())),
+            self.data.replace(data.into()),
         )
     }
 
@@ -210,7 +210,7 @@ impl Event {
     /// let old_data = e.set_data_unchecked(json!({}));
     /// ```
     pub fn set_data_unchecked(&mut self, data: impl Into<Data>) -> Option<Data> {
-        std::mem::replace(&mut self.data, Some(data.into()))
+        self.data.replace(data.into())
     }
 
     /// Get the [extension](https://github.com/cloudevents/spec/blob/main/cloudevents/spec.md#extension-context-attributes) named `extension_name`

@@ -94,10 +94,9 @@ impl BinaryDeserializer for ConsumerRecordDeserializer {
             }
         }
 
-        if self.payload.is_some() {
-            visitor.end_with_data(self.payload.unwrap())
-        } else {
-            visitor.end()
+        match self.payload {
+            Some(payload) => visitor.end_with_data(payload),
+            None => visitor.end(),
         }
     }
 }

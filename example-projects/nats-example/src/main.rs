@@ -1,7 +1,7 @@
 use std::error::Error;
 
 use cloudevents::binding::nats::{MessageExt, NatsCloudEvent};
-use cloudevents::{Event, EventBuilder, EventBuilderV10};
+use cloudevents::{EventBuilder, EventBuilderV10};
 use serde_json::json;
 use futures::StreamExt;
 

@@ -1,6 +1,12 @@
 //! This library provides Kafka protocol bindings for CloudEvents
 //! using the [rust-rdkafka](https://fede1024.github.io/rust-rdkafka) library.
 //!
+//! Building this binding requires a C compiler and CMake. With librdkafka 2.12.1,
+//! curl development headers are also required even when curl support is disabled.
+//! On Debian/Ubuntu, install `cmake` and `libcurl4-openssl-dev`. For musl builds,
+//! make the curl headers available in the musl compiler's include path without
+//! adding glibc's system headers. This does not enable or link curl support.
+//!
 //! To produce Cloudevents:
 //!
 //! ```

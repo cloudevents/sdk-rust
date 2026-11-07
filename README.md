@@ -66,6 +66,7 @@ Checkout the examples using our integrations to learn how to send and receive ev
 * [Kafka Example](example-projects/rdkafka-example)
 * [Warp Example](example-projects/warp-example)
 * [NATS Example](example-projects/nats-example)
+* [Distributed tracing example](example-projects/tracing-example)
 
 ## Community
 

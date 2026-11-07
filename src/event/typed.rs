@@ -1,4 +1,4 @@
-use crate::event::{AttributesReader, Data, Event};
+use crate::event::{AttributesReader, AttributesWriter, Data, Event};
 use serde::de::DeserializeOwned;
 use serde::Serialize;
 use std::convert::TryFrom;
@@ -38,6 +38,8 @@ pub enum TypedEventError {
     TypeMismatch { expected: String, actual: String },
     /// The event data could not be deserialized into the target type.
     DeserializationError(String),
+    /// The typed payload could not be serialized into event data.
+    SerializationError(String),
     /// The event has no data, but data was expected.
     MissingData,
 }
@@ -55,6 +57,9 @@ impl fmt::Display for TypedEventError {
             TypedEventError::DeserializationError(msg) => {
                 write!(f, "Failed to deserialize event data: {}", msg)
             }
+            TypedEventError::SerializationError(msg) => {
+                write!(f, "Failed to serialize event data: {}", msg)
+            }
             TypedEventError::MissingData => {
                 write!(f, "Event has no data but data was expected")
             }
@@ -66,9 +71,9 @@ impl std::error::Error for TypedEventError {}
 
 /// A wrapper around `Event` that provides type-safe access to the event data.
 ///
-/// `TypedEvent<T>` represents a CloudEvent with validated event type and
-/// deserialized payload. It preserves all CloudEvent metadata while providing
-/// compile-time safety for the event data.
+/// `TypedEvent<T>` represents a CloudEvent with a type-safe payload. The payload
+/// is authoritative and is kept separately from the event metadata. Converting
+/// back to `Event` serializes the payload as JSON.
 ///
 /// # Type Safety
 ///
@@ -110,18 +115,15 @@ pub struct TypedEvent<T: CloudEventPayload> {
 }
 
 impl<T: CloudEventPayload> TypedEvent<T> {
-    /// Creates a new `TypedEvent` with the given event and payload.
+    /// Creates a `TypedEvent` with the given event metadata and payload.
     ///
-    /// # Arguments
-    ///
-    /// * `event` - The CloudEvent with metadata
-    /// * `payload` - The strongly-typed event data
-    ///
-    /// # Note
-    ///
-    /// This function does not validate that the event's type matches `T::EVENT_TYPE`.
-    /// Use `try_from` for validated conversion.
-    pub fn new(event: Event, payload: T) -> Self {
+    /// The event type is set to `T::EVENT_TYPE`, and any existing event data is
+    /// discarded so the typed payload remains authoritative. Use
+    /// [`TryFrom<Event>`] to validate and convert an existing event.
+    pub fn new(mut event: Event, payload: T) -> Self {
+        event.set_type(T::EVENT_TYPE);
+        event.data = None;
+        event.set_datacontenttype(None as Option<String>);
         TypedEvent { event, payload }
     }
 
@@ -130,27 +132,28 @@ impl<T: CloudEventPayload> TypedEvent<T> {
         &self.payload
     }
 
-    /// Returns a mutable reference to the typed payload.
-    pub fn data_mut(&mut self) -> &mut T {
-        &mut self.payload
-    }
-
     /// Consumes the `TypedEvent` and returns the typed payload.
     pub fn into_data(self) -> T {
         self.payload
     }
 
-    /// Returns a reference to the underlying CloudEvent.
+    /// Returns the event metadata without event data.
     pub fn event(&self) -> &Event {
         &self.event
     }
 
-    /// Returns a mutable reference to the underlying CloudEvent.
-    pub fn event_mut(&mut self) -> &mut Event {
-        &mut self.event
+    /// Consumes the `TypedEvent` and serializes its payload into a CloudEvent.
+    ///
+    /// The payload is encoded as JSON and the event's data content type is set
+    /// to `application/json`.
+    pub fn try_into_event(mut self) -> Result<Event, TypedEventError> {
+        let data = serde_json::to_value(&self.payload)
+            .map_err(|e| TypedEventError::SerializationError(e.to_string()))?;
+        self.event.set_data("application/json", data);
+        Ok(self.event)
     }
 
-    /// Consumes the `TypedEvent` and returns the underlying CloudEvent and payload.
+    /// Consumes the `TypedEvent` and returns the event metadata and payload.
     pub fn into_parts(self) -> (Event, T) {
         (self.event, self.payload)
     }
@@ -187,6 +190,10 @@ impl<T: CloudEventPayload> TryFrom<Event> for TypedEvent<T> {
             .data()
             .ok_or(TypedEventError::MissingData)
             .and_then(|data| deserialize_payload::<T>(data))?;
+
+        let mut event = event;
+        event.data = None;
+        event.set_datacontenttype(None as Option<String>);
 
         Ok(TypedEvent { event, payload })
     }
@@ -239,6 +246,11 @@ mod tests {
 
         let typed: TypedEvent<TestPayload> = event.try_into().unwrap();
         assert_eq!(typed.data(), &payload);
+        assert!(typed.event().data().is_none());
+
+        let event = typed.try_into_event().unwrap();
+        let recovered: TypedEvent<TestPayload> = event.try_into().unwrap();
+        assert_eq!(recovered.data(), &payload);
     }
 
     #[test]
@@ -348,6 +360,34 @@ mod tests {
         let (recovered_event, recovered_payload) = typed.into_parts();
 
         assert_eq!(recovered_event.id(), "test-id-4");
+        assert!(recovered_event.data().is_none());
         assert_eq!(recovered_payload, payload);
+    }
+
+    #[test]
+    fn test_typed_event_new_sets_type_and_payload_is_authoritative() {
+        let event = EventBuilderV10::new()
+            .id("test-id-5")
+            .source(Url::parse("http://example.com").unwrap())
+            .ty("com.example.wrong.type")
+            .data("application/json", serde_json::json!({"stale": true}))
+            .build()
+            .unwrap();
+        let payload = TestPayload {
+            user_id: "123".to_string(),
+            email: "test@example.com".to_string(),
+        };
+
+        let typed = TypedEvent::new(event, payload.clone());
+        assert_eq!(typed.event().ty(), TestPayload::EVENT_TYPE);
+        assert!(typed.event().data().is_none());
+
+        let event = typed.try_into_event().unwrap();
+        assert_eq!(event.ty(), TestPayload::EVENT_TYPE);
+        assert_eq!(event.datacontenttype(), Some("application/json"));
+        assert_eq!(
+            event.data(),
+            Some(&Data::Json(serde_json::to_value(payload).unwrap()))
+        );
     }
 }

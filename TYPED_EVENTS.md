@@ -49,7 +49,10 @@ impl CloudEventPayload for UserCreated {
 
 ## TypedEvent Wrapper
 
-`TypedEvent<T>` wraps a generic `Event` with strongly-typed payload access.
+`TypedEvent<T>` keeps the typed payload authoritative and stores event metadata
+separately. Converting an existing `Event` validates its type and deserializes
+its data. `TypedEvent::new` creates a typed event from metadata and payload,
+setting the event type from `T::EVENT_TYPE`.
 
 ### Creating TypedEvent from Event
 
@@ -77,11 +80,7 @@ let typed: TypedEvent<UserCreated> = event.try_into()?;
 let payload: &UserCreated = typed.data();
 println!("Email: {}", payload.email);
 
-// Mutate the payload
-let payload_mut: &mut UserCreated = typed.data_mut();
-payload_mut.email = "new@example.com".to_string();
-
-// Access the underlying Event
+// Access event metadata. The typed payload is not duplicated in this Event.
 let event: &Event = typed.event();
 println!("Event ID: {}", event.id());
 
@@ -91,11 +90,35 @@ let source: &UriReference = typed.event().source();
 let time: Option<&DateTime<Utc>> = typed.event().time();
 ```
 
+The payload is immutable through `TypedEvent`, so it cannot diverge from an
+event-data copy. Convert it back to a generic event with the fallible
+`try_into_event()` method, which serializes the payload as JSON:
+
+```rust
+let event: Event = typed.try_into_event()?;
+```
+
+Typed event producers can use `TypedEvent::new` without specifying the event
+type string separately. The supplied `Event` is used for metadata; any existing
+data is discarded, and the type is set to `T::EVENT_TYPE`.
+
+```rust
+let metadata = EventBuilderV10::new()
+    .id("event-123")
+    .source(Url::parse("https://example.com")?)
+    .build()?;
+let typed = TypedEvent::new(metadata, UserCreated {
+    user_id: "user-123".into(),
+    email: "alice@example.com".into(),
+});
+let event = typed.try_into_event()?;
+```
+
 ### Decomposing TypedEvent
 
 ```rust
 let (event, payload) = typed.into_parts();
-// event is now an Event
+// event contains metadata but no event data
 // payload is now a UserCreated
 ```
 
@@ -110,6 +133,9 @@ pub enum TypedEventError {
     
     /// Event data cannot be deserialized into the target type
     DeserializationError(String),
+
+    /// Typed payload cannot be serialized into event data
+    SerializationError(String),
     
     /// Event has no data but data was expected
     MissingData,
@@ -128,6 +154,9 @@ match result {
     }
     Err(TypedEventError::DeserializationError(e)) => {
         eprintln!("Failed to deserialize: {}", e);
+    }
+    Err(TypedEventError::SerializationError(e)) => {
+        eprintln!("Failed to serialize: {}", e);
     }
     Err(TypedEventError::MissingData) => {
         eprintln!("Event has no data");
@@ -280,8 +309,7 @@ We chose `TypedEvent<T>` as a wrapper instead of making `Event<T>` generic becau
 ## Limitations and Future Work
 
 - **Optional data**: Currently requires event data to be present. Events without data will fail conversion.
-- **Direct construction**: Use `TypedEvent::new()` to construct without validation if needed
-- **Serialization**: TypedEvent itself is not directly serializable; decompose with `into_parts()` first
+- **Serialization**: Use `try_into_event()` to serialize the authoritative typed payload into JSON event data
 
 ## See Also
 

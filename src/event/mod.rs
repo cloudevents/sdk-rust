@@ -8,6 +8,7 @@ mod extensions;
 mod format;
 mod message;
 mod spec_version;
+mod typed;
 mod types;
 
 pub use attributes::Attributes;
@@ -20,6 +21,7 @@ pub(crate) use message::EventBinarySerializer;
 pub(crate) use message::EventStructuredSerializer;
 pub use spec_version::SpecVersion;
 pub use spec_version::UnknownSpecVersion;
+pub use typed::{CloudEventPayload, TypedEvent, TypedEventError};
 pub use types::{TryIntoTime, TryIntoUrl, UriReference};
 
 mod v03;

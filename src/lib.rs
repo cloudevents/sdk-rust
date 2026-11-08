@@ -68,4 +68,5 @@ pub mod test;
 pub use event::Data;
 pub use event::Event;
 pub use event::{AttributesReader, AttributesWriter};
+pub use event::{CloudEventPayload, TypedEvent, TypedEventError};
 pub use event::{EventBuilder, EventBuilderV03, EventBuilderV10};

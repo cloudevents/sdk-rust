@@ -11,6 +11,8 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v7
+      - name: Install librdkafka build dependencies
+        run: sudo apt-get update && sudo apt-get install -y cmake libcurl4-openssl-dev
       - uses: dtolnay/rust-toolchain@master
         with:
           toolchain: stable

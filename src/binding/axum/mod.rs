@@ -97,7 +97,7 @@ mod tests {
             .route(
                 "/",
                 post(|event: Event| async move {
-                    println!("received cloudevent {}", &event);
+                    println!("received cloudevent {}", event);
                     (StatusCode::OK, event)
                 }),
             )

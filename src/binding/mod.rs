@@ -6,6 +6,9 @@ pub mod actix;
 #[cfg_attr(docsrs, doc(cfg(feature = "axum")))]
 #[cfg(feature = "axum")]
 pub mod axum;
+#[cfg_attr(docsrs, doc(cfg(feature = "fe2o3-amqp")))]
+#[cfg(feature = "fe2o3-amqp")]
+pub mod fe2o3_amqp;
 
 #[cfg_attr(
     docsrs,
@@ -30,7 +33,6 @@ pub mod http;
 )]
 #[cfg(any(feature = "http-0-2-binding", feature = "actix", feature = "warp",))]
 pub mod http_0_2;
-
 #[cfg_attr(docsrs, doc(cfg(feature = "nats")))]
 #[cfg(feature = "nats")]
 pub mod nats;
@@ -63,7 +65,8 @@ pub(crate) mod kafka {
     feature = "warp",
     feature = "axum",
     feature = "poem",
-    feature = "rdkafka"
+    feature = "rdkafka",
+    feature = "fe2o3-amqp"
 ))]
 pub(crate) static CLOUDEVENTS_JSON_HEADER: &str = "application/cloudevents+json";
 #[cfg(feature = "reqwest")]
@@ -76,7 +79,8 @@ pub(crate) static CLOUDEVENTS_BATCH_JSON_HEADER: &str = "application/cloudevents
     feature = "warp",
     feature = "axum",
     feature = "poem",
-    feature = "rdkafka"
+    feature = "rdkafka",
+    feature = "fe2o3-amqp"
 ))]
 pub(crate) static CONTENT_TYPE: &str = "content-type";
 
@@ -88,7 +92,8 @@ pub(crate) static CONTENT_TYPE: &str = "content-type";
     feature = "warp",
     feature = "axum",
     feature = "poem",
-    feature = "rdkafka"
+    feature = "rdkafka",
+    feature = "fe2o3-amqp"
 ))]
 fn header_prefix(prefix: &str, name: &str) -> String {
     if name == "datacontenttype" {

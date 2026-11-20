@@ -16,9 +16,14 @@ pub enum Data {
 }
 
 pub(crate) fn is_json_content_type(ct: &str) -> bool {
-    // Ignore media type parameters, e.g. `application/vnd.foo+json; charset=utf-8`
-    let ct = ct.split(';').next().unwrap_or(ct).trim();
-    ct.starts_with("application/json") || ct.starts_with("text/json") || ct.ends_with("+json")
+    let media_type = ct.split(';').next().unwrap_or(ct).trim();
+    let Some((top_level_type, subtype)) = media_type.split_once('/') else {
+        return false;
+    };
+
+    (top_level_type.eq_ignore_ascii_case("application") && subtype.eq_ignore_ascii_case("json"))
+        || (top_level_type.eq_ignore_ascii_case("text") && subtype.eq_ignore_ascii_case("json"))
+        || subtype.to_ascii_lowercase().ends_with("+json")
 }
 
 impl From<serde_json::Value> for Data {

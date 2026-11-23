@@ -36,6 +36,9 @@ pub mod http_0_2;
 #[cfg_attr(docsrs, doc(cfg(feature = "nats")))]
 #[cfg(feature = "nats")]
 pub mod nats;
+#[cfg_attr(docsrs, doc(cfg(feature = "paho_mqtt")))]
+#[cfg(feature = "paho_mqtt")]
+pub mod paho_mqtt;
 #[cfg_attr(docsrs, doc(cfg(feature = "poem")))]
 #[cfg(feature = "poem")]
 pub mod poem;
@@ -66,7 +69,8 @@ pub(crate) mod kafka {
     feature = "axum",
     feature = "poem",
     feature = "rdkafka",
-    feature = "fe2o3-amqp"
+    feature = "fe2o3-amqp",
+    feature = "paho_mqtt"
 ))]
 pub(crate) static CLOUDEVENTS_JSON_HEADER: &str = "application/cloudevents+json";
 #[cfg(feature = "reqwest")]
@@ -80,7 +84,8 @@ pub(crate) static CLOUDEVENTS_BATCH_JSON_HEADER: &str = "application/cloudevents
     feature = "axum",
     feature = "poem",
     feature = "rdkafka",
-    feature = "fe2o3-amqp"
+    feature = "fe2o3-amqp",
+    feature = "paho_mqtt"
 ))]
 pub(crate) static CONTENT_TYPE: &str = "content-type";
 
@@ -93,7 +98,8 @@ pub(crate) static CONTENT_TYPE: &str = "content-type";
     feature = "axum",
     feature = "poem",
     feature = "rdkafka",
-    feature = "fe2o3-amqp"
+    feature = "fe2o3-amqp",
+    feature = "paho_mqtt"
 ))]
 fn header_prefix(prefix: &str, name: &str) -> String {
     if name == "datacontenttype" {

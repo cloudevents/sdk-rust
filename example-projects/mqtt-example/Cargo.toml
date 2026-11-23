@@ -1,0 +1,13 @@
+[package]
+name = "mqtt-example"
+version = "0.1.0"
+authors = ["Subhobrata Dey <sbcd90@gmail.com>"]
+edition = "2024"
+
+[dependencies]
+cloudevents-sdk = { path = "../..", features = ["paho_mqtt"] }
+paho-mqtt = "0.14.0"
+serde_json = "1.0.154"
+clap = "4.6.8"
+futures = "0.3.34"
+tokio = { version = "1.54.1", features = ["full"] }

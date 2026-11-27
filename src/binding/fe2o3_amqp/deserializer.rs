@@ -3,11 +3,11 @@ use std::convert::TryFrom;
 use fe2o3_amqp_types::primitives::{SimpleValue, Symbol};
 
 use crate::{
-    binding::CLOUDEVENTS_JSON_HEADER,
     event::SpecVersion,
     message::{
-        BinaryDeserializer, BinarySerializer, Encoding, Error, MessageAttributeValue,
-        MessageDeserializer, Result, StructuredDeserializer, StructuredSerializer,
+        is_cloudevents_json_content_type, BinaryDeserializer, BinarySerializer, Encoding, Error,
+        MessageAttributeValue, MessageDeserializer, Result, StructuredDeserializer,
+        StructuredSerializer,
     },
 };
 
@@ -100,11 +100,45 @@ impl MessageDeserializer for EventMessage {
         match self
             .content_type
             .as_ref()
-            .map(|s| s.starts_with(CLOUDEVENTS_JSON_HEADER))
+            .map(|s| is_cloudevents_json_content_type(s))
         {
             Some(true) => Encoding::STRUCTURED,
             Some(false) => Encoding::BINARY,
             None => Encoding::UNKNOWN,
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use fe2o3_amqp_types::messaging::Body;
+
+    #[test]
+    fn structured_content_type_matching() {
+        for ct in [
+            "application/cloudevents+json",
+            "Application/CloudEvents+JSON",
+            "APPLICATION/CLOUDEVENTS+JSON; charset=utf-8",
+        ] {
+            let msg = EventMessage {
+                content_type: Some(Symbol::from(ct)),
+                application_properties: None,
+                body: Body::Empty,
+            };
+            assert_eq!(msg.encoding(), Encoding::STRUCTURED, "ct={ct}");
+        }
+
+        for ct in [
+            "application/cloudevents+json-batch",
+            "application/cloudevents+jsonl",
+        ] {
+            let msg = EventMessage {
+                content_type: Some(Symbol::from(ct)),
+                application_properties: None,
+                body: Body::Empty,
+            };
+            assert_eq!(msg.encoding(), Encoding::BINARY, "ct={ct}");
         }
     }
 }

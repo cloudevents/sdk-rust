@@ -1,11 +1,11 @@
 use super::{Headers, SPEC_VERSION_HEADER};
 use crate::{
-    binding::CLOUDEVENTS_JSON_HEADER,
     event::SpecVersion,
     header_value_to_str, message,
     message::{
-        BinaryDeserializer, BinarySerializer, Encoding, MessageAttributeValue, MessageDeserializer,
-        Result, StructuredDeserializer, StructuredSerializer,
+        is_cloudevents_json_content_type, BinaryDeserializer, BinarySerializer, Encoding,
+        MessageAttributeValue, MessageDeserializer, Result, StructuredDeserializer,
+        StructuredSerializer,
     },
 };
 use http_0_2 as http;
@@ -88,14 +88,57 @@ impl<'a, T: Headers<'a>> MessageDeserializer for Deserializer<'a, T> {
             .headers
             .get(http::header::CONTENT_TYPE)
             .and_then(|v| v.to_str().ok())
-            .filter(|&v| v.starts_with(CLOUDEVENTS_JSON_HEADER))
-            .is_some()
+            .is_some_and(is_cloudevents_json_content_type)
         {
             Encoding::STRUCTURED
         } else if self.headers.get(SPEC_VERSION_HEADER).is_some() {
             Encoding::BINARY
         } else {
             Encoding::UNKNOWN
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::test::fixtures;
+    use http_0_2::{self as http, HeaderMap, HeaderValue};
+
+    #[test]
+    fn structured_content_type_matches_case_insensitively() {
+        let expected = fixtures::v10::minimal_string_extension();
+        let body = serde_json::to_vec(&expected).unwrap();
+
+        for ct in [
+            "application/cloudevents+json",
+            "Application/CloudEvents+JSON",
+            "APPLICATION/CLOUDEVENTS+JSON; charset=utf-8",
+            " application/cloudevents+json ; charset=UTF-8",
+        ] {
+            let mut headers = HeaderMap::new();
+            headers.insert(http::header::CONTENT_TYPE, HeaderValue::from_static(ct));
+            let deserializer = Deserializer::new(&headers, body.clone());
+            assert_eq!(deserializer.encoding(), Encoding::STRUCTURED, "ct={ct}");
+            assert_eq!(
+                MessageDeserializer::into_event(deserializer).unwrap(),
+                expected,
+                "ct={ct}"
+            );
+        }
+    }
+
+    #[test]
+    fn structured_content_type_rejects_prefix_collisions() {
+        for ct in [
+            "application/cloudevents+json-batch",
+            "application/cloudevents+jsonl",
+            "application/cloudevents+json2; charset=utf-8",
+        ] {
+            let mut headers = HeaderMap::new();
+            headers.insert(http::header::CONTENT_TYPE, HeaderValue::from_static(ct));
+            let deserializer = Deserializer::new(&headers, Vec::new());
+            assert_eq!(deserializer.encoding(), Encoding::UNKNOWN, "ct={ct}");
         }
     }
 }

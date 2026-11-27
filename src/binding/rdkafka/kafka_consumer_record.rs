@@ -1,10 +1,11 @@
 use rdkafka_lib as rdkafka;
 
-use crate::binding::{kafka::SPEC_VERSION_HEADER, CLOUDEVENTS_JSON_HEADER, CONTENT_TYPE};
+use crate::binding::{kafka::SPEC_VERSION_HEADER, CONTENT_TYPE};
 use crate::event::SpecVersion;
 use crate::message::{
-    BinaryDeserializer, BinarySerializer, Encoding, MessageAttributeValue, MessageDeserializer,
-    Result, StructuredDeserializer, StructuredSerializer,
+    is_cloudevents_json_content_type, BinaryDeserializer, BinarySerializer, Encoding,
+    MessageAttributeValue, MessageDeserializer, Result, StructuredDeserializer,
+    StructuredSerializer,
 };
 use crate::{message, Event};
 use rdkafka::message::{BorrowedMessage, Headers, Message, OwnedMessage};
@@ -116,9 +117,8 @@ impl MessageDeserializer for ConsumerRecordDeserializer {
         match (
             self.headers
                 .get("content-type")
-                .and_then(|s| String::from_utf8(s.to_vec()).ok())
-                .map(|s| s.starts_with(CLOUDEVENTS_JSON_HEADER))
-                .unwrap_or(false),
+                .and_then(|s| str::from_utf8(s).ok())
+                .is_some_and(is_cloudevents_json_content_type),
             self.headers.get(SPEC_VERSION_HEADER),
         ) {
             (true, _) => Encoding::STRUCTURED,
